@@ -1,0 +1,29 @@
+{
+  "fps": 30,
+  "lang": "en",
+  "duration": 104,
+  "music": {
+    "prompt": "Instrumental background music for a 104-second education software advert staged as a physics lesson about Newton's laws and friction, mixed as a bed under a clear, warm female voice-over: keep the midrange sparse and leave room for speech. Opens with a held, slightly tense low note and a soft, stuck, repeating pluck, as if something is straining and not moving, then at about 4 seconds it releases into a light, forward-moving groove around 100 BPM: felt piano, plucked strings, soft bass and brushed percussion, curious and warm. Small lifts as each part of the lesson begins, around 12, 25, 41 and 57 seconds. Around 68 seconds it pauses and holds almost still, then at 79 seconds it releases again and opens up, brighter and fuller, through a warm, wondering section. Resolves cleanly and warmly at 104 seconds. Understated, intelligent, optimistic. Instrumental only. No vocals, no risers, no whooshes, no sound effects.",
+    "instrumental": true,
+    "length_s": 104
+  },
+  "mix": {
+    "fade_out": 0.4
+  },
+  "voices": [
+    { "id": "hook", "at": 0.4, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Push a heavy box. Nothing. Push harder, and it slides." },
+    { "id": "today", "at": 7.2, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Today: Newton's laws, and why the box sticks." },
+    { "id": "forces", "at": 12.0, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Part one: the forces. The pull, friction, the weight, and the floor pushing back." },
+    { "id": "givens", "at": 19.6, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Five kilograms, thirty newtons, two kinds of friction." },
+    { "id": "second", "at": 25.0, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Part two: the second law. Select the question, press Solve." },
+    { "id": "working", "at": 31.4, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "The normal force, the friction, the net force, and the acceleration: four metres per second squared, computed by SymPy." },
+    { "id": "why", "at": 41.4, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "But why did the box stick at first? Explain draws it out." },
+    { "id": "why-steps", "at": 46.4, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Static friction matches your push, up to fifteen newtons. Past that, the box slides, and the smaller kinetic friction takes over." },
+    { "id": "lab", "at": 57.0, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Part four: the lab. Ask for a simulation, and the box is yours to push." },
+    { "id": "twelve", "at": 68.4, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Drop the pull to twelve newtons. Friction matches it, the net force is zero, and nothing moves. That's the first law." },
+    { "id": "sixteen", "at": 79.0, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Sixteen newtons, and it breaks free." },
+    { "id": "class", "at": 84.8, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Same box, same numbers, and the whole class sees the moment it lets go." },
+    { "id": "homework", "at": 91.8, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Homework: double the mass. Does thirty newtons still move it?" },
+    { "id": "end", "at": 98.4, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Newton's laws, on one board. MathbookLM." }
+  ]
+}

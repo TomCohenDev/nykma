@@ -1,0 +1,92 @@
+{
+  "shots": [
+    {
+      "id": "bench-still",
+      "kind": "image",
+      "via": "codex",
+      "prompt": "Photorealistic macro photo on a physics teacher's lab bench, no people, no hands. In the foreground, sharp: a white solderless breadboard holding a blue cylindrical electrolytic capacitor, a copper wire-wound inductor coil on a black bobbin, and a small black toggle switch, joined by short red and black jumper wires into one closed loop. Behind it, slightly soft, a small benchtop oscilloscope facing the camera; its display is a flat, evenly lit chroma-key green rectangle filling the screen edge to edge, no text, no grid, no interface, no reflections, all four corners of the display in frame. Warm late-afternoon window light from the left, dark wooden bench, shallow depth of field, 50mm, calm and clean. Leave empty bench space around the edges of the frame.",
+      "why": "A real circuit on a real bench, so the lesson starts from a physical thing; code can't make it look real. The scope screen is green so the ringing trace is drawn in code.",
+      "aspect_ratio": "16:9"
+    },
+    {
+      "id": "bench",
+      "kind": "video",
+      "via": "local",
+      "model": "ltx-2.5-q4",
+      "prompt": "Very slow, smooth push-in toward the capacitor and coil on the breadboard, nothing in the scene moves. The oscilloscope display stays a flat, evenly lit chroma-key green with no text or interface for the whole shot.",
+      "why": "The bench shot in motion, for the opening.",
+      "seconds": 6,
+      "resolution": "720p",
+      "aspect_ratio": "16:9",
+      "first": "generated/bench-still.png",
+      "audio": false,
+      "seed": 4117
+    },
+    {
+      "id": "bench-tall-still",
+      "kind": "image",
+      "via": "codex",
+      "prompt": "Photorealistic vertical macro photo on a physics teacher's lab bench, no people, no hands. In the lower half, sharp: a white solderless breadboard holding a blue cylindrical electrolytic capacitor, a copper wire-wound inductor coil on a black bobbin, and a small black toggle switch, joined by short red and black jumper wires into one closed loop. In the upper half, slightly soft, a small benchtop oscilloscope facing the camera; its display is a flat, evenly lit chroma-key green rectangle filling the screen edge to edge, no text, no grid, no interface, no reflections, all four corners of the display in frame. Warm late-afternoon window light from the left, dark wooden bench, shallow depth of field, 50mm. Leave empty space around the edges of the frame.",
+      "why": "The same bench composed for 9:16, since a crop of the wide shot loses either the circuit or the scope.",
+      "aspect_ratio": "9:16"
+    },
+    {
+      "id": "bench-tall",
+      "kind": "video",
+      "via": "local",
+      "model": "ltx-2.5-q4",
+      "prompt": "Very slow, smooth push-in toward the capacitor and coil on the breadboard, nothing in the scene moves. The oscilloscope display stays a flat, evenly lit chroma-key green with no text or interface for the whole shot.",
+      "why": "The tall bench shot in motion, for the 9:16 opening.",
+      "seconds": 6,
+      "resolution": "720p",
+      "aspect_ratio": "9:16",
+      "first": "generated/bench-tall-still.png",
+      "audio": false,
+      "seed": 4118
+    },
+    {
+      "id": "room-still",
+      "kind": "image",
+      "via": "codex",
+      "prompt": "Photorealistic photo of an empty high-school physics classroom before the first lesson, no people. Seen from the back row: rows of empty wooden desks and chairs lead to a large wall-mounted projector screen at the front. The projector screen is a flat, evenly lit chroma-key green rectangle, edge to edge, no text, no image, no interface, all four corners in frame. Soft morning light through tall windows on the right, a few textbooks on the desks, a periodic table poster on the side wall. Calm, quiet, 35mm, natural colour.",
+      "why": "The classroom where the lesson happens, without showing a person as a user; the canvas goes onto the green screen in code.",
+      "aspect_ratio": "16:9"
+    },
+    {
+      "id": "room",
+      "kind": "video",
+      "via": "local",
+      "model": "ltx-2.5-q4",
+      "prompt": "Slow, steady dolly forward between the rows of empty desks toward the projector screen. The screen stays a flat, evenly lit chroma-key green with no text or image for the whole shot; dust floats in the window light.",
+      "why": "The room in motion, so the cut from the bench into the lesson is a move and not a slide.",
+      "seconds": 5,
+      "resolution": "720p",
+      "aspect_ratio": "16:9",
+      "first": "generated/room-still.png",
+      "audio": false,
+      "seed": 4119
+    },
+    {
+      "id": "room-tall-still",
+      "kind": "image",
+      "via": "codex",
+      "prompt": "Photorealistic vertical photo of an empty high-school physics classroom before the first lesson, no people. Seen from the aisle between rows of empty wooden desks: a large wall-mounted projector screen at the front fills the upper half of the frame. The projector screen is a flat, evenly lit chroma-key green rectangle, edge to edge, no text, no image, no interface, all four corners in frame. Soft morning light through tall windows on the right. Calm, quiet, 35mm, natural colour.",
+      "why": "The classroom composed for 9:16.",
+      "aspect_ratio": "9:16"
+    },
+    {
+      "id": "room-tall",
+      "kind": "video",
+      "via": "local",
+      "model": "ltx-2.5-q4",
+      "prompt": "Slow, steady dolly forward along the aisle toward the projector screen. The screen stays a flat, evenly lit chroma-key green with no text or image for the whole shot; dust floats in the window light.",
+      "why": "The tall room shot in motion.",
+      "seconds": 5,
+      "resolution": "720p",
+      "aspect_ratio": "9:16",
+      "first": "generated/room-tall-still.png",
+      "audio": false,
+      "seed": 4120
+    }
+  ]
+}

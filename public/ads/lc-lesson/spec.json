@@ -1,0 +1,29 @@
+{
+  "fps": 30,
+  "lang": "en",
+  "duration": 107,
+  "music": {
+    "prompt": "Instrumental background music for a 107-second education software advert staged as a physics lesson, mixed as a bed under a clear, warm female voice-over: keep the midrange sparse and leave room for speech. Opens quiet and curious: a soft, steady electronic pulse like a slow oscillation, felt piano and light plucked synth, about 96 BPM. Builds gently through the middle, adding soft bass and light brushed percussion, with small lifts every 15 to 20 seconds as each part of the lesson begins. Around 64 seconds it opens into a brighter, wondering section with a gently rising arpeggio, warm and alive. Around 88 seconds it settles down and slows, as if a ringing sound dies away, then resolves cleanly and warmly at 107 seconds. Understated, intelligent, optimistic. Instrumental only. No vocals, no risers, no whooshes, no sound effects.",
+    "instrumental": true,
+    "length_s": 107
+  },
+  "mix": {
+    "fade_out": 0.4
+  },
+  "voices": [
+    { "id": "hook", "at": 0.4, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "No battery. Yet this circuit rings, a hundred and fifty-nine times a second." },
+    { "id": "today", "at": 7.0, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Today: where does the ring come from?" },
+    { "id": "capacitor", "at": 11.2, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Part one: the capacitor. Charge it to nine volts, and it stores energy in its electric field." },
+    { "id": "coil", "at": 21.0, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Part two: the coil. It resists any change in current, and stores energy in its magnetic field." },
+    { "id": "together", "at": 31.0, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Part three: join them. Select the maths, and press Solve." },
+    { "id": "working", "at": 37.0, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "MathbookLM writes the working right on the board, step by step, with the numbers computed by SymPy. About a hundred and fifty-nine hertz." },
+    { "id": "why", "at": 48.0, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Students need more than the answer. They need the why." },
+    { "id": "why-steps", "at": 54.4, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "The capacitor empties into the coil. The coil keeps the current going, and charges it back. Energy, back and forth." },
+    { "id": "lab", "at": 64.0, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Part four: the lab. Ask for a simulation, and the circuit comes alive." },
+    { "id": "octave", "at": 75.0, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Four times the capacitance: the ring drops an octave." },
+    { "id": "fades", "at": 81.8, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Add resistance, and it fades." },
+    { "id": "critical", "at": 87.8, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "At twenty ohms, the ring is gone. Critical damping, and the whole class just watched it happen." },
+    { "id": "homework", "at": 95.6, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "Homework: double the coil. Predict the frequency, then simulate." },
+    { "id": "end", "at": 101.6, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "align": "whisper", "text": "The whole lesson, on one board. MathbookLM." }
+  ]
+}

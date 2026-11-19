@@ -1,0 +1,112 @@
+{
+  "bench-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic macro photo on a physics teacher's lab bench, no people, no hands. In the foreground, sharp: a white solderless breadboard holding a blue cylindrical electrolytic capacitor, a copper wire-wound inductor coil on a black bobbin, and a small black toggle switch, joined by short red and black jumper wires into one closed loop. Behind it, slightly soft, a small benchtop oscilloscope facing the camera; its display is a flat, evenly lit chroma-key green rectangle filling the screen edge to edge, no text, no grid, no interface, no reflections, all four corners of the display in frame. Warm late-afternoon window light from the left, dark wooden bench, shallow depth of field, 50mm, calm and clean. Leave empty bench space around the edges of the frame.",
+    "why": "A real circuit on a real bench, so the lesson starts from a physical thing; code can't make it look real. The scope screen is green so the ringing trace is drawn in code.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "16:9"
+    },
+    "file": "generated/bench-still.png",
+    "sha256": "0b70bcca14f57d23a093224e2f415b8bca625970e1c97aceab30bf18c7552e64",
+    "request": "164b9a316a94666e8ae37034906b888153068ee17d79f537e1e5389872131d9c",
+    "job": "e16b28da-b22d-4a65-9e18-ab820c039124",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-08T22:53:04.209Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic image, widescreen 16:9 composition with modest crop-safe margin and empty dark wooden bench space around all edges. Macro-style close photograph on a physics teacher's lab bench, no people, no hands. Foreground tack sharp: a white solderless breadboard holding a blue cylindrical electrolytic capacitor, a copper wire-wound inductor coil on a black bobbin, and a small black toggle switch. Short red and black jumper wires visibly connect these components into a single closed loop. Realistic electronic components, convincing physical construction and scale. Behind the breadboard, slightly soft yet clearly recognizable, a small benchtop oscilloscope faces the camera. Its entire display is visible, all four display corners comfortably within frame. The display is a perfectly flat, evenly lit, solid chroma-key green rectangle filling the screen edge to edge, absolutely no text, grid, trace, interface, reflections, glare, gradients or markings on the display. Keep screen suitable for chroma key replacement. Warm late-afternoon window light from the left, dark wooden bench, shallow depth of field, 50mm photographic look, calm and clean natural scene. No captions, logos, watermarks or added text anywhere."
+  },
+  "bench-tall-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic vertical macro photo on a physics teacher's lab bench, no people, no hands. In the lower half, sharp: a white solderless breadboard holding a blue cylindrical electrolytic capacitor, a copper wire-wound inductor coil on a black bobbin, and a small black toggle switch, joined by short red and black jumper wires into one closed loop. In the upper half, slightly soft, a small benchtop oscilloscope facing the camera; its display is a flat, evenly lit chroma-key green rectangle filling the screen edge to edge, no text, no grid, no interface, no reflections, all four corners of the display in frame. Warm late-afternoon window light from the left, dark wooden bench, shallow depth of field, 50mm. Leave empty space around the edges of the frame.",
+    "why": "The same bench composed for 9:16, since a crop of the wide shot loses either the circuit or the scope.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16"
+    },
+    "file": "generated/bench-tall-still.png",
+    "sha256": "5b69ff821565f2f036a5f2f3abb1e91c0afaaee1b22ac9f9d273551016f012a7",
+    "request": "a27ddc0f9b0da57f836074c483df6fe387c6d99c85205d6c8a4bff022ab507af",
+    "job": "92891e5d-937c-45b2-b469-c07aa49f891f",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-08T22:53:58.399Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic vertical macro photograph, aspect ratio 9:16, composed with generous small empty safety margins on every edge for a final 9:16 crop. A physics teacher's lab bench, no people and no hands. Dark wooden bench in warm late-afternoon window light from the left. In the lower half, in crisp sharp focus, a white solderless breadboard holding exactly these clearly recognizable components: a blue cylindrical electrolytic capacitor, a copper wire-wound inductor coil on a black bobbin, and a small black toggle switch. Short red and black jumper wires connect these components into one closed electrical loop, with plausible wiring. In the upper half, slightly soft due to shallow depth of field, a small benchtop oscilloscope faces directly toward camera. Its entire display and all four corners are clearly inside the frame. The display is a perfectly flat evenly illuminated solid chroma-key green rectangle, bright uniform green edge to edge, absolutely no text, grid, trace, interface, reflections, glare, gradients, or icons on the screen. Keep the green screen clean and usable for chroma key compositing despite mild optical softness. Realistic material textures, subtle warm shadows, 50mm lens look, close-up macro aesthetic, restrained natural photographic color. Leave empty space around the frame edges. No captions, text, logos, branding, labels, or watermarks anywhere."
+  },
+  "room-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic photo of an empty high-school physics classroom before the first lesson, no people. Seen from the back row: rows of empty wooden desks and chairs lead to a large wall-mounted projector screen at the front. The projector screen is a flat, evenly lit chroma-key green rectangle, edge to edge, no text, no image, no interface, all four corners in frame. Soft morning light through tall windows on the right, a few textbooks on the desks, a periodic table poster on the side wall. Calm, quiet, 35mm, natural colour.",
+    "why": "The classroom where the lesson happens, without showing a person as a user; the canvas goes onto the green screen in code.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "16:9"
+    },
+    "file": "generated/room-still.png",
+    "sha256": "661600ec9310e59b324ad26a4adfd1a70d76007c0cd70310a3b6ed23683c61d5",
+    "request": "f96034bbf25bb7c1acb7df002412ea6e6322d1d89a8212f590ed6be86d9a1306",
+    "job": "93be56ae-b1cf-4cc0-96b3-6d671a601890",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-08T22:54:37.511Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic photograph in a 16:9 landscape composition, with a little safe room at all edges for cropping. Empty high-school physics classroom before the first lesson, absolutely no people. Viewpoint from the back row, 35mm photography: orderly rows of empty wooden desks and chairs lead toward a large wall-mounted projector screen at the front. The entire projector screen surface is a perfectly flat, evenly lit chroma-key green rectangle (#00FF00), edge to edge: no text, image, interface, gradients, shadows or reflections within the green surface. All four screen corners are clearly visible in frame, unobstructed. Soft morning light enters through tall windows on the right. A few textbooks rest on desks. A periodic table poster hangs on a side wall, incidental background classroom detail. Calm, quiet atmosphere, natural colour, realistic materials and photographic lighting. No added captions, logos or watermarks."
+  },
+  "room-tall-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic vertical photo of an empty high-school physics classroom before the first lesson, no people. Seen from the aisle between rows of empty wooden desks: a large wall-mounted projector screen at the front fills the upper half of the frame. The projector screen is a flat, evenly lit chroma-key green rectangle, edge to edge, no text, no image, no interface, all four corners in frame. Soft morning light through tall windows on the right. Calm, quiet, 35mm, natural colour.",
+    "why": "The classroom composed for 9:16.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16"
+    },
+    "file": "generated/room-tall-still.png",
+    "sha256": "3c1809fcabfc59a000b0b9279f6fda88ab4d2446b54b840979c707b9a098454e",
+    "request": "cdead1c214648bd36de40cbc69aa048cf2837a1d591bc4ec21a9fda6f6ce1c04",
+    "job": "7e5982ad-3d28-4a1a-b393-a965e392ff5c",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-08T22:55:12.700Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic vertical photograph, aspect ratio 9:16, composed with a little room at the outer edges for cropping. Empty high-school physics classroom before the first lesson, absolutely no people. Camera positioned in the central aisle between rows of empty wooden school desks, looking toward the front wall. A large wall-mounted projector screen dominates and fills the upper half of the frame. The screen's entire inner display surface is one perfectly flat, uniformly and evenly lit chroma-key green rectangle (#00FF00), edge to edge: no text, no image, no interface, no gradients, no shadows or reflections on the green surface. All four corners of the rectangular screen are clearly inside the image, with a small margin around them. Physically realistic slim screen border permitted outside the green area. Tall windows on the right admit soft morning light, natural shadows on desks and classroom, calm quiet atmosphere. Subtle physics classroom equipment or laboratory cabinets at the periphery, no readable writing anywhere. Natural colour, realistic wood texture, 35mm photographic look, straight architectural lines, high photographic realism. No added text, captions, logos, watermarks, or people."
+  },
+  "bench": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "Very slow, smooth push-in toward the capacitor and coil on the breadboard, nothing in the scene moves. The oscilloscope display stays a flat, evenly lit chroma-key green with no text or interface for the whole shot.",
+    "why": "The bench shot in motion, for the opening.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "16:9",
+      "resolution": "720p",
+      "seed": 4117,
+      "seconds": 6,
+      "audio": false,
+      "first": "generated/bench-still.png"
+    },
+    "file": "generated/bench.mp4",
+    "sha256": "24108d0075c19c7f60844cb2932574a02c7ecd9d6efffa4154d56c141f735c4d",
+    "request": "5a1cec399f1bbd6bdfeea13bd5f7b90bf90b8d291321c64d3bbdf3301e3d7d46",
+    "job": "d5073671-ef6e-4713-91d2-bf217a9afed0",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T07:55:48.481Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/lc-lesson/gen/footage/bench/#####.jpg",
+      "fps": 24,
+      "frames": 145,
+      "sheet": "public/ads/lc-lesson/gen/footage/bench/sheet.jpg"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "fps": 30,
+  "lang": "he",
+  "duration": 33,
+  "music": {
+    "prompt": "Calm, warm and understated instrumental for a thoughtful film about a teacher at work: gentle felt piano and soft plucked textures (kalimba, muted nylon guitar) over a light, steady soft pulse, curious and focused, about 96 bpm, intimate and close. Starts quiet and simple from the first second. Around 8 seconds a small, gentle lift: a soft round bass note and a light brushed rhythm join, the plucks get a little brighter. Then it stays even and light and ends softly on a resolved chord. No big swells, no epic hits, no risers, no tension builds, no drops, no cinematic drums.",
+    "instrumental": true,
+    "length_s": 25
+  },
+  "mix": {
+    "fade_out": 0.6
+  },
+  "sfx": [
+    {
+      "id": "pop",
+      "text": "a soft clean UI pop, a small white toolbar appearing",
+      "duration": 0.5
+    }
+  ]
+}

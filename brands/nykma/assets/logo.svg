@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" aria-label="logo">
+  <!-- A terminal prompt, closed by one stroke of a red pen, is a play button. -->
+  <path d="M36 22 L92 60 L36 98" fill="none" stroke="#141414" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M34 18 C31 44 39 72 33 102" fill="none" stroke="#E8301F" stroke-width="13" stroke-linecap="round"/>
+</svg>

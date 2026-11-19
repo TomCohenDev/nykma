@@ -1,0 +1,108 @@
+{
+  "fps": 30,
+  "lang": "he",
+  "duration": 34.3,
+  "music": {
+    "made_from": "ElevenLabs music_v2_5, instrumental, 37 s asked (it made 42 s), from the prompt in source_prompt. v3 re-cuts the same track (no new credits): the tension to 7.9 s, a silent beat under the projector, then the warm part from 17.96 s (six beats in at 104 BPM), so its lift lands at about 27.5 s.",
+    "source_prompt": "Instrumental background music for a 37-second education software advert aimed at teachers and lecturers, mixed as a bed under a calm male voice-over: keep the midrange sparse and leave room for speech. First 9.5 seconds: cold, stalled and slightly tense, a slow low cello drone and a dry, hesitant ticking pulse that keeps losing its footing, almost nothing else. At 9.5 seconds, one beat of silence. Then it opens up into warm, light, curious music at about 104 BPM: plucked strings and felt piano with a bouncing, springy rhythm, soft bass, light brushed drums, steady and patient like a good explanation. At 30.5 seconds it lifts into a small, warm moment of wonder, a little fuller and brighter, then resolves cleanly at 37 seconds. Understated and intelligent. Instrumental only. No vocals, no bells, no risers, no whooshes, no sound effects.",
+    "script": "ffmpeg -y -loglevel error -i public/ads/spring-moves/music-src.mp3 -filter_complex [0]atrim=0:7.9,afade=t=out:st=7.55:d=0.35[a];[0]atrim=start=17.96,asetpts=PTS-STARTPTS,afade=t=in:d=0.4,adelay=10000:all=1[b];[a][b]amix=inputs=2:normalize=0:duration=longest[m] -map [m] -ar 48000 public/ads/spring-moves/gen/music-cut.wav",
+    "file": "gen/music-cut.wav",
+    "sections": [
+      {
+        "name": "Opening Tension",
+        "start": 0,
+        "end": 7.9
+      },
+      {
+        "name": "Drop",
+        "start": 7.9,
+        "end": 10
+      },
+      {
+        "name": "Clear Exposition",
+        "start": 10,
+        "end": 27.5
+      },
+      {
+        "name": "Gentle Wonder",
+        "start": 27.5,
+        "end": 34.3
+      }
+    ]
+  },
+  "mix": {
+    "fade_out": 0.2
+  },
+  "voices": [
+    {
+      "id": "whole-lesson",
+      "at": 0.3,
+      "voice_id": "4TiHIzbcqE2V6QgIGXzD",
+      "align": "whisper",
+      "text": "שיעור שלם, רק כדי לכתוב את הפתרון על הלוח."
+    },
+    {
+      "id": "nothing",
+      "at": 5.2,
+      "voice_id": "4TiHIzbcqE2V6QgIGXzD",
+      "align": "whisper",
+      "text": "והכיתה לא הבינה כלום."
+    },
+    {
+      "id": "new-way",
+      "at": 8.3,
+      "voice_id": "4TiHIzbcqE2V6QgIGXzD",
+      "align": "whisper",
+      "text": "דרך חדשה ללמד."
+    },
+    {
+      "id": "write-once",
+      "at": 10.6,
+      "voice_id": "4TiHIzbcqE2V6QgIGXzD",
+      "align": "whisper",
+      "text": "כותבים את התרגיל בקלות,"
+    },
+    {
+      "id": "steps",
+      "at": 13.9,
+      "voice_id": "4TiHIzbcqE2V6QgIGXzD",
+      "align": "whisper",
+      "text": "מקבלים את הפתרון, שלב אחרי שלב,"
+    },
+    {
+      "id": "moves",
+      "at": 17.8,
+      "voice_id": "4TiHIzbcqE2V6QgIGXzD",
+      "align": "whisper",
+      "text": "ורואים סימולציה אינטראקטיבית."
+    },
+    {
+      "id": "edit",
+      "at": 20.35,
+      "voice_id": "4TiHIzbcqE2V6QgIGXzD",
+      "align": "whisper",
+      "text": "משנים כל ערך בקלות,"
+    },
+    {
+      "id": "organized",
+      "at": 23.7,
+      "voice_id": "4TiHIzbcqE2V6QgIGXzD",
+      "align": "whisper",
+      "text": "והכול נשאר מסודר, במקום אחד."
+    },
+    {
+      "id": "clearer",
+      "at": 27.3,
+      "voice_id": "4TiHIzbcqE2V6QgIGXzD",
+      "align": "whisper",
+      "text": "הרבה יותר מובן."
+    },
+    {
+      "id": "end",
+      "at": 29.8,
+      "voice_id": "4TiHIzbcqE2V6QgIGXzD",
+      "align": "whisper",
+      "text": "MathbookLM. כלי הוראה משולב AI. נסו בחינם."
+    }
+  ]
+}

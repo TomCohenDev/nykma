@@ -1,0 +1,8 @@
+{
+  "fps": 30,
+  "music": {
+    "script": "node scripts/audio/whos-sarah-track.mjs src/ads/whos-sarah/score.json",
+    "file": "assets/track.wav",
+    "grid": { "bpm": 120, "offset": 0 }
+  }
+}

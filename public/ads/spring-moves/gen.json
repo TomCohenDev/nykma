@@ -1,0 +1,114 @@
+{
+  "shots": [
+    {
+      "id": "board-a-still",
+      "kind": "image",
+      "via": "codex",
+      "prompt": "Photorealistic candid photo, vertical framing. A plain university seminar room on a grey overcast afternoon: flat daylight from windows on the left, fluorescent ceiling panels, beige walls, a ceiling projector switched off. A wide white whiteboard spans the front wall across the full width of the frame, in the upper half. The whiteboard is completely full, edge to edge, of handwritten dry-erase marker in black, blue and red. Copy everything written on the attached reference board exactly, character for character, with the same layout: the equations, the spring-and-mass sketch at the top right and the cosine graph at the bottom left. Large, roomy writing at the top left, smaller and tighter toward the bottom right, the last lines squeezed tiny into the bottom-right corner and two lines written sideways up the right edge. Written in a real person's marker hand, not a font. A male teacher in his mid 40s, short dark hair going grey, rolled-up light blue shirt sleeves, stands at the right end of the board in three-quarter view, bent slightly at the knees, pressing a black marker into the last free corner of the board, trying to squeeze in one more line, his brow furrowed. Out-of-focus empty student desks along the bottom edge of the frame. All four corners of the whiteboard in frame, the writing sharp. No other text, no logos. Adults only: the students are university students in their twenties, no children or teenagers anywhere, and the room is a plain university seminar room, not a school classroom: no school decorations, posters, children's artwork, cubbies or small desks.",
+      "why": "The teacher and the whiteboard he's run out of, as one real-looking moment: the strain of squeezing the last line in is what code can't make believable. The maths on the board is copied from board-ref.png, a correct derivation built in code, and is checked line by line before the video is made from it.",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "board-ref.png"
+      ]
+    },
+    {
+      "id": "board-a2-still",
+      "kind": "image",
+      "via": "codex",
+      "prompt": "Photorealistic candid photo, vertical framing. A plain university seminar room on a grey overcast afternoon: flat daylight from windows on the left, fluorescent ceiling panels, beige walls, a ceiling projector switched off. A wide white whiteboard spans the front wall across the full width of the frame, in the upper half. The whiteboard is completely full, edge to edge, of handwritten dry-erase marker in black, blue and red. Keep the room, the light, the camera and the teacher exactly as in the second reference (the same man, the same clothes, the same pose at the right end of the board). Copy everything written on the first reference, the board, exactly, character for character, with the same layout: the equations, the spring-and-mass sketch at the top right and the cosine graph at the bottom left. Large, roomy writing at the top left, smaller and tighter toward the bottom right and the last lines squeezed tiny into the bottom-right corner. Nothing is written sideways. Written in a real person's marker hand, not a font. A male teacher in his mid 40s, short dark hair going grey, rolled-up light blue shirt sleeves, stands at the right end of the board in three-quarter view, bent slightly at the knees, pressing a black marker into the last free corner of the board, trying to squeeze in one more line, his brow furrowed. Out-of-focus empty student desks along the bottom edge of the frame. All four corners of the whiteboard in frame, the writing sharp. No other text, no logos. Adults only: the students are university students in their twenties, no children or teenagers anywhere, and the room is a plain university seminar room, not a school classroom: no school decorations, posters, children's artwork, cubbies or small desks.",
+      "why": "Retake of board-a-still, which wrote the two sideways lines on the right edge wrong (a missing minus sign, and x(T/20) for x(π/20)). The reference board lost those lines, and the first still is a reference here so the teacher and room stay the same. The maths on the board is checked line by line before the video is made from it.",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "board-ref2.png",
+        "generated/board-a-still.png"
+      ]
+    },
+    {
+      "id": "board-a",
+      "kind": "video",
+      "via": "local",
+      "model": "ltx-2.5-q4",
+      "prompt": "Locked-off camera, no camera movement, no cuts. The teacher writes a few tiny characters into the last free corner of the full whiteboard, stops, steps back, looks over the whole crowded board and lets out a tired breath, rubbing the back of his neck with his free hand. The writing already on the board stays exactly as it is, sharp and unchanged.",
+      "why": "The same teacher in motion: running out of board and stepping back from it is the hook.",
+      "aspect_ratio": "9:16",
+      "resolution": "1080p",
+      "seconds": 6,
+      "seed": 5101,
+      "first": "generated/board-a2-still.png"
+    },
+    {
+      "id": "class-a-still",
+      "kind": "image",
+      "via": "codex",
+      "prompt": "Photorealistic candid photo, vertical framing, from the front of the same plain university seminar room as the reference (same beige walls, windows on the left, grey overcast light, fluorescent panels), looking at the students at their desks. University students in their twenties, a mix of backgrounds. Sharp in the foreground, a young woman stares past the camera with her pen stopped above her notebook. Behind her a young man rests his head on his hand, lost, and the student next to him glances at his phone under the desk with its screen turned away. Notebooks and screens out of focus and unreadable. 35mm, shallow depth of field, natural skin, no text in the image. Adults only: the students are university students in their twenties, no children or teenagers anywhere, and the room is a plain university seminar room, not a school classroom: no school decorations, posters, children's artwork, cubbies or small desks.",
+      "why": "The class that has stopped following, in the same room: real-looking faces that code can't make honestly.",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "generated/board-a-still.png"
+      ]
+    },
+    {
+      "id": "class-a",
+      "kind": "video",
+      "via": "local",
+      "model": "ltx-2.5-q4",
+      "prompt": "Locked-off camera, no cuts. The young woman in front slowly puts her pen down and leans back in her chair; behind her the young man rubs his eyes. Small, natural movements in a quiet, tired classroom.",
+      "why": "The class giving up, in motion: the beat the voice lands on.",
+      "aspect_ratio": "9:16",
+      "resolution": "1080p",
+      "seconds": 4,
+      "seed": 5102,
+      "first": "generated/class-a-still.png"
+    },
+    {
+      "id": "desk-b-still",
+      "kind": "image",
+      "via": "codex",
+      "prompt": "Photorealistic candid photo, vertical framing. The same ordinary college classroom and the same teacher as the references, on a bright afternoon: warm sunlight through the windows on the left, blinds half drawn. The same wide whiteboard spans the front wall in the upper half of the frame, wiped clean, and a ceiling projector throws a large rectangle of light onto it: the projected rectangle is a flat, evenly lit chroma-key green filling it edge to edge, no text, no interface, with a thin margin of white whiteboard around it. All four corners of the projected rectangle in frame and sharp, and nothing in front of it. A faint beam from the projector crosses the top of the frame. In the lower third, at the front left of the room, the teacher sits at the teacher's desk on a low wooden platform one step above the classroom floor, relaxed, with a laptop whose screen faces away from the camera and a plain black pen tablet with no screen, holding its stylus, looking up at the projection with a calm half smile. In the soft-focus foreground at the bottom edge, the backs of two students' heads, below the projection, not covering it. 35mm, no text in the image, no logos. Adults only: the students are university students in their twenties, no children or teenagers anywhere, and the room is a plain university seminar room, not a school classroom: no school decorations, posters, children's artwork, cubbies or small desks.",
+      "why": "The same teacher in the same room, now projecting from his desk. The projection is keyed green so the real MathbookLM canvas, built in code, plays on it frame for frame. The model never draws the app.",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "generated/board-a-still.png",
+        "generated/class-a-still.png"
+      ]
+    },
+    {
+      "id": "desk-b",
+      "kind": "video",
+      "via": "local",
+      "model": "ltx-2.5-q4",
+      "prompt": "Locked-off camera, no camera movement, no cuts. The teacher writes on the pen tablet with the stylus, glances up at the projection, then turns to the class and gestures toward it with an open hand, explaining calmly. The projected rectangle stays a flat, evenly lit chroma-key green with no text for the whole shot.",
+      "why": "The same teacher in motion at his desk, so the real MathbookLM canvas on the board sits in a real lesson.",
+      "aspect_ratio": "9:16",
+      "resolution": "1080p",
+      "seconds": 6,
+      "seed": 5103,
+      "first": "generated/desk-b-still.png"
+    },
+    {
+      "id": "class-b-still",
+      "kind": "image",
+      "via": "codex",
+      "prompt": "Photorealistic candid photo, vertical framing, from the front of the same plain university seminar room as the references, on the same bright afternoon: warm sunlight from the windows on the left, blinds half drawn. The same students as the class reference. Sharp in the foreground, the young man who was lost before now leans forward on his desk with his chin on his hand, watching the front of the room with rapt attention, his face softly lit by the projector's glow from off camera. Next to him the young woman also watches, pen in hand. Notebooks out of focus and unreadable. Nothing on any screen in the frame. 35mm, shallow depth of field, natural skin, no text in the image. Adults only: the students are university students in their twenties, no children or teenagers anywhere, and the room is a plain university seminar room, not a school classroom: no school decorations, posters, children's artwork, cubbies or small desks.",
+      "why": "The payoff for the class that gave up: the same students, won over. A believable reaction is what code can't make honestly. The projection stays off camera, so the model never draws the app.",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "generated/class-a-still.png",
+        "generated/desk-b-still.png"
+      ]
+    },
+    {
+      "id": "class-b",
+      "kind": "video",
+      "via": "local",
+      "model": "ltx-2.5-q4",
+      "prompt": "Locked-off camera, no cuts. The young man watches the front of the room; his eyes widen and his eyebrows go up in a quiet 'whoa', he sits up and turns to the young woman next to him with a grin, and she nods back, still watching. Natural, genuine reactions, nothing exaggerated.",
+      "why": "The wow in motion, the beat the voice lands on.",
+      "aspect_ratio": "9:16",
+      "resolution": "1080p",
+      "seconds": 4,
+      "seed": 5104,
+      "first": "generated/class-b-still.png"
+    }
+  ]
+}

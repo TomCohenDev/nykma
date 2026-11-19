@@ -1,0 +1,95 @@
+{
+  "shots": [
+    {
+      "id": "push-still",
+      "kind": "image",
+      "via": "codex",
+      "prompt": "Photorealistic candid photo in a bright high-school physics classroom in the morning. A physics teacher, a woman in her late 30s with shoulder-length dark curly hair, tortoiseshell glasses, a navy sweater with the sleeves pushed up and grey trousers, leans in with both hands flat on the side of a large, heavy wooden crate standing on the grey classroom floor, pushing it, her body at an angle, effort in her shoulders. The crate is plain unvarnished wood, about knee high, no text or logos on it. Behind her, out of focus, rows of desks with a few teenage students watching, and tall windows with soft daylight. Natural colour, 35mm, eye level, shallow depth of field. She is a fictional person, not a real or famous one. Leave space around the edges of the frame.",
+      "why": "The lesson's hook in the real world: a real-looking teacher pushing a heavy box that won't move. Code can't make a person or a room look real.",
+      "aspect_ratio": "16:9"
+    },
+    {
+      "id": "push",
+      "kind": "video",
+      "via": "local",
+      "model": "ltx-2.5-q4",
+      "prompt": "Slow push-in. The teacher pushes hard on the heavy wooden crate and it does not move at all for two seconds, then it suddenly breaks loose and slides forward across the floor a short way as she steps after it. She is not speaking.",
+      "why": "The push that fails, then succeeds: the question the lesson answers.",
+      "seconds": 6,
+      "resolution": "720p",
+      "aspect_ratio": "16:9",
+      "first": "generated/push-still.png",
+      "audio": false,
+      "seed": 5211
+    },
+    {
+      "id": "push-tall-still",
+      "kind": "image",
+      "via": "codex",
+      "prompt": "Photorealistic vertical candid photo in a bright high-school physics classroom in the morning. The same physics teacher as in the reference image (a woman in her late 30s with shoulder-length dark curly hair, tortoiseshell glasses, a navy sweater with the sleeves pushed up, grey trousers) leans in with both hands flat on the side of a large, heavy wooden crate on the grey classroom floor, pushing it. The crate is plain unvarnished wood, about knee high, no text or logos. Her whole body and the crate fill the lower two thirds of the frame; behind her, out of focus, desks, a few teenage students and tall windows with soft daylight. Natural colour, 35mm, shallow depth of field. A fictional person, not a real or famous one.",
+      "why": "The hook composed for 9:16, with the same teacher.",
+      "aspect_ratio": "9:16",
+      "refs": ["generated/push-still.png"]
+    },
+    {
+      "id": "push-tall",
+      "kind": "video",
+      "via": "local",
+      "model": "ltx-2.5-q4",
+      "prompt": "Slow push-in. The teacher pushes hard on the heavy wooden crate and it does not move at all for two seconds, then it suddenly breaks loose and slides forward across the floor a short way as she steps after it. She is not speaking.",
+      "why": "The tall hook in motion.",
+      "seconds": 6,
+      "resolution": "720p",
+      "aspect_ratio": "9:16",
+      "first": "generated/push-tall-still.png",
+      "audio": false,
+      "seed": 5212
+    },
+    {
+      "id": "front-still",
+      "kind": "image",
+      "via": "codex",
+      "prompt": "Photorealistic photo of the same physics teacher as in the reference image (a woman in her late 30s with shoulder-length dark curly hair, tortoiseshell glasses, a navy sweater with the sleeves pushed up) standing at the front of the classroom beside a large wall-mounted projector screen, half turned toward it, one hand raised and pointing at the screen, a tablet held against her chest with its screen facing her, not the camera. The projector screen is a flat, evenly lit chroma-key green rectangle edge to edge, no text, no image, no interface, all four corners clearly in frame, and she stands beside it, not in front of it. Seen from the back of the room over the blurred heads and shoulders of a few teenage students in the foreground. Soft morning light from tall windows, natural colour, 35mm. A fictional person, not a real or famous one.",
+      "why": "The teacher teaching with MathbookLM: the canvas goes onto the green screen in code, so the class sees the real app.",
+      "aspect_ratio": "16:9",
+      "refs": ["generated/push-still.png"]
+    },
+    {
+      "id": "front",
+      "kind": "video",
+      "via": "local",
+      "model": "ltx-2.5-q4",
+      "prompt": "Locked-off camera, no camera movement. The teacher gestures toward the projector screen with her raised hand and glances back at the class; the students' heads move slightly. The projector screen stays a flat, evenly lit chroma-key green with no text or image for the whole shot. She is not speaking.",
+      "why": "The teacher at the projector in motion, used twice: the lesson plan, then the simulation on the screen.",
+      "seconds": 6,
+      "resolution": "720p",
+      "aspect_ratio": "16:9",
+      "first": "generated/front-still.png",
+      "audio": false,
+      "seed": 5213
+    },
+    {
+      "id": "front-tall-still",
+      "kind": "image",
+      "via": "codex",
+      "prompt": "Photorealistic vertical photo of the same physics teacher as in the reference image (a woman in her late 30s with shoulder-length dark curly hair, tortoiseshell glasses, a navy sweater with the sleeves pushed up) standing beside a large wall-mounted projector screen at the front of a classroom, pointing at it, a tablet held against her chest with its screen facing her. The projector screen fills the upper half of the frame and is a flat, evenly lit chroma-key green rectangle edge to edge, no text, no image, all four corners in frame; she stands to its right, in the lower half, not in front of it. Blurred heads of a few teenage students at the bottom edge. Soft morning light, natural colour, 35mm. A fictional person, not a real or famous one.",
+      "why": "The teacher at the projector, composed for 9:16.",
+      "aspect_ratio": "9:16",
+      "refs": ["generated/push-still.png"]
+    },
+    {
+      "id": "front-tall",
+      "kind": "video",
+      "via": "local",
+      "model": "ltx-2.5-q4",
+      "prompt": "Locked-off camera, no camera movement. The teacher gestures toward the projector screen and glances back at the class. The projector screen stays a flat, evenly lit chroma-key green with no text or image for the whole shot. She is not speaking.",
+      "why": "The tall projector shot in motion.",
+      "seconds": 6,
+      "resolution": "720p",
+      "aspect_ratio": "9:16",
+      "first": "generated/front-tall-still.png",
+      "audio": false,
+      "seed": 5214
+    }
+  ]
+}

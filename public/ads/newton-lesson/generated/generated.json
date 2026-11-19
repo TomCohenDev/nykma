@@ -1,0 +1,211 @@
+{
+  "push-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic candid photo in a bright high-school physics classroom in the morning. A physics teacher, a woman in her late 30s with shoulder-length dark curly hair, tortoiseshell glasses, a navy sweater with the sleeves pushed up and grey trousers, leans in with both hands flat on the side of a large, heavy wooden crate standing on the grey classroom floor, pushing it, her body at an angle, effort in her shoulders. The crate is plain unvarnished wood, about knee high, no text or logos on it. Behind her, out of focus, rows of desks with a few teenage students watching, and tall windows with soft daylight. Natural colour, 35mm, eye level, shallow depth of field. She is a fictional person, not a real or famous one. Leave space around the edges of the frame.",
+    "why": "The lesson's hook in the real world: a real-looking teacher pushing a heavy box that won't move. Code can't make a person or a room look real.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "16:9"
+    },
+    "file": "generated/push-still.png",
+    "sha256": "b26d71e0419014dbd899095be33818dd05f4ccc7f97d9dc2f33783a1d2790e68",
+    "request": "25f72c6c7b573a31aac3802a5788e9f1e2596d032c491a7dd6d73cc8254c585d",
+    "job": "5e3e890c-bd27-4fd9-b69b-f9db42eb060f",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T00:19:39.956Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic candid photograph, landscape 16:9 composition with a little extra room around all edges for cropping. In a bright high-school physics classroom in the morning, a fictional female physics teacher in her late 30s with shoulder-length dark curly hair and tortoiseshell glasses wears a navy sweater with sleeves pushed up and grey trousers. Show her full body, leaning forward at an angle with both palms flat against the vertical side of a large heavy knee-high wooden crate on the grey classroom floor, actively pushing it horizontally, visible effort in her shoulders and grounded feet. The crate is plain unvarnished wood with no writing or logos. Behind her, softly out of focus, rows of desks and a few teenage students watching, tall windows admitting soft morning daylight. Natural colour, realistic anatomy and hands, 35mm lens, eye-level viewpoint, shallow depth of field, authentic unstaged classroom photography. No added text, captions, logos or watermarks. The teacher is not a real or famous person."
+  },
+  "push-tall-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic vertical candid photo in a bright high-school physics classroom in the morning. The same physics teacher as in the reference image (a woman in her late 30s with shoulder-length dark curly hair, tortoiseshell glasses, a navy sweater with the sleeves pushed up, grey trousers) leans in with both hands flat on the side of a large, heavy wooden crate on the grey classroom floor, pushing it. The crate is plain unvarnished wood, about knee high, no text or logos. Her whole body and the crate fill the lower two thirds of the frame; behind her, out of focus, desks, a few teenage students and tall windows with soft daylight. Natural colour, 35mm, shallow depth of field. A fictional person, not a real or famous one.",
+    "why": "The hook composed for 9:16, with the same teacher.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "generated/push-still.png"
+      ]
+    },
+    "file": "generated/push-tall-still.png",
+    "sha256": "adfee8cc8ae73d444b746933c776a40d81c06ec1a66f59292f5f56a1d796a82f",
+    "request": "015f601573e0c3cb304c4ed4dae58d7a5e2f35c912807e600861295d354b6037",
+    "job": "61d18455-184f-4c01-a224-0bd650c820bd",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T00:20:35.979Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic vertical 9:16 candid photograph, with a little safe room around all edges for cropping to exactly 9:16. Use the attached image as the reference for the SAME fictional physics teacher: woman late 30s, shoulder-length dark curly hair, tortoiseshell glasses, navy sweater sleeves pushed up, grey trousers and practical dark shoes. Bright high-school physics classroom in morning. Teacher leans forward in a convincing strenuous pushing stance, both hands with palms flat against the vertical SIDE of a large heavy plain unvarnished wooden crate on the grey classroom floor. Crate about knee high, realistic unfinished wood, no writing or logos. Show her entire body including both shoes and the entire crate, together filling the lower two thirds of this vertical frame. Compose with teacher on left and crate on right, suitably compact perspective for a vertical composition; anatomically natural arms and fingers, palms pressing the side rather than resting on top. Behind her are out-of-focus classroom desks, a few teenage students, tall windows with soft morning daylight. Natural colour, authentic candid photographic realism, 35mm lens, shallow depth of field. Match the reference teacher's facial identity and clothes closely. No text, captions, logos, watermarks or graphics."
+  },
+  "front-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic photo of the same physics teacher as in the reference image (a woman in her late 30s with shoulder-length dark curly hair, tortoiseshell glasses, a navy sweater with the sleeves pushed up) standing at the front of the classroom beside a large wall-mounted projector screen, half turned toward it, one hand raised and pointing at the screen, a tablet held against her chest with its screen facing her, not the camera. The projector screen is a flat, evenly lit chroma-key green rectangle edge to edge, no text, no image, no interface, all four corners clearly in frame, and she stands beside it, not in front of it. Seen from the back of the room over the blurred heads and shoulders of a few teenage students in the foreground. Soft morning light from tall windows, natural colour, 35mm. A fictional person, not a real or famous one.",
+    "why": "The teacher teaching with MathbookLM: the canvas goes onto the green screen in code, so the class sees the real app.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "16:9",
+      "refs": [
+        "generated/push-still.png"
+      ]
+    },
+    "file": "generated/front-still.png",
+    "sha256": "357bbebd754fa0d0d8f53a0fe3a37a59da0dc723c86eb246e68d5007f08f49b3",
+    "request": "95c838621e6d7317b834f29e3e374e2b8c479a9ee9fa56e606d56dc66737fef0",
+    "job": "f18e59cb-226e-4b5f-a63d-2f7caba7487f",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T00:21:23.816Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Generate exactly one photorealistic image, landscape 16:9 composition with a little safe room at every edge for a precise 16:9 crop. Use the attached reference image to match the identity and appearance of the same fictional physics teacher: woman in her late 30s, shoulder-length dark curly hair, tortoiseshell glasses, navy sweater with sleeves pushed up, gray trousers. New scene: seen from the back of a classroom over the softly blurred heads and shoulders of a few seated teenage students in the bottom foreground. Teacher stands at the front beside a large wall-mounted projector screen, half turned toward it, raising one hand and pointing toward the screen. She holds a tablet against her chest with her other arm, its display facing inward toward her body and NOT toward the camera, only its plain back visible. The entire projector screen surface is a flat uniform evenly lit chroma-key green rectangle edge to edge, no gradients, text, images or interface. All four screen corners must be clearly visible inside the frame with comfortable margins. The teacher stands entirely beside the screen, not in front of it; keep her body and pointing hand clear of the green rectangle so the screen remains completely unobstructed. Soft morning light from tall classroom windows, natural colors, authentic photographic textures, 35mm lens, realistic proportions, cinematic documentary photograph. No text, captions, logos or watermarks anywhere."
+  },
+  "front-tall-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic vertical photo of the same physics teacher as in the reference image (a woman in her late 30s with shoulder-length dark curly hair, tortoiseshell glasses, a navy sweater with the sleeves pushed up) standing beside a large wall-mounted projector screen at the front of a classroom, pointing at it, a tablet held against her chest with its screen facing her. The projector screen fills the upper half of the frame and is a flat, evenly lit chroma-key green rectangle edge to edge, no text, no image, all four corners in frame; she stands to its right, in the lower half, not in front of it. Blurred heads of a few teenage students at the bottom edge. Soft morning light, natural colour, 35mm. A fictional person, not a real or famous one.",
+    "why": "The teacher at the projector, composed for 9:16.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "generated/push-still.png"
+      ]
+    },
+    "file": "generated/front-tall-still.png",
+    "sha256": "836422cb73338764b010c1c724d398f635cbd04aa5d1e7fd0e5252b72104c46b",
+    "request": "88b71a9b1d68aa513afbc17065455803e0e7e8de75930f3a0c2678cd4883b11f",
+    "job": "7ffb89fd-cb11-4c3e-85cf-7041fff488eb",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T00:22:13.784Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Generate exactly one photorealistic vertical 9:16 photograph for a video ad, with a little safe room around the edges for cropping. Use the attached reference to preserve the identity and appearance of the SAME fictional physics teacher: woman late 30s, shoulder-length dark curly hair, tortoiseshell eyeglasses, navy knit sweater with sleeves pushed up, gray trousers. New scene: at the front of a classroom, beside a large wall-mounted projector screen. Composition is crucial: the entire rectangular projector screen occupies the upper half of the vertical frame, with ALL FOUR CORNERS visibly inside the frame and modest margins. Its interior is perfectly flat, uniformly evenly lit saturated chroma-key green from edge to edge, without text, imagery, gradients, shadows, glare, or objects. The teacher stands at its lower right, her body and head in the lower half of the photograph, outside the green rectangle, not occluding it. She points upward toward the screen with one hand, with her pointing hand beside the screen rather than over its green surface. With her other arm she holds a tablet against her chest, its display facing inward toward her chest and its plain back facing the camera. Natural relaxed teaching expression. Blurred backs of heads of a few teenage students along the bottom edge, classroom context, soft morning window light, natural colors, realistic skin and anatomy, 35mm photographic look. No captions, text, logos, or watermarks anywhere."
+  },
+  "push": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "Slow push-in. The teacher pushes hard on the heavy wooden crate and it does not move at all for two seconds, then it suddenly breaks loose and slides forward across the floor a short way as she steps after it. She is not speaking.",
+    "why": "The push that fails, then succeeds: the question the lesson answers.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "16:9",
+      "resolution": "720p",
+      "seed": 5211,
+      "seconds": 6,
+      "audio": false,
+      "first": "generated/push-still.png"
+    },
+    "file": "generated/push.mp4",
+    "sha256": "3c3ff73c96ce6721df49beffd8904425d7c5d9531b47c4fbf64a5a140a6c58ef",
+    "request": "579eee5f14b7ed26f4c81120c4b7566669a651613242a6eb1fde9272093dba79",
+    "job": "3bb7cb23-38ed-4e31-b58f-819e39bba8da",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T07:16:38.464Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/newton-lesson/gen/footage/push/#####.jpg",
+      "fps": 24,
+      "frames": 145,
+      "sheet": "public/ads/newton-lesson/gen/footage/push/sheet.jpg"
+    }
+  },
+  "push-tall": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "Slow push-in. The teacher pushes hard on the heavy wooden crate and it does not move at all for two seconds, then it suddenly breaks loose and slides forward across the floor a short way as she steps after it. She is not speaking.",
+    "why": "The tall hook in motion.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "9:16",
+      "resolution": "720p",
+      "seed": 5212,
+      "seconds": 6,
+      "audio": false,
+      "first": "generated/push-tall-still.png"
+    },
+    "file": "generated/push-tall.mp4",
+    "sha256": "5cc5044bcb790c6c048c6321890c7b668c5cecb6631dfda69eef3b19c9d8852b",
+    "request": "ef6db9e2e5fe3473577fcb55afd730223e82eade4d8c1c54fb2e58483a890cb8",
+    "job": "ef4ea1a6-5d84-40ec-ae48-6fe8a365a227",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T07:47:46.650Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/newton-lesson/gen/footage/push-tall/#####.jpg",
+      "fps": 24,
+      "frames": 145,
+      "sheet": "public/ads/newton-lesson/gen/footage/push-tall/sheet.jpg"
+    }
+  },
+  "front": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "Locked-off camera, no camera movement. The teacher gestures toward the projector screen with her raised hand and glances back at the class; the students' heads move slightly. The projector screen stays a flat, evenly lit chroma-key green with no text or image for the whole shot. She is not speaking.",
+    "why": "The teacher at the projector in motion, used twice: the lesson plan, then the simulation on the screen.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "16:9",
+      "resolution": "720p",
+      "seed": 5213,
+      "seconds": 6,
+      "audio": false,
+      "first": "generated/front-still.png"
+    },
+    "file": "generated/front.mp4",
+    "sha256": "0c19dd4007717b184f1cb9ac54eefe5ad4d4b8c68fe08b9e2351e7c18c51d3c0",
+    "request": "3b4c394a098db8bf793db1e2b2f093220cb8551b3e470d2f0f9423a33a846758",
+    "job": "a03683b7-3718-4c99-858d-412ddb168e12",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T07:49:38.623Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/newton-lesson/gen/footage/front/#####.jpg",
+      "fps": 24,
+      "frames": 145,
+      "sheet": "public/ads/newton-lesson/gen/footage/front/sheet.jpg"
+    }
+  },
+  "front-tall": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "Locked-off camera, no camera movement. The teacher gestures toward the projector screen and glances back at the class. The projector screen stays a flat, evenly lit chroma-key green with no text or image for the whole shot. She is not speaking.",
+    "why": "The tall projector shot in motion.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "9:16",
+      "resolution": "720p",
+      "seed": 5214,
+      "seconds": 6,
+      "audio": false,
+      "first": "generated/front-tall-still.png"
+    },
+    "file": "generated/front-tall.mp4",
+    "sha256": "2889a75cb2d37d3ad9329fd2e45d2e49cc228736e88b04a1553acb5c97bbe135",
+    "request": "cfef4dbbf79b68603c3e075e4f53e96b5f6ed6726f01971adc966d1ea61c7053",
+    "job": "79954fd8-4721-4145-a12b-ee88b9c2df84",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T07:53:55.095Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/newton-lesson/gen/footage/front-tall/#####.jpg",
+      "fps": 24,
+      "frames": 145,
+      "sheet": "public/ads/newton-lesson/gen/footage/front-tall/sheet.jpg"
+    }
+  }
+}

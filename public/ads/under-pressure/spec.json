@@ -1,0 +1,21 @@
+{
+  "fps": 30,
+  "lang": "en",
+  "duration": 30,
+  "music": {
+    "prompt": "Professional modern instrumental background music for a 30-second education software advert aimed at university lecturers, mixed as a bed under a spoken voice-over: keep the midrange sparse and leave room for speech. Starts tense and mechanical: a low ticking pulse and muted staccato strings, like pressure building, about 100 BPM, speeding up slightly from 3 seconds. At 6.5 seconds a short clean break, then it opens up into warm, confident, curious music: felt piano, soft pulsing synth bass, light tasteful drums, gentle strings. Lifts once more at 21 seconds and resolves with a clean ending at 30 seconds. Polished, intelligent, understated. Instrumental only. No vocals, no bells, no chimes, no sound effects, no risers, no whooshes.",
+    "instrumental": true,
+    "length_s": 30
+  },
+  "mix": { "fade_out": 0.4 },
+  "voices": [
+    { "id": "line", "at": 0.3, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "text": "The physics fits on one line." },
+    { "id": "hour", "at": 3.2, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "text": "The arithmetic takes the hour." },
+    { "id": "teach", "at": 6.9, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "text": "So teach the line." },
+    { "id": "write", "at": 8.8, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "text": "Write it the way you would on the board." },
+    { "id": "solve", "at": 12.5, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "text": "Select it. Solved exactly." },
+    { "id": "why", "at": 17.9, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "text": "When a student asks why, press Explain." },
+    { "id": "canvas", "at": 25.4, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "text": "All on one canvas." },
+    { "id": "end", "at": 27.7, "voice_id": "Xb7hH8MSUJpSbSDYk0k2", "text": "Try MathbookLM free." }
+  ]
+}

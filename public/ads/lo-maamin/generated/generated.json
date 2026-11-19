@@ -1,0 +1,423 @@
+{
+  "gasp-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic candid photo, not a real or famous person. A young Israeli woman in her mid-twenties, dark curly hair tied up, oversized grey hoodie, sits on a worn beige fabric couch in a sunny Tel Aviv apartment living room with a laptop open on her knees (we see the back of the laptop lid, no logo). She has just turned her head sharply to her right, toward someone sitting next to her just out of frame, eyebrows shooting up, eyes wide, mouth starting to fall open in disbelief. She sits in the right third of the frame, looking toward frame left. Soft natural window light, plants and a bookshelf softly blurred behind, shallow depth of field, 35mm lens, documentary handheld feel, true skin texture. Leave empty space around the edges of the frame.",
+    "why": "A real-looking face and a real reaction open the ad; code can't make a person.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "16:9"
+    },
+    "file": "generated/gasp-still.png",
+    "sha256": "bc3e1d402ebd2db7c6adecdc3592df67952ffb1e2db47947534a0656834d68bf",
+    "request": "26787dba7ebf8bbd15a3b6a626885736be0a421544d5168910a0e7ac2c4c5aa6",
+    "job": "82fc0027-2999-4364-b4f8-2abe9f7aec16",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-08T22:53:09.497Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic candid photograph in a horizontal 16:9 composition, with a little extra safe room at all edges for cropping. Fictional, non-famous young Israeli woman in her mid-twenties, dark curly hair tied up, oversized grey hoodie, seated on a worn beige fabric couch in a sunny Tel Aviv apartment living room. Place her in the right third of the frame. An open laptop rests on her knees, with the plain back of its lid facing the camera, absolutely no logo. Capture the immediate instant after she sharply turns her head to her own right, toward frame left, reacting to someone sitting next to her just outside the frame: eyebrows shooting up, eyes wide, mouth just beginning to fall open in authentic disbelief. Her gaze is directed toward frame left. Soft natural window light, leafy houseplants and a bookshelf softly blurred in the background, shallow depth of field, 35mm lens, documentary handheld photographic feel, true natural skin texture. Believable unposed anatomy and expression. Keep breathing room around the frame edges and generous natural living-room negative space to the left. No text, captions, logos, watermarks, or other people visible."
+  },
+  "chill-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic candid photo, not a real or famous person. A young Israeli man in his mid-twenties, short dark hair and light stubble, plain white t-shirt, lounges far back on the same worn beige fabric couch in a sunny Tel Aviv apartment, one arm behind his head, totally relaxed, a faint smug half-smile. His other hand holds a black smartphone up in front of him, the screen facing him and away from the camera, so only the back of the phone shows (no logo). A coffee mug rests on the armrest. Soft natural window light, plants softly blurred behind, shallow depth of field, 35mm lens, documentary handheld feel. He sits in the left half of the frame. Leave empty space around the edges of the frame.",
+    "why": "The friend she's staring at, easy and unbothered; a person, so code can't make him.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "16:9",
+      "refs": [
+        "generated/gasp-still.png"
+      ]
+    },
+    "file": "generated/chill-still.png",
+    "sha256": "113ce9ce513d2a18fe1a1b1f01ee3513023ad85181e0cd518029e69d206cca2d",
+    "request": "04e3b419e6744b3eeccdf100939da7ea2a53592f8d94f469df472998d4d971c5",
+    "job": "1e913b80-3b6a-49af-a35f-761d1f8358a2",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-08T22:54:05.872Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic candid photograph, landscape 16:9. Use the attached reference image for the SAME worn beige fabric couch and sunny Tel Aviv apartment environment: textured soft beige couch, natural window light, leafy houseplants and casually furnished background. Replace the reference woman and laptop entirely with a fictional young Israeli man in his mid-twenties, short dark hair, light stubble, plain white t-shirt. He lounges deeply far back into the couch, totally relaxed, one arm bent behind his head, a faint smug half-smile while looking at his phone. Position him in the LEFT HALF of the frame. His other hand naturally holds a plain black smartphone up in front of him; screen faces him, away from camera; ONLY the unbranded black BACK of the phone is visible. Anatomically natural hands and relaxed posture. A plain coffee mug rests securely on the couch armrest. Soft natural sunny window light, softly blurred green plants behind him, shallow depth of field, 35mm lens, authentic handheld documentary feeling, realistic skin and fabric texture, unposed everyday moment. Wider framing with generous breathing room around all frame edges, leave spacious empty couch and softly blurred apartment on the right, keep head, elbows, phone, and mug safely inside frame for slight 16:9 cropping. No woman, no laptop. No text, captions, graphics, logos, or watermarks."
+  },
+  "shoulder-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic over-the-shoulder photo from just behind and above the right shoulder of a young man in a plain white t-shirt lounging on a worn beige fabric couch. His right hand holds a black Android smartphone upright in portrait, thin bezels, rounded corners, a small punch-hole camera, held fairly large and sharp in the centre of the frame, his thumb resting on the lower edge of the screen. The phone's display is a flat, evenly lit chroma-key green filling the screen edge to edge, no text, no interface, no reflections, all four corners of the display in frame. His shoulder and the side of his head are soft in the foreground. Living room softly blurred beyond, soft natural window light, 35mm lens. Leave empty space around the edges of the frame.",
+    "why": "Her view of his phone. The screen is green so the real Gomlin feed is laid on it in code; the model never draws the app.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "16:9",
+      "refs": [
+        "generated/chill-still.png"
+      ]
+    },
+    "file": "generated/shoulder-still.png",
+    "sha256": "1544de7a3cb2209edb52b95582db29ba8bce5e399ce893e90550b9b100121067",
+    "request": "f42c1a9672391016dd328c389f571945d5e8540cf4aee059766aa6c222ea963d",
+    "job": "d6e1a211-8874-4083-b5fe-1ec82b506b0d",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-08T22:54:58.993Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Generate exactly one photorealistic image, landscape 16:9 composition with a little crop-safe empty breathing room at all edges. Use the attached reference for the young man's appearance (dark curly hair, olive skin), plain white T-shirt, worn beige fabric couch, relaxed domestic mood, natural window lighting and plant-filled living room. Change camera viewpoint completely: over-the-shoulder photograph from just behind and above his RIGHT shoulder while he lounges on the couch. The soft out-of-focus right shoulder and side/back of his head are in foreground. His RIGHT hand holds a black Android smartphone upright in portrait, fairly large and tack-sharp at the exact center of the frame; phone has thin black bezels, rounded corners and a tiny punch-hole camera near the top. We see the FRONT display clearly, all four display corners fully within frame and unobscured. His thumb rests at the lower edge without covering the usable green area. The entire display is perfectly flat, uniformly evenly lit pure chroma-key green edge to edge, without any text, interface, icons, gradients, reflections, glare or content, apart from the tiny physical punch-hole. Anatomically realistic right hand and natural grip. Softly blurred living room beyond, soft natural window light, realistic 35mm lens photography, shallow depth of field with the smartphone as focal subject. No text, captions, logos or watermarks anywhere."
+  },
+  "laptop-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic candid photo, not a real or famous person. The same young Israeli woman, dark curly hair tied up, oversized grey hoodie, on the same worn beige couch, now looking back down at the laptop on her knees with a flat, defeated deadpan stare, one hand on the top edge of the lid, about to close it. We see the back of the laptop lid, no logo, no screen visible. Soft natural window light, plants and a bookshelf softly blurred behind, shallow depth of field, 35mm lens. She sits in the right third of the frame. Leave empty space around the edges of the frame.",
+    "why": "Her own job hunt, the old way, closing in defeat: a person, so code can't make it.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "16:9",
+      "refs": [
+        "generated/gasp-still.png"
+      ]
+    },
+    "file": "generated/laptop-still.png",
+    "sha256": "36bfb14a58dd5a7245d9fdfb489d861f4cb481e8abfe6b069e6c7d4ae124759c",
+    "request": "0c82ab97a413c44642782b93d884c73739513290e5df3aaf5b9bdfa703dd19c7",
+    "job": "6673ec10-0338-47ad-8ff1-9ae088320d6e",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-08T22:56:53.533Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic candid photograph in a 16:9 landscape frame. Use the attached reference to preserve the identity and appearance of the same fictional young Israeli woman, her dark curly hair tied in a loose high bun, her oversized grey hoodie, the same worn beige couch, and the same softly sunlit plant-filled living room with bookshelf. Change her pose and expression: she is now looking downward at the laptop on her knees with a flat, defeated deadpan stare, mouth closed, relaxed brows, tired resignation. One hand rests naturally over the top edge of the laptop lid, poised to close it. The camera sees only the plain back of the grey laptop lid: no logo and absolutely no screen visible. Keep her seated in the right third of the composition with generous empty couch and room on the left. Leave a little breathing room at all outer edges for a precise 16:9 crop, including above her bun. Soft natural window light, realistic skin texture, shallow depth of field, 35mm lens aesthetic, plants and bookshelf softly blurred behind. Maintain photographic realism and the reference's understated natural colors. No text, captions, logos, watermarks, or graphic elements."
+  },
+  "gasp-tall-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Vertical version of the reference photo, the same woman, couch, hoodie and light. Photorealistic candid photo, not a real or famous person: a young Israeli woman in her mid-twenties, dark curly hair tied up, oversized grey hoodie, on a worn beige couch with a laptop on her knees (back of the lid, no logo). She has just turned her head sharply to her right toward someone just out of frame, eyebrows up, eyes wide, mouth starting to fall open in disbelief. Her face in the upper middle of the frame, framed from the chest up. Soft window light, shallow depth of field. Leave empty space around the edges of the frame.",
+    "why": "The gasp composed for 9:16, since a crop of the wide shot is too soft at that height.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "generated/gasp-still.png"
+      ]
+    },
+    "file": "generated/gasp-tall-still.png",
+    "sha256": "bc76bc7178dee3880988006712d2bba0bcb213b3d42bd34115ffce81cc557e3a",
+    "request": "e5323d89b33538b7df75e973c01fad0071bbb8718b5d9326b30633cd93ec38bf",
+    "job": "1dae1970-a1b4-4da0-bcf1-8f82c311eae6",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-08T22:57:25.323Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic vertical 9:16 image using the attached reference photo. Preserve the same fictional young Israeli woman in her mid twenties, her facial identity, dark curly hair loosely tied up, small gold hoop earrings, oversized washed grey hoodie, worn beige couch, and soft window lighting from the reference. Recompose as a vertical candid photograph, chest-up framing with the back of an open plain grey laptop lid visible at the bottom on her knees, no logo. Her face is in the upper middle of the frame. She has just turned her head sharply to her own right (toward image left, like the reference), looking at someone just outside the frame, eyebrows raised, eyes wide, mouth beginning to fall open in disbelief. Natural authentic surprised expression, realistic skin texture, photographic realism. Soft daylight from the window on image left, blurred leafy houseplants and home background, shallow depth of field. Give generous breathing room above her hair and around both shoulders and all frame edges for slight 9:16 cropping. No text, captions, logos, watermarks or additional people. Match the reference woman, couch, hoodie, light and candid visual character closely."
+  },
+  "chill-tall-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Vertical version of the reference photo, the same man, couch and light. Photorealistic candid photo, not a real or famous person: a young Israeli man in his mid-twenties, short dark hair, light stubble, plain white t-shirt, lounging far back on a worn beige couch, one arm behind his head, a faint smug half-smile, holding a black smartphone up in front of him with the screen facing him and away from the camera (no logo). Framed from the waist up, his face in the upper middle. Soft window light, shallow depth of field. Leave empty space around the edges of the frame.",
+    "why": "The friend composed for 9:16.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "generated/chill-still.png"
+      ]
+    },
+    "file": "generated/chill-tall-still.png",
+    "sha256": "2cbb4715ed1fd5bc268947907d6968c1982fc1b5cd8ed1eb6b9ab4e52b5c736f",
+    "request": "8e539d5ef150543bd34438f98a0c02e89794f6c0d22dd7982688ae0570ae5204",
+    "job": "8cb03a28-4e69-43cd-955a-43d36aba00ea",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-08T22:57:58.074Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic image, vertical 9:16 composition. Use the attached reference for the exact same fictional young man, worn beige textured couch, room atmosphere and soft natural window light. Recompose the photo vertically, with generous crop-safe breathing room at all edges. Young Israeli man in his mid-twenties, short tousled dark hair, light stubble, plain white t-shirt, lounging far back on that beige couch, one arm bent behind his head, a faint smug half-smile. He holds a black smartphone up in front of himself in his other hand, looking at its screen; screen faces him and away from camera, only unbranded black rear of phone visible. Waist-up framing, face in the upper middle of frame, maintain relaxed natural anatomy and realistic fingers. Soft window light, shallow depth of field, subtly blurred houseplants and windows in the background matching reference. Candid natural photographic realism, skin texture and fabric detail. No text, captions, logos, watermarks, or graphic elements."
+  },
+  "shoulder-tall-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Vertical version of the reference photo. Photorealistic over-the-shoulder photo from just behind the right shoulder of a young man in a plain white t-shirt on a worn beige couch. His right hand holds a black Android smartphone upright in portrait, thin bezels, rounded corners, a small punch-hole camera, large and sharp in the centre of the frame, his thumb resting on the lower edge of the screen. The phone's display is a flat, evenly lit chroma-key green filling the screen edge to edge, no text, no interface, no reflections, all four corners of the display in frame. His shoulder soft in the foreground at the bottom. Soft window light. Leave empty space around the edges of the frame.",
+    "why": "Her view of his phone, composed for 9:16, with a green screen for the real UI.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "generated/shoulder-still.png"
+      ]
+    },
+    "file": "generated/shoulder-tall-still.png",
+    "sha256": "09dfb481a74ef1d7de8cd90aa690c8da5c2579e87f0b88f9be78ee967e036c51",
+    "request": "b07a2b75b789843608c841ccb56336d0ca1ffb78e518939d14c56106a1df51af",
+    "job": "f6dd9c4c-4edf-4d6e-814b-a2d21bb8416b",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-08T22:58:38.324Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic image, vertical 9:16 composition, using the attached reference for the natural home setting, soft window light, beige couch texture, realistic young man and black Android phone appearance. Recompose the scene vertically, photographed from just behind the RIGHT shoulder of a young adult man wearing a plain white t-shirt sitting on a worn beige couch. His RIGHT hand holds a black Android smartphone upright in portrait, large, tack sharp and centered in the frame. Anatomically correct right-hand grip with his thumb resting at the lower edge of the screen without hiding the display corners. Thin black bezels, rounded corners, a small centered punch-hole camera. The entire display is flat, perfectly even vivid chroma-key green edge to edge, with no text, interface, glare, reflections or gradients. All four display corners fully visible. His white-shirted right shoulder is softly out of focus across the bottom foreground, with a little of the back of his head at the right, never obstructing the phone. Soft natural window illumination, blurred plants and cozy home furnishings in the background, photographic realism and natural skin detail. Keep ample breathing room around every outside edge for a slight crop to exactly 9:16. No captions, text, logos or watermarks."
+  },
+  "laptop-tall-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Vertical version of the reference photo, the same woman, couch, hoodie and light. Photorealistic candid photo, not a real or famous person: the young woman looks down at the laptop on her knees with a flat, defeated deadpan stare, one hand on the top edge of the lid, about to close it (back of the lid, no logo, no screen visible). Framed from the chest up, her face in the upper middle. Soft window light, shallow depth of field. Leave empty space around the edges of the frame.",
+    "why": "The laptop beat composed for 9:16.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "generated/laptop-still.png"
+      ]
+    },
+    "file": "generated/laptop-tall-still.png",
+    "sha256": "baac37a9c5060e46992ec0c0db34de4d2afbfdd23d9954ef4c5f364da6ba28b7",
+    "request": "42384890a551e73863acd928645dc86cdb6e8b08657b1856f74d161822f6e0f8",
+    "job": "151bf4d8-754b-46e8-90aa-c58495c70c0f",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-08T22:59:13.911Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one image: a photorealistic vertical 9:16 adaptation of the provided reference photo. Preserve the same fictional young adult woman, facial features, dark curly messy bun, gold hoop earrings, gray hoodie, beige textured couch, softly lit home with plants, and soft window light from camera left. Candid natural photography with shallow depth of field and realistic skin texture. Frame chest-up with her face in the upper middle, with comfortable empty space above her hair and around both edges for cropping to exactly 9:16. She looks downward at the laptop on her knees with a flat, defeated deadpan stare, subdued mouth and tired eyes. One anatomically natural hand rests over the top edge of the laptop lid, poised to close it. The plain gray back of the laptop lid faces the viewer in the lower part of the portrait; no screen visible and no logo. Keep her face unobstructed. Match the reference's quiet, authentic mood, colors, couch and light. No text, captions, logos, or watermarks."
+  },
+  "gasp": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "The woman freezes staring to her right, her eyes widen and her mouth drops open into a stunned O, and she leans in slightly. Subtle handheld camera drift.",
+    "why": "The gasp in motion: the hook in the first second.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "16:9",
+      "resolution": "720p",
+      "seed": 2311,
+      "seconds": 4,
+      "audio": false,
+      "first": "generated/gasp-still.png"
+    },
+    "file": "generated/gasp.mp4",
+    "sha256": "edd80696779cb8383dc672f572bbb185143c1b340982e46b212cf3cd82c6ae69",
+    "request": "96e26f433f973830d3245517eab6e3db97ff2870335d704f99768691ec9e3df4",
+    "job": "98c2b39b-8ba7-4858-acb0-74f826acba9f",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-08T23:49:57.331Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/lo-maamin/gen/footage/gasp/#####.jpg",
+      "fps": 24,
+      "frames": 97,
+      "sheet": "public/ads/lo-maamin/gen/footage/gasp/sheet.jpg"
+    }
+  },
+  "chill": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "He keeps holding the phone up in his right hand the whole time and only his thumb flicks sideways across the screen, again and again, with a lazy half-smile; his other arm stays behind his head. Slow handheld push-in.",
+    "why": "The reverse shot: what she's looking at.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "16:9",
+      "resolution": "720p",
+      "seed": 2412,
+      "seconds": 4,
+      "audio": false,
+      "first": "generated/chill-still.png"
+    },
+    "file": "generated/chill.mp4",
+    "sha256": "deb6f9b266841048d6a6ea23e85a4b1a4e63fa929db6ddf7112032c450cd4b52",
+    "request": "8cfa964079f2e8ed7bca3b612bb589ed59b0f4632d9199f4658b5b5798ee7621",
+    "job": "cfe4d3ac-be64-47d6-ba12-fba6ad275be5",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T04:18:56.446Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/lo-maamin/gen/footage/chill-2/#####.jpg",
+      "fps": 24,
+      "frames": 97,
+      "sheet": "public/ads/lo-maamin/gen/footage/chill-2/sheet.jpg"
+    }
+  },
+  "shoulder": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "His thumb flicks sideways across the phone screen four times in a relaxed rhythm while the phone stays steady in his hand. Locked-off camera. The phone display stays a flat, evenly lit chroma-key green with no text or interface for the whole shot.",
+    "why": "The swiping, so the real UI on the screen moves with a real thumb.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "16:9",
+      "resolution": "720p",
+      "seed": 2313,
+      "seconds": 6,
+      "audio": false,
+      "first": "generated/shoulder-still.png"
+    },
+    "file": "generated/shoulder.mp4",
+    "sha256": "e3f425793418cbed6c6c1fba36b7afb92c64e6a89112a4f1772af72bc7ebd717",
+    "request": "4628a7b420ead9e53b6193bc7f5bc0e1861854b3477e832d3c712e03c4981721",
+    "job": "97d0d2d3-d6d3-4328-b9f7-1c0e3669f2c2",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T00:23:13.842Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/lo-maamin/gen/footage/shoulder/#####.jpg",
+      "fps": 24,
+      "frames": 145,
+      "sheet": "public/ads/lo-maamin/gen/footage/shoulder/sheet.jpg"
+    }
+  },
+  "gasp-tall": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "The woman freezes staring to her right, her eyes widen and her mouth drops open into a stunned O, and she leans in slightly. Subtle handheld camera drift.",
+    "why": "The tall gasp in motion.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "9:16",
+      "resolution": "720p",
+      "seed": 2321,
+      "seconds": 4,
+      "audio": false,
+      "first": "generated/gasp-tall-still.png"
+    },
+    "file": "generated/gasp-tall.mp4",
+    "sha256": "24d295ea2eb28313dad37162311160f1e31e2d44b9c97f3dd459b364133af2d3",
+    "request": "909a4cb14020152f83d58d946c658b85f3f42cddf9579282848e8cdc53e35416",
+    "job": "910e0f55-838b-4706-a739-94eceb72aaf2",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T02:05:34.593Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/lo-maamin/gen/footage/gasp-tall/#####.jpg",
+      "fps": 24,
+      "frames": 97,
+      "sheet": "public/ads/lo-maamin/gen/footage/gasp-tall/sheet.jpg"
+    }
+  },
+  "chill-tall": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "The relaxed man flicks his thumb sideways across his phone, again and again, with a lazy half-smile, still leaning back on the couch. Slow handheld push-in.",
+    "why": "The tall reverse shot in motion.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "9:16",
+      "resolution": "720p",
+      "seed": 2322,
+      "seconds": 4,
+      "audio": false,
+      "first": "generated/chill-tall-still.png"
+    },
+    "file": "generated/chill-tall.mp4",
+    "sha256": "7f3dc1930cf84026de969abe52272a337e7c321c1f9a5820c307dea9ac4b5706",
+    "request": "f2979b1e5d22f37bcdce5bc86b0b24edae13db18e53e0502fb2fc53abed5622c",
+    "job": "5bfa7bd8-6920-4972-b440-5eb8c7b77f96",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T02:14:58.060Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/lo-maamin/gen/footage/chill-tall/#####.jpg",
+      "fps": 24,
+      "frames": 97,
+      "sheet": "public/ads/lo-maamin/gen/footage/chill-tall/sheet.jpg"
+    }
+  },
+  "laptop-tall": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "With a deadpan face the woman slowly closes the laptop lid, then looks up toward the camera-left side with a tired sigh. Subtle handheld camera drift.",
+    "why": "The tall laptop beat in motion.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "9:16",
+      "resolution": "720p",
+      "seed": 2324,
+      "seconds": 4,
+      "audio": false,
+      "first": "generated/laptop-tall-still.png"
+    },
+    "file": "generated/laptop-tall.mp4",
+    "sha256": "424d52aa6a68dfd7402948adde78ad1781f599128caf7a190549b8874304d4a8",
+    "request": "acc94a85f1c6fc437b8b437e94e04b35315eeb2c245af6b050610349cf9bcf77",
+    "job": "6a48acea-4423-4ec8-a828-f000eecfc3da",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T04:14:14.672Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/lo-maamin/gen/footage/laptop-tall/#####.jpg",
+      "fps": 24,
+      "frames": 97,
+      "sheet": "public/ads/lo-maamin/gen/footage/laptop-tall/sheet.jpg"
+    }
+  },
+  "laptop": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "With a deadpan face the woman slowly closes the laptop lid, then looks up toward the camera-left side with a tired sigh. Subtle handheld camera drift.",
+    "why": "The laptop closing, the turn before the end card.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "16:9",
+      "resolution": "720p",
+      "seed": 2314,
+      "seconds": 4,
+      "audio": false,
+      "first": "generated/laptop-still.png"
+    },
+    "file": "generated/laptop.mp4",
+    "sha256": "3efacfa5831d5fd418e97556e66617065b30cb163ec1ae3de113255dc5275a28",
+    "request": "8d084c26a56f5576f68ec507fc57a4f9c7d5ce79bbe15167de358ee2d61409a3",
+    "job": "8edf49cd-59de-4da5-975f-e66f846ea1cc",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T04:21:13.714Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/lo-maamin/gen/footage/laptop/#####.jpg",
+      "fps": 24,
+      "frames": 97,
+      "sheet": "public/ads/lo-maamin/gen/footage/laptop/sheet.jpg"
+    }
+  },
+  "shoulder-tall": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "His thumb flicks sideways across the phone screen four times in a relaxed rhythm while the phone stays steady in his hand. Locked-off camera. The phone display stays a flat, evenly lit chroma-key green with no text or interface for the whole shot.",
+    "why": "The tall swiping shot in motion.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "9:16",
+      "resolution": "720p",
+      "seed": 2323,
+      "seconds": 6,
+      "audio": false,
+      "first": "generated/shoulder-tall-still.png"
+    },
+    "file": "generated/shoulder-tall.mp4",
+    "sha256": "8ec7fa1c34c564c1a5d6bbe6d3001258d7b0d76be201b5053b201ee0d6b2e3bc",
+    "request": "f1dc302cb2f5f52d399b5801591499598fecf5e734df17374da8c661f73f41d6",
+    "job": "cddf4c4d-70dd-4911-908b-d5db14338996",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-09T04:23:55.009Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/lo-maamin/gen/footage/shoulder-tall/#####.jpg",
+      "fps": 24,
+      "frames": 145,
+      "sheet": "public/ads/lo-maamin/gen/footage/shoulder-tall/sheet.jpg"
+    }
+  }
+}

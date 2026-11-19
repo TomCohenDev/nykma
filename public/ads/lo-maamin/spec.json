@@ -1,0 +1,13 @@
+{
+  "fps": 30,
+  "lang": "he",
+  "duration": 23,
+  "music": {
+    "prompt": "Professional, modern instrumental track for a 23-second comedic mobile app advert. Opens on a single held, suspenseful plucked-bass note and a short pause of disbelief for 3 seconds, then drops into a cool, confident, laid-back groove: tight hip-hop drums, a warm bouncy bass line, crisp muted electric guitar stabs and light synth keys, about 112 BPM, playful and swaggering. Around 16 seconds the groove thins out for a deadpan two-second beat, then returns with one strong final hit and a clean ending at 23 seconds. Polished and tasteful. Instrumental only. No vocals, no bells, no chimes, no sound effects, no risers, no whooshes.",
+    "instrumental": true,
+    "length_s": 23
+  },
+  "mix": {
+    "fade_out": 0.4
+  }
+}

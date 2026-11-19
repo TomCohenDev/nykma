@@ -1,0 +1,106 @@
+{
+  "fps": 30,
+  "lang": "he",
+  "duration": 30,
+  "music": {
+    "prompt": "Professional modern corporate background music for a 30-second mobile app advert. Warm, optimistic and confident. Clean felt piano and soft electric keys over a gentle pulsing synth bass, light tasteful drums and subtle strings, about 104 BPM, building gently and resolving with a clear ending at 30 seconds. Polished, sophisticated, understated. Instrumental only. No vocals, no bells, no chimes, no sound effects, no risers, no whooshes.",
+    "instrumental": true,
+    "length_s": 30
+  },
+  "mix": {
+    "duck_db": 9,
+    "fade_out": 0.4
+  },
+  "voices": [
+    {
+      "id": "swipe",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 0.2,
+      "text": "מחליקים ימינה, והוגש.",
+      "voice_settings": {
+        "speed": 1.15
+      }
+    },
+    {
+      "id": "rate",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 2.4,
+      "text": "בספטמבר, האבטלה בישראל: שלוש נקודה שתיים אחוז.",
+      "voice_settings": {
+        "speed": 1.15
+      }
+    },
+    {
+      "id": "market",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 5.5,
+      "text": "יותר ממאתיים אלף במדד הרחב, ומאה ארבעים ושמונה אלף משרות פנויות.",
+      "voice_settings": {
+        "speed": 1.15
+      }
+    },
+    {
+      "id": "form",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 11,
+      "text": "עוד טופס מההתחלה? לא צריך.",
+      "voice_settings": {
+        "speed": 1.15
+      }
+    },
+    {
+      "id": "resume",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 13.5,
+      "text": "קורות חיים פעם אחת, והתחומים שלך מזוהים.",
+      "voice_settings": {
+        "speed": 1.15
+      }
+    },
+    {
+      "id": "feed",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 16.5,
+      "text": "פיד שמתאים לך: הרבה משרות הייטק, וגם משרות לסטודנטים.",
+      "voice_settings": {
+        "speed": 1.15
+      }
+    },
+    {
+      "id": "chat",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 20.5,
+      "text": "לפני שמגישים, שואלים את סוכן ה-AI.",
+      "voice_settings": {
+        "speed": 1.15
+      }
+    },
+    {
+      "id": "tailored",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 23,
+      "text": "קורות חיים מותאמים לכל משרה.",
+      "voice_settings": {
+        "speed": 1.15
+      }
+    },
+    {
+      "id": "list",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 25.2,
+      "text": "וכל ההגשות במקום אחד.",
+      "voice_settings": {
+        "speed": 1.15
+      }
+    },
+    {
+      "id": "end",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 27,
+      "text": "גומלין. מחליקים, ומגישים.",
+      "voice_settings": {
+        "speed": 1.15
+      }
+    }
+  ]
+}

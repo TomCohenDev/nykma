@@ -1,0 +1,93 @@
+{
+ "rival-frenzy-v": {
+  "still": "rival-frenzy",
+  "canvas": [
+   1440,
+   1440
+  ],
+  "scale": 0.9875598086124403,
+  "offset": [
+   101.0,
+   202.0
+  ],
+  "key": "blue"
+ },
+ "rival-stride-v": {
+  "still": "rival-stride",
+  "canvas": [
+   1080,
+   1920
+  ],
+  "scale": 1.0334928229665072,
+  "offset": [
+   53.0,
+   153.0
+  ],
+  "key": "blue"
+ },
+ "rival-laugh-v": {
+  "still": "rival-stride",
+  "canvas": [
+   1440,
+   1440
+  ],
+  "scale": 1.3671826625386996,
+  "offset": [
+   76.0,
+   115.0
+  ],
+  "key": "blue"
+ },
+ "chad-walk-v": {
+  "still": "chad-walk",
+  "canvas": [
+   1080,
+   1920
+  ],
+  "scale": 1.0334928229665072,
+  "offset": [
+   53.0,
+   153.0
+  ],
+  "key": "green"
+ },
+ "chad-stride-v": {
+  "still": "chad-stride",
+  "canvas": [
+   1080,
+   1920
+  ],
+  "scale": 1.0334928229665072,
+  "offset": [
+   54.0,
+   153.0
+  ],
+  "key": "green"
+ },
+ "chad-finger-v": {
+  "still": "chad-finger",
+  "canvas": [
+   1440,
+   1440
+  ],
+  "scale": 1.079425837320574,
+  "offset": [
+   43.0,
+   86.0
+  ],
+  "key": "green"
+ },
+ "chad-blow-v": {
+  "still": "chad-blow",
+  "canvas": [
+   1440,
+   1440
+  ],
+  "scale": 1.079425837320574,
+  "offset": [
+   43.0,
+   86.0
+  ],
+  "key": "green"
+ }
+}

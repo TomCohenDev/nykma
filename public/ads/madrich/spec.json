@@ -1,0 +1,82 @@
+{
+  "fps": 30,
+  "lang": "he",
+  "duration": 26.2,
+  "music": {
+    "file": "music-edit.mp3",
+    "gain_db": -8,
+    "made_from": "gen/music.mp3, composed by ElevenLabs music_v2_5 from the pitch prompt (41 s), then cut with ffmpeg: 2.46-6.43 s, 0.8 s of silence (the freeze on זהו.), 2.46-20.42 s, 36.14-39.8 s (the final hit)"
+  },
+  "voices": [
+    {
+      "id": "hook",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 0.15,
+      "text": "איך מגישים מועמדות לעבודה?"
+    },
+    {
+      "id": "done",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 3.75,
+      "text": "[deadpan] זהו."
+    },
+    {
+      "id": "wait",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 4.87,
+      "text": "רגע, נשארו עוד תשע־עשרה שניות?"
+    },
+    {
+      "id": "sent",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 7.72,
+      "text": "ההחלקה שלחה שם, אימייל, טלפון וקורות חיים."
+    },
+    {
+      "id": "once",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 11.87,
+      "text": "קורות חיים מעלים פעם אחת, והפיד מסתדר לפיהם."
+    },
+    {
+      "id": "chat",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 16.02,
+      "text": "לא בטוחים? שואלים את הצ'אט על המשרה."
+    },
+    {
+      "id": "tailor",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 19.12,
+      "text": "ואפשר גם קורות חיים שמותאמים למשרה הזאת."
+    },
+    {
+      "id": "end",
+      "voice_id": "s0T0DT6EAPeX57MQpn3I",
+      "at": 22.97,
+      "text": "גומלין."
+    }
+  ],
+  "markers": [
+    {
+      "name": "swipe",
+      "at": 2.433
+    },
+    {
+      "name": "freeze",
+      "at": 3.967
+    },
+    {
+      "name": "restart",
+      "at": 4.767
+    },
+    {
+      "name": "hit",
+      "at": 22.733
+    }
+  ],
+  "mix": {
+    "fade_out": 0.4,
+    "duck_db": 10
+  }
+}

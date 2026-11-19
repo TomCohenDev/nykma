@@ -1,0 +1,24 @@
+{
+  "shots": [
+    {
+      "id": "pc-still",
+      "kind": "image",
+      "model": "google/gemini-nano-banana-2.1",
+      "prompt": "Photorealistic candid photo. A high school student sits at a desk in a softly lit bedroom in the evening, seen over their right shoulder from behind, looking at a large desktop monitor. The monitor shows a flat, evenly lit chroma-key green screen that fills the display edge to edge: no text, no interface, no logos, no reflections, no glare. The whole monitor and its four corners are in frame, sharp; the student's head and shoulder overlap the lower left of the screen a little. An open notebook and a pencil on the desk. Natural warm lamp light, 35mm, shallow depth of field on the background only.",
+      "why": "A real-looking person at a real desk, for the ad to play on their screen: code and Blender can't make that believable.",
+      "aspect_ratio": "16:9",
+      "resolution": "2K"
+    },
+    {
+      "id": "pc",
+      "kind": "video",
+      "model": "google/veo-3.1-fast",
+      "prompt": "Locked-off camera, no camera movement, no cuts. The student leans in slightly toward the monitor, rests their chin on one hand, then sits back a little; small, natural movements only. The monitor keeps showing a flat, evenly lit chroma-key green screen, edge to edge, with no text or interface, for the whole shot.",
+      "why": "The same person in motion, so the ad playing on their screen sits in a real moment.",
+      "seconds": 6,
+      "resolution": "1080p",
+      "aspect_ratio": "16:9",
+      "first": "generated/pc-still.png"
+    }
+  ]
+}

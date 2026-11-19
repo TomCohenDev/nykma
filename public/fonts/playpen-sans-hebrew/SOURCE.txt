@@ -1,0 +1,7 @@
+Playpen Sans Hebrew (variable, wght 100-800), Version 2.000. Hebrew hand font, with Latin letters too.
+Licence: SIL Open Font License 1.1 (OFL.txt here), commercial use allowed. No Reserved Font Name. fsType 0.
+Copyright 2023 The Playpen Sans Project Authors (https://github.com/TypeTogether/Playpen-Sans)
+Source: Google Fonts, https://github.com/google/fonts/blob/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/playpensanshebrew/PlaypenSansHebrew%5Bwght%5D.ttf
+Only the file name changed (from PlaypenSansHebrew[wght].ttf, brackets are awkward in URLs). The bytes are as downloaded.
+sha256 0ec8a95033c5a01e1799c60b49ab76d9922a68f715a081fc1f5587e4d2bb5b69
+Fetched 2026-10-31.

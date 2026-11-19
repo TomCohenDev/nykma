@@ -1,0 +1,68 @@
+{
+  "order": [
+    "board",
+    "wipe",
+    "press",
+    "engine",
+    "explain",
+    "sim",
+    "end"
+  ],
+  "arrows": [
+    [
+      "board",
+      "wipe"
+    ],
+    [
+      "wipe",
+      "press"
+    ],
+    [
+      "press",
+      "engine"
+    ],
+    [
+      "engine",
+      "explain"
+    ],
+    [
+      "explain",
+      "sim"
+    ],
+    [
+      "sim",
+      "end"
+    ]
+  ],
+  "start": "board",
+  "board": {
+    "board": [
+      0,
+      0
+    ],
+    "wipe": [
+      2400,
+      0
+    ],
+    "press": [
+      4800,
+      0
+    ],
+    "engine": [
+      7200,
+      0
+    ],
+    "explain": [
+      9600,
+      0
+    ],
+    "sim": [
+      12000,
+      0
+    ],
+    "end": [
+      14488,
+      -11
+    ]
+  }
+}

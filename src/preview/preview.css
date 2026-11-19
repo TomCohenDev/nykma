@@ -1,0 +1,21 @@
+html, body, #root { height: 100%; margin: 0; }
+body { background: #111; color: #ddd; font: 14px system-ui, sans-serif; }
+
+.preview { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; outline: none; }
+.preview header, .preview footer { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #1a1a1a; }
+.preview main { display: grid; place-items: center; overflow: hidden; margin: 12px; }
+.preview .fit { overflow: hidden; }
+.preview .id { margin-inline-start: auto; opacity: 0.6; font-family: ui-monospace, monospace; }
+.preview .ratios { display: flex; gap: 4px; }
+.preview label { display: flex; align-items: center; gap: 6px; }
+.preview input[type="range"] { flex: 1; }
+.preview output { min-width: 150px; text-align: right; font-variant-numeric: tabular-nums; }
+.preview button, .preview select { background: #2a2a2a; color: inherit; border: 1px solid #444; border-radius: 4px; padding: 4px 10px; font: inherit; }
+.preview button[aria-pressed="true"] { background: #f5c542; border-color: #f5c542; color: #111; }
+
+/* The desk's Play overlay. */
+[hidden] { display: none !important; }
+.preview.embed { background: #1e1e1e; font-family: "Inter Variable", system-ui, sans-serif; font-size: 12px; }
+.preview.embed footer { background: #2c2c2c; border-top: 1px solid #3a3a3a; }
+.preview.embed button { background: #383838; border-color: #444; }
+.preview.embed input[type="range"] { accent-color: #0d99ff; }

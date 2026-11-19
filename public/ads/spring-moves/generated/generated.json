@@ -1,0 +1,428 @@
+{
+  "lecture-a-still": {
+    "kind": "image",
+    "model": "google/gemini-nano-banana-2.1",
+    "prompt": "Photorealistic candid photo, vertical framing, camera at the side of the front of a university lecture hall, dim cold fluorescent light. In the lower third, a lecturer in his late 40s, shirt sleeves rolled up, sits at a lectern desk behind an open laptop, one hand on the trackpad, the other rubbing his forehead, tired and frustrated, his face lit cold blue by the laptop. We see only the plain back of the laptop lid, no logo, the laptop screen faces away from the camera. Behind and above him, filling the upper half of the frame, a ceiling projector throws a large rectangle onto a white wall-mounted whiteboard: the projected rectangle is a flat, evenly lit chroma-key green filling it edge to edge, no text, no interface, no reflections, no hot spot. All four corners of the projected rectangle are in frame and sharp, and nothing covers it. A faint beam of light with floating dust crosses the top of the frame from the projector. Focus on his face. 35mm, natural skin, no text in the image.",
+    "why": "A real-looking lecturer at his computer, giving up, while his projection fills the board behind him. Code and Blender can't make a person's frustration believable. The projection is keyed green so the real derivation, built in code, is laid onto it frame for frame. The model never draws the maths.",
+    "settings": {
+      "aspect_ratio": "9:16",
+      "resolution": "2K"
+    },
+    "file": "generated/lecture-a-still.jpg",
+    "sha256": "b6a0a1a4b0bc72662ac1f94f5c165992145c1c73a9b3aa80d99dc1f9a51f2c68",
+    "request": "cf5420f1c8a9bc4ac1d4b9d6877cfb171451e9c404204e36ce39af14accbf804",
+    "job": "img-89a7c624-8cd4-4154-b459-5e5a1641ba1b",
+    "costUsd": 0.0567,
+    "estimateUsd": 0.0504,
+    "made": "2026-11-05T15:30:11.421Z",
+    "via": "openrouter",
+    "terms": "https://openrouter.ai/terms"
+  },
+  "lecture-a": {
+    "kind": "video",
+    "model": "google/veo-3.1-fast",
+    "prompt": "Locked-off camera, no camera movement, no cuts. The lecturer clicks on his laptop's trackpad, glances up over his shoulder at the projection behind him, exhales heavily and shakes his head slightly, then leans back from the laptop and looks out at the class. Small, natural movements; he stays seated and does not walk in front of the projection. The projected rectangle on the whiteboard keeps showing a flat, evenly lit chroma-key green edge to edge, with no text or interface, for the whole shot. The laptop screen stays facing away from the camera. No captions.",
+    "why": "The same lecturer in motion: the glance up and the sigh are the hook, and only a real-looking person sells them. The derivation is laid onto the green projection in code.",
+    "settings": {
+      "aspect_ratio": "9:16",
+      "resolution": "1080p",
+      "seconds": 6,
+      "audio": false,
+      "first": "generated/lecture-a-still.png"
+    },
+    "file": "generated/lecture-a.mp4",
+    "sha256": "0149964da7522d2f3de5b405c650185f73dea7ae7f632080857b966bcf9cbf30",
+    "request": "400af699e454aa31c7795f6f2285cb70cc41de8e6cdb5250c8915dff5cdcc7d3",
+    "job": "gen-vid-1793892615-xjlrvBnz6ttIQ9ge4DEa",
+    "costUsd": 0.6,
+    "estimateUsd": 0.6,
+    "made": "2026-11-05T15:32:04.339Z",
+    "via": "openrouter",
+    "terms": "https://openrouter.ai/terms",
+    "footage": {
+      "src": "ads/spring-moves/gen/footage/lecture-a/#####.jpg",
+      "fps": 24,
+      "frames": 144,
+      "sheet": "public/ads/spring-moves/gen/footage/lecture-a/sheet.jpg"
+    }
+  },
+  "room-a-still": {
+    "kind": "image",
+    "model": "google/gemini-nano-banana-2.1",
+    "prompt": "Photorealistic candid photo, vertical framing, taken from the front of a tiered university lecture hall looking up at the seats, cold fluorescent light. Adult university students in their early twenties, a mix of backgrounds, with laptops and notebooks. Sharp in the foreground, a young woman stares blankly ahead with her pen stopped above her notebook. Behind her a young man rests his head on his hand, lost, and another student squints toward the front. Every notebook and laptop screen is out of focus and unreadable. 35mm, shallow depth of field, no text in the image.",
+    "why": "Adult students who have stopped following: real-looking people and their faces, which code can't make honestly.",
+    "settings": {
+      "aspect_ratio": "9:16",
+      "resolution": "2K"
+    },
+    "file": "generated/room-a-still.jpg",
+    "sha256": "0f0f980e29c21055dd5c1fdcdcf57adee64b7173a53b080229074f55b2742203",
+    "request": "d3d37b361a18c0ce68f3f1656c85bcebb223c02cb71a99bda6a8e9b9732975d1",
+    "job": "img-f23eec1f-c4fe-4d52-84d5-58d643c836b8",
+    "costUsd": 0.0533,
+    "estimateUsd": 0.0504,
+    "made": "2026-11-05T15:32:34.496Z",
+    "via": "openrouter",
+    "terms": "https://openrouter.ai/terms"
+  },
+  "room-a": {
+    "kind": "video",
+    "model": "google/veo-3.1-fast",
+    "prompt": "Locked-off camera, no cuts. The young woman in front slowly puts her pen down and leans back in her seat; behind her the young man rubs his eyes; small, natural movements, a quiet tired room. Notebooks and screens stay out of focus and unreadable. No text, no captions.",
+    "why": "The room giving up, in motion: the beat the voice-over lands on ('Neither has the room').",
+    "settings": {
+      "aspect_ratio": "9:16",
+      "resolution": "1080p",
+      "seconds": 4,
+      "audio": false,
+      "first": "generated/room-a-still.png"
+    },
+    "file": "generated/room-a.mp4",
+    "sha256": "bfac326b4a701393df5377d919d5b0cd0b814253703047462878ae04a4921c04",
+    "request": "ae89aa13c140a76f9754d82edd372fff8334fcdba416a80eb9c1f111c911b8af",
+    "job": "gen-vid-1793892756-C73C6oUfZBqIp1fer7Nz",
+    "costUsd": 0.4,
+    "estimateUsd": 0.4,
+    "made": "2026-11-05T15:34:15.476Z",
+    "via": "openrouter",
+    "terms": "https://openrouter.ai/terms",
+    "footage": {
+      "src": "ads/spring-moves/gen/footage/room-a/#####.jpg",
+      "fps": 24,
+      "frames": 96,
+      "sheet": "public/ads/spring-moves/gen/footage/room-a/sheet.jpg"
+    }
+  },
+  "lecture-b-still": {
+    "kind": "image",
+    "model": "google/gemini-nano-banana-2.1",
+    "prompt": "Photorealistic candid photo, vertical framing. A bright, modern university lecture hall in warm daylight. A large wall-mounted landscape touchscreen display fills the full width of the upper half of the frame. The display shows a flat, evenly lit chroma-key green screen filling it edge to edge: no text, no interface, no logos, no reflections, no glare. All four corners of the display are in frame and sharp. A lecturer, a woman in her early 40s in a dark blazer, stands just to the right below it, holding a stylus, the tip touching the lower right of the screen, turning toward the class with a calm half smile. In the soft-focus foreground at the bottom, the backs of two students' heads, below the display, not covering it. 35mm, no text in the image.",
+    "why": "A second lecturer teaching from a screen, with the screen keyed green so the real MathbookLM canvas, built in code, plays on it frame for frame. The model never draws the app.",
+    "settings": {
+      "aspect_ratio": "9:16",
+      "resolution": "2K"
+    },
+    "file": "generated/lecture-b-still.jpg",
+    "sha256": "ae3ab9efb7e66919483850617b601956d9863971649164841316109c8852498e",
+    "request": "bba0c21030bc6ad705c2ae050cca356b3951867531a10e0d11a15e2855bd137d",
+    "job": "img-7aa2c876-99d6-4f86-a464-893707d6922b",
+    "costUsd": 0.054,
+    "estimateUsd": 0.0504,
+    "made": "2026-11-05T15:34:43.073Z",
+    "via": "openrouter",
+    "terms": "https://openrouter.ai/terms"
+  },
+  "lecture-b": {
+    "kind": "video",
+    "model": "google/veo-3.1-fast",
+    "prompt": "Locked-off camera, no camera movement, no cuts. The lecturer taps the screen once with her stylus, then turns to the students and gestures toward the display with an open hand, explaining calmly. In the foreground one student leans forward. The display keeps showing a flat, evenly lit chroma-key green screen edge to edge, with no text or interface, for the whole shot. No captions.",
+    "why": "The same lecturer in motion, so the real MathbookLM UI on her screen sits in a real moment.",
+    "settings": {
+      "aspect_ratio": "9:16",
+      "resolution": "1080p",
+      "seconds": 6,
+      "audio": false,
+      "first": "generated/lecture-b-still.png"
+    },
+    "file": "generated/lecture-b.mp4",
+    "sha256": "fec2c793b55d47b137e0a67d66414f36a14c7a5d8651d98a15205f35dbdbe5c1",
+    "request": "b1148c5945f1a440e079124e4828620dde884fad79b524cd7728ee129dd8390a",
+    "job": "gen-vid-1793892885-GmWl6Qu8ewolVdzXjsao",
+    "costUsd": 0.6,
+    "estimateUsd": 0.6,
+    "made": "2026-11-05T15:36:45.679Z",
+    "via": "openrouter",
+    "terms": "https://openrouter.ai/terms",
+    "footage": {
+      "src": "ads/spring-moves/gen/footage/lecture-b/#####.jpg",
+      "fps": 24,
+      "frames": 144,
+      "sheet": "public/ads/spring-moves/gen/footage/lecture-b/sheet.jpg"
+    }
+  },
+  "room-b-still": {
+    "kind": "image",
+    "model": "google/gemini-nano-banana-2.1",
+    "prompt": "Photorealistic candid photo, vertical framing, taken from the front of a bright, modern tiered university lecture hall in warm afternoon daylight, looking up at the seats. Sharp in the foreground, a male university student in his early twenties, curly dark hair, hoodie, leaning forward on his desk with his chin on his hand, watching something at the front of the room with rapt attention, his face softly lit by the glow of a large screen off camera. Next to him, slightly out of focus, a female student in her early twenties also watching. Laptops and notebooks on the desks are out of focus and unreadable. Nothing is on any screen in the frame. 35mm, shallow depth of field, natural skin, no text in the image.",
+    "why": "A real-looking student being won over, the payoff for the students who gave up in Lecture A. A believable face and reaction is what code can't make honestly. The screen he's watching stays off camera, so the model never draws the app.",
+    "settings": {
+      "aspect_ratio": "9:16",
+      "resolution": "2K"
+    },
+    "file": "generated/room-b-still.jpg",
+    "sha256": "37a78ccbecf38c293a1678d2f0575e39b98423eff065bfe9ea5138517fbf108e",
+    "request": "5802e880ab4bc044b5674fe36a8c5388cdcfca8561bd3c09c67b4e7e17b5a261",
+    "job": "img-2c17ab42-c8ae-46cd-af4f-53db117679f3",
+    "costUsd": 0.0537,
+    "estimateUsd": 0.0504,
+    "made": "2026-11-05T15:37:15.651Z",
+    "via": "openrouter",
+    "terms": "https://openrouter.ai/terms"
+  },
+  "room-b": {
+    "kind": "video",
+    "model": "google/veo-3.1-fast",
+    "prompt": "Locked-off camera, no cuts. The student in front watches the front of the room; his eyes widen, his eyebrows go up and his mouth opens slightly in an amazed 'whoa', he lifts his chin off his hand and sits up, then turns to the student next to him with a delighted grin, and she smiles and nods back, still watching. Natural, genuine reactions, nothing exaggerated. The screen stays off camera; notebooks and laptops stay out of focus and unreadable. No text, no captions.",
+    "why": "The wow in motion: the eyes widening and the turn to his neighbour is the beat the voice-over lands on ('This time, so does the room').",
+    "settings": {
+      "aspect_ratio": "9:16",
+      "resolution": "1080p",
+      "seconds": 4,
+      "audio": false,
+      "first": "generated/room-b-still.png"
+    },
+    "file": "generated/room-b.mp4",
+    "sha256": "ddd284f9c2ebf73ffe52be6cc6e712fa90e49f0eb078f91c3e55c0a1d6d6d449",
+    "request": "a5c61a27b31e8aa6fc63f616cb0eddf6ea05e409f59c4c50ffada9c25ab1c790",
+    "job": "gen-vid-1793893039-Jw5XTv04ogwv9cXLunEp",
+    "costUsd": 0.4,
+    "estimateUsd": 0.4,
+    "made": "2026-11-05T15:39:19.239Z",
+    "via": "openrouter",
+    "terms": "https://openrouter.ai/terms",
+    "footage": {
+      "src": "ads/spring-moves/gen/footage/room-b/#####.jpg",
+      "fps": 24,
+      "frames": 96,
+      "sheet": "public/ads/spring-moves/gen/footage/room-b/sheet.jpg"
+    }
+  },
+  "board-a-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic candid photo, vertical framing. A plain university seminar room on a grey overcast afternoon: flat daylight from windows on the left, fluorescent ceiling panels, beige walls, a ceiling projector switched off. A wide white whiteboard spans the front wall across the full width of the frame, in the upper half. The whiteboard is completely full, edge to edge, of handwritten dry-erase marker in black, blue and red. Copy everything written on the attached reference board exactly, character for character, with the same layout: the equations, the spring-and-mass sketch at the top right and the cosine graph at the bottom left. Large, roomy writing at the top left, smaller and tighter toward the bottom right, the last lines squeezed tiny into the bottom-right corner and two lines written sideways up the right edge. Written in a real person's marker hand, not a font. A male teacher in his mid 40s, short dark hair going grey, rolled-up light blue shirt sleeves, stands at the right end of the board in three-quarter view, bent slightly at the knees, pressing a black marker into the last free corner of the board, trying to squeeze in one more line, his brow furrowed. Out-of-focus empty student desks along the bottom edge of the frame. All four corners of the whiteboard in frame, the writing sharp. No other text, no logos. Adults only: the students are university students in their twenties, no children or teenagers anywhere, and the room is a plain university seminar room, not a school classroom: no school decorations, posters, children's artwork, cubbies or small desks.",
+    "why": "The teacher and the whiteboard he's run out of, as one real-looking moment: the strain of squeezing the last line in is what code can't make believable. The maths on the board is copied from board-ref.png, a correct derivation built in code, and is checked line by line before the video is made from it.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "board-ref.png"
+      ]
+    },
+    "file": "generated/board-a-still.png",
+    "sha256": "f12b83ef1afddfb43af5a1cf8db12f14e9c6ffc48aaa86c6a6da718daa4e0738",
+    "request": "cc2cfba618aed37f8cf7ffaaf8ca26f46d730e4f50982e05582578b5c3acb08c",
+    "job": "91810dd0-6f1c-48b0-9227-e6b96f36c848",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-06T01:46:48.769Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Make exactly one photorealistic candid photograph, portrait 9:16 composition with a little crop-safe margin. Use attached reference as the exact source for all whiteboard content: reproduce every character, equation, color and layout, the spring and mass sketch top right and cosine graph bottom left, including tiny lower-right notes and two sideways lines up the right edge. All board writing must be sharp, real human dry-erase handwriting, black blue and red, not typeset. Plain university seminar room on grey overcast afternoon, flat daylight through windows on left, fluorescent ceiling panels, beige walls, switched-off ceiling projector. Wide white whiteboard spanning front wall across full frame width in upper half; all four board corners visible. Board is completely filled edge to edge as in reference, large roomy upper left handwriting progressively smaller tighter toward lower right. Male teacher mid-40s, short dark hair going grey, rolled-up light blue shirt sleeves, at right end of board in three-quarter view, knees slightly bent, furrowed brow, pressing black marker into final tiny free bottom-right corner trying to squeeze one more line. Position him so the equations stay visible. Out-of-focus empty adult-size university student desks along bottom edge; no students needed. No children, teens, school decorations, posters, artwork, cubbies or small desks. No text outside the reference whiteboard content, no captions, logos or watermarks. Preserve reference content character for character, including m x'' = -kx; m = 2 kg, k = 200 N/m; x(0) = 0.1 m, x'(0) = 0; 2x'' + 200x = 0; x'' + 100x = 0; x = e^(rt) → r² + 100 = 0; r = ±10i; ω = √(k/m) = 10 rad/s; x(t) = A cos 10t + B sin 10t; x(0) = A = 0.1; x'(t) = -10A sin 10t + 10B cos 10t; x'(0) = 10B = 0 → B = 0; x(t) = 0.1 cos 10t; T = 2π/ω = π/5 ≈ 0.63 s; f = 1/T ≈ 1.6 Hz; v_max = Aω = 1 m/s; a_max = Aω² = 10 m/s²; E = ½kA² = ½·200·0.1² = 1 J; k = 800 → ω = √400 = 20; T = π/10 ≈ 0.31 s; v_max = 2 m/s; E = 4 J; x = 0.1 cos 20t. Copy sideways notes from the reference exactly as well. Reference board is the authoritative visual for typography, math, diagrams, position and colors."
+  },
+  "class-a-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic candid photo, vertical framing, from the front of the same plain university seminar room as the reference (same beige walls, windows on the left, grey overcast light, fluorescent panels), looking at the students at their desks. University students in their twenties, a mix of backgrounds. Sharp in the foreground, a young woman stares past the camera with her pen stopped above her notebook. Behind her a young man rests his head on his hand, lost, and the student next to him glances at his phone under the desk with its screen turned away. Notebooks and screens out of focus and unreadable. 35mm, shallow depth of field, natural skin, no text in the image. Adults only: the students are university students in their twenties, no children or teenagers anywhere, and the room is a plain university seminar room, not a school classroom: no school decorations, posters, children's artwork, cubbies or small desks.",
+    "why": "The class that has stopped following, in the same room: real-looking faces that code can't make honestly.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "generated/board-a-still.png"
+      ]
+    },
+    "file": "generated/class-a-still.png",
+    "sha256": "93e6644aa182ba0657877d1e1e4cb223e1536234df5c81c86392ab70a55b0117",
+    "request": "9e56135127197cd266e028157365d43dc9bc8bc9e6c7327a5bb3944961d04b5f",
+    "job": "3ddc4a62-ca9f-49c4-9c8a-b7cc4c2d1c91",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-06T01:47:44.214Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic candid photograph, vertical 9:16 composition with a little crop-safe room at all edges. Use the attached reference only for the identity and architecture of the plain university seminar room: beige walls, tall dark-framed windows along the left, grey overcast daylight, suspended acoustic tile ceiling with rectangular fluorescent light panels, neutral adult-size seminar desks and dark chairs, grey patterned carpet. Reverse the viewpoint: camera is at the front of that same room looking toward the seated university students, not toward the board. All people are clearly adults in their twenties, diverse backgrounds. In sharp foreground focus, a young adult woman seated at a desk stares past the camera with a subtly vacant, stalled expression; her pen is visibly paused above an open notebook. Behind her, a young adult man rests his head on one hand, looking lost. The adult student next to him glances down at a smartphone held discreetly under the desk, phone screen turned away from camera. Additional adult university students can recede softly in the background. Convincing unposed documentary moment, natural skin texture, restrained realistic colors, soft overcast light mixed with fluorescent room lighting, 35mm lens, shallow depth of field. Foreground woman's face and paused pen hand sharp, background students recognizable in gesture but softly focused. Notebook pages and any computer displays are out of focus and entirely unreadable. No visible text anywhere, no captions, logos, watermarks, writing on walls or boards. Plain university seminar room, no school decorations, posters, children's artwork, cubbies, or small desks. No children or teenagers."
+  },
+  "desk-b-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic candid photo, vertical framing. The same ordinary college classroom and the same teacher as the references, on a bright afternoon: warm sunlight through the windows on the left, blinds half drawn. The same wide whiteboard spans the front wall in the upper half of the frame, wiped clean, and a ceiling projector throws a large rectangle of light onto it: the projected rectangle is a flat, evenly lit chroma-key green filling it edge to edge, no text, no interface, with a thin margin of white whiteboard around it. All four corners of the projected rectangle in frame and sharp, and nothing in front of it. A faint beam from the projector crosses the top of the frame. In the lower third, at the front left of the room, the teacher sits at the teacher's desk on a low wooden platform one step above the classroom floor, relaxed, with a laptop whose screen faces away from the camera and a plain black pen tablet with no screen, holding its stylus, looking up at the projection with a calm half smile. In the soft-focus foreground at the bottom edge, the backs of two students' heads, below the projection, not covering it. 35mm, no text in the image, no logos. Adults only: the students are university students in their twenties, no children or teenagers anywhere, and the room is a plain university seminar room, not a school classroom: no school decorations, posters, children's artwork, cubbies or small desks.",
+    "why": "The same teacher in the same room, now projecting from his desk. The projection is keyed green so the real MathbookLM canvas, built in code, plays on it frame for frame. The model never draws the app.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "generated/board-a-still.png",
+        "generated/class-a-still.png"
+      ]
+    },
+    "file": "generated/desk-b-still.png",
+    "sha256": "7d6e616c08b0a654b6994f43d893a63e25ecb669e04d2770dc310ec04cf76569",
+    "request": "e27cab1ab520e01839beaad1b71c83c24727312e3382c277a332a3bd81586cf6",
+    "job": "b8f56c9b-c80d-43bc-83e4-ddbee58acc99",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-06T01:48:44.963Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Generate exactly one photorealistic candid photograph, vertical 9:16 composition with a little crop-safe room at all edges. Use the two attached images as visual references: preserve the ordinary university seminar room's beige walls, wide aluminum-framed whiteboard, black-framed tall windows on the left, acoustic tile ceiling, ceiling projector, neutral tables and chairs, and preserve the identity and appearance of the middle-aged male teacher from reference 1 (wavy short brown and gray hair, light blue rolled-sleeve button-down shirt, gray trousers). Bright warm afternoon sunlight enters through the left windows with half-drawn blinds. Camera looks toward the front wall, 35mm photographic aesthetic. The wide wiped-clean whiteboard spans the upper half of the image, framed to fit entirely in view. A large perfectly flat evenly lit chroma-key green projected rectangle fills most of the whiteboard, with a thin clean white whiteboard margin on every side. This is an uninterrupted solid uniform green compositing area, no text, no interface, no markings, no shadows or objects crossing it. All four corners are sharp and completely visible with crop safety. Ceiling mounted projector near top of frame with a faint visible light beam above the board. In the lower third at the front LEFT, the same teacher sits relaxed at a teacher's desk on a low wooden platform exactly one step above the classroom floor. Teacher is entirely below the green projection and does not overlap it. He holds the stylus of a plain black screenless pen tablet on the desk, next to an open laptop whose screen faces away from camera (only plain back of lid visible). Teacher looks up toward the projected green rectangle with a calm half smile. Natural anatomically correct hands and relaxed seated pose. At the very bottom foreground, only the soft-focus backs of two adult university students' heads, both in their twenties, below the projection without covering it. Plain university seminar room, adult-scale furniture. No children, teenagers, decorations, posters, children's artwork, cubbies, small school desks. No visible text anywhere, no captions, no logos, no watermarks. Realistic documentary photography with natural texture and warm sunlight, modest everyday academic atmosphere."
+  },
+  "class-b-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic candid photo, vertical framing, from the front of the same plain university seminar room as the references, on the same bright afternoon: warm sunlight from the windows on the left, blinds half drawn. The same students as the class reference. Sharp in the foreground, the young man who was lost before now leans forward on his desk with his chin on his hand, watching the front of the room with rapt attention, his face softly lit by the projector's glow from off camera. Next to him the young woman also watches, pen in hand. Notebooks out of focus and unreadable. Nothing on any screen in the frame. 35mm, shallow depth of field, natural skin, no text in the image. Adults only: the students are university students in their twenties, no children or teenagers anywhere, and the room is a plain university seminar room, not a school classroom: no school decorations, posters, children's artwork, cubbies or small desks.",
+    "why": "The payoff for the class that gave up: the same students, won over. A believable reaction is what code can't make honestly. The projection stays off camera, so the model never draws the app.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "generated/class-a-still.png",
+        "generated/desk-b-still.png"
+      ]
+    },
+    "file": "generated/class-b-still.png",
+    "sha256": "8eb561b746505f0b838aa2957211146983e4717080064a1211020664f1c9a196",
+    "request": "26e4b0fbf1d229f9e83690c15ca93be0fd2fa1cd79182c63e35709445aad9d86",
+    "job": "3f9e5dac-1e79-463c-a430-e2cc59045bd8",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-06T01:49:46.480Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic candid photograph, vertical 9:16 composition with a little safe room at all edges for cropping. Use the two attached images as visual references. Maintain the same plain university seminar room and same adult students from image 1, with the warm bright afternoon sunlight and half-drawn window blinds of image 2. Camera is at the front of the room facing the students. Main subject sharp in the foreground is the same twenty-something young man with tousled curly brown hair, light stubble and navy crewneck sweater seen in the center of image 1. He is now seated beside the same young woman with brown messy bun, olive green knitted sweater, small gold hoop earrings from image 1. Frame the man prominently in foreground, leaning forward at his adult-sized seminar desk, chin resting naturally on one hand, eyes engaged and rapt, watching the presentation just off camera at the front. His face is softly illuminated by a subtle cool projector glow from off camera, balanced with warm sunlight from left windows. Beside him the young woman also looks toward the front attentively, holding a pen over her open notebook. Preserve their facial identities, clothing and natural skin texture. Other same university students visible softly blurred behind them, all clearly adults in their twenties. Neutral beige walls, black-framed windows on the left with blinds half drawn, adult-sized desks, ordinary acoustic ceiling. Natural believable candid expressions and anatomically correct hands. 35mm photographic look, shallow depth of field, main man's face and nearby woman's face in focus, foreground notebooks softly out of focus with no readable writing. No screens visible anywhere in the composition, no board or projection surface in frame. No text, letters, captions, logos, branding or watermarks anywhere. No children or teenagers, no school decorations, posters, children's artwork, cubbies or small desks. Match reference continuity while making this a closer, emotionally engaged two-person shot, with the man as primary subject."
+  },
+  "board-a2-still": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Photorealistic candid photo, vertical framing. A plain university seminar room on a grey overcast afternoon: flat daylight from windows on the left, fluorescent ceiling panels, beige walls, a ceiling projector switched off. A wide white whiteboard spans the front wall across the full width of the frame, in the upper half. The whiteboard is completely full, edge to edge, of handwritten dry-erase marker in black, blue and red. Keep the room, the light, the camera and the teacher exactly as in the second reference (the same man, the same clothes, the same pose at the right end of the board). Copy everything written on the first reference, the board, exactly, character for character, with the same layout: the equations, the spring-and-mass sketch at the top right and the cosine graph at the bottom left. Large, roomy writing at the top left, smaller and tighter toward the bottom right and the last lines squeezed tiny into the bottom-right corner. Nothing is written sideways. Written in a real person's marker hand, not a font. A male teacher in his mid 40s, short dark hair going grey, rolled-up light blue shirt sleeves, stands at the right end of the board in three-quarter view, bent slightly at the knees, pressing a black marker into the last free corner of the board, trying to squeeze in one more line, his brow furrowed. Out-of-focus empty student desks along the bottom edge of the frame. All four corners of the whiteboard in frame, the writing sharp. No other text, no logos. Adults only: the students are university students in their twenties, no children or teenagers anywhere, and the room is a plain university seminar room, not a school classroom: no school decorations, posters, children's artwork, cubbies or small desks.",
+    "why": "Retake of board-a-still, which wrote the two sideways lines on the right edge wrong (a missing minus sign, and x(T/20) for x(π/20)). The reference board lost those lines, and the first still is a reference here so the teacher and room stay the same. The maths on the board is checked line by line before the video is made from it.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "board-ref2.png",
+        "generated/board-a-still.png"
+      ]
+    },
+    "file": "generated/board-a2-still.png",
+    "sha256": "0402541b905af73611706d2b64ef9c59e8c8721c223609a576af18cf10959284",
+    "request": "410b1f4a2669f107b45956ca3abb27991147f0f60db5edc9077902c69f309355",
+    "job": "30db1ac3-8544-443b-bee0-9291c33a7348",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-06T01:53:07.247Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one photorealistic image, vertical 9:16, with slight safe room around edges for cropping. Use attached reference 2 as the exact photographic base: preserve same plain university seminar room, grey overcast flat daylight through left windows, fluorescent panels, off ceiling projector, beige walls, camera perspective, furniture, and SAME man, clothing and pose at right end of board. All four board corners visible, board across full frame width in upper half as closely as possible within reference composition; empty blurred adult university desks bottom foreground. Male teacher mid 40s, short dark greying hair, rolled up light blue shirt, grey trousers, three-quarter view slightly bent knees, furrowed brow, pressing black marker into last bottom right corner. Replace ALL whiteboard content with EXACT content and spatial layout from attached reference 1. Do not preserve extra sideways writing from reference 2. NOTHING sideways. Faithful character-for-character copy of reference 1 in natural marker handwriting black blue red, sharp and readable, large roomy top left progressively small tighter right bottom, very tiny last bottom-right lines. Preserve graph bottom left and spring mass diagram top right. Board transcription to aid accuracy (reference 1 controls exact placement, color and notation): top left black m x'' = -kx; blue m = 2 kg, k = 200 N/m and x(0) = 0.1 m, x'(0) = 0; second row black 2x'' + 200x = 0 and x'' + 100x = 0; third row x = e^(rt) → r² + 100 = 0; r = ±10i; red ω = √(k/m) = 10 rad/s. Next x(t) = A cos 10t + B sin 10t; x(0) = A = 0.1. Next x'(t) = -10A sin 10t + 10B cos 10t; x'(0) = 10B = 0 → B = 0. Red x(t) = 0.1 cos 10t; black T = 2π/ω = π/5 ≈ 0.63 s; f = 1/T ≈ 1.6 Hz. Next black v_max = Aω = 1 m/s; a_max = Aω² = 10 m/s²; E = ½kA² = ½·200·0.1² = 1 J. Right lower region blue k = 800 → ω = √400 = 20; below blue T = π/10 ≈ 0.31 s; below black v_max = 2 m/s; below black E = 4 J; below tiny red x = 0.1 cos 20t; last tiny black f = 20/2π ≈ 3.2 Hz in bottom right corner, teacher writing here. Graph: black horizontal t arrow and vertical x axis, 0.1 label, T at one period, red cosine curve starting at positive maximum with two troughs. Spring sketch: black ceiling hatched support, vertical zigzag spring, rectangular weight marked 2 kg, red down arrow x. EXACT reference 1 board layout and relative handwriting sizes, all horizontal. No extra equations or other text, no logos, no watermarks, no children, no school decorations. Candid photograph with realistic skin, marker texture and slight whiteboard surface reflections while writing remains sharp."
+  },
+  "board-a": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "Locked-off camera, no camera movement, no cuts. The teacher writes a few tiny characters into the last free corner of the full whiteboard, stops, steps back, looks over the whole crowded board and lets out a tired breath, rubbing the back of his neck with his free hand. The writing already on the board stays exactly as it is, sharp and unchanged.",
+    "why": "The same teacher in motion: running out of board and stepping back from it is the hook.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "9:16",
+      "resolution": "1080p",
+      "seed": 5101,
+      "seconds": 6,
+      "audio": false,
+      "first": "generated/board-a2-still.png"
+    },
+    "file": "generated/board-a.mp4",
+    "sha256": "20aaf26854b77814d803128837b78cae81c342f080fa02d6062a0e696dd2ffed",
+    "request": "34a4d77ffce2b229ce3c516ef7df8abac026b74810631c3764012756209a5dc4",
+    "job": "fadc98a7-e421-48f9-98c0-47cb53d2ad5f",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-06T08:27:29.092Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/spring-moves/gen/footage/board-a/#####.jpg",
+      "fps": 24,
+      "frames": 145,
+      "sheet": "public/ads/spring-moves/gen/footage/board-a/sheet.jpg"
+    }
+  },
+  "class-a": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "Locked-off camera, no cuts. The young woman in front slowly puts her pen down and leans back in her chair; behind her the young man rubs his eyes. Small, natural movements in a quiet, tired classroom.",
+    "why": "The class giving up, in motion: the beat the voice lands on.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "9:16",
+      "resolution": "1080p",
+      "seed": 5102,
+      "seconds": 4,
+      "audio": false,
+      "first": "generated/class-a-still.png"
+    },
+    "file": "generated/class-a.mp4",
+    "sha256": "91934e93cea01d5caf284007c20abc4fa73d5a5d6dcf458070dcd43efb2efbb3",
+    "request": "eb5c8d9e9f9a091919f8c0b75e6488e8ea3c1c4d4466dafc9e46e79bbd84dee1",
+    "job": "317df219-cf9d-4a91-b270-4c648e351ffc",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-06T12:58:37.193Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/spring-moves/gen/footage/class-a/#####.jpg",
+      "fps": 24,
+      "frames": 97,
+      "sheet": "public/ads/spring-moves/gen/footage/class-a/sheet.jpg"
+    }
+  },
+  "desk-b": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "Locked-off camera, no camera movement, no cuts. The teacher writes on the pen tablet with the stylus, glances up at the projection, then turns to the class and gestures toward it with an open hand, explaining calmly. The projected rectangle stays a flat, evenly lit chroma-key green with no text for the whole shot.",
+    "why": "The same teacher in motion at his desk, so the real MathbookLM canvas on the board sits in a real lesson.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "9:16",
+      "resolution": "1080p",
+      "seed": 5103,
+      "seconds": 6,
+      "audio": false,
+      "first": "generated/desk-b-still.png"
+    },
+    "file": "generated/desk-b.mp4",
+    "sha256": "51ac2c08618c7e52f6f60e8ff0e9db11ed772e9a4b84dd51a89c535a298088c9",
+    "request": "0a414278fa28996d5e52c2ee2590a59cb590929d33cf7537f30d452abb72ab83",
+    "job": "16c70a18-9775-45c1-ad87-59c840f1820c",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-06T13:02:35.484Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/spring-moves/gen/footage/desk-b/#####.jpg",
+      "fps": 24,
+      "frames": 145,
+      "sheet": "public/ads/spring-moves/gen/footage/desk-b/sheet.jpg"
+    }
+  },
+  "class-b": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "Locked-off camera, no cuts. The young man watches the front of the room; his eyes widen and his eyebrows go up in a quiet 'whoa', he sits up and turns to the young woman next to him with a grin, and she nods back, still watching. Natural, genuine reactions, nothing exaggerated.",
+    "why": "The wow in motion, the beat the voice lands on.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "9:16",
+      "resolution": "1080p",
+      "seed": 5104,
+      "seconds": 4,
+      "audio": false,
+      "first": "generated/class-b-still.png"
+    },
+    "file": "generated/class-b.mp4",
+    "sha256": "ee04a2bcdb7305129e5c3b76fe2cfa0cec4e6111354bc27438195d561f4b3821",
+    "request": "2385aa3c68bda55042bcfc3b3f84bd8e5b4548bfc5d5d5559bc0a22cba864628",
+    "job": "bb511ee5-ff52-4662-a869-8e209b84f0c9",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-06T13:05:24.655Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/spring-moves/gen/footage/class-b/#####.jpg",
+      "fps": 24,
+      "frames": 97,
+      "sheet": "public/ads/spring-moves/gen/footage/class-b/sheet.jpg"
+    }
+  }
+}

@@ -1,0 +1,114 @@
+{
+ "composition_plan": {
+  "chunks": [
+   {
+    "text": "[Opening Tension]",
+    "duration_ms": 9500,
+    "positive_styles": [
+     "cold restrained underscore",
+     "76 BPM",
+     "slow low cello drone",
+     "dry hesitant ticking pulse",
+     "sparse midrange",
+     "tense documentary intro",
+     "close-mic'd texture",
+     "subtle low-end weight",
+     "instrumental bed"
+    ],
+    "negative_styles": [
+     "vocals",
+     "bells",
+     "risers",
+     "whooshes",
+     "sound effects"
+    ],
+    "context_adherence": "high",
+    "conditioning_ref": null,
+    "condition_strength": null
+   },
+   {
+    "text": "[Silence]",
+    "duration_ms": 5000,
+    "positive_styles": [
+     "brief silence",
+     "clean pause"
+    ],
+    "negative_styles": [
+     "vocals",
+     "bells",
+     "risers",
+     "whooshes",
+     "sound effects"
+    ],
+    "context_adherence": "high",
+    "conditioning_ref": null,
+    "condition_strength": null
+   },
+   {
+    "text": "[Clear Exposition]",
+    "duration_ms": 21000,
+    "positive_styles": [
+     "104 BPM",
+     "warm light plucked strings",
+     "felt piano motif",
+     "bouncy springy rhythm",
+     "soft rounded bass",
+     "light brushed drums",
+     "patient explanatory groove",
+     "open airy arrangement",
+     "understated instrumental bed"
+    ],
+    "negative_styles": [
+     "vocals",
+     "bells",
+     "risers",
+     "whooshes",
+     "sound effects"
+    ],
+    "context_adherence": "high",
+    "conditioning_ref": null,
+    "condition_strength": null
+   },
+   {
+    "text": "[Gentle Wonder]",
+    "duration_ms": 6500,
+    "positive_styles": [
+     "104 BPM",
+     "slightly fuller warm harmony",
+     "plucked strings with brighter voicing",
+     "felt piano figures",
+     "soft bass support",
+     "light brushed drums",
+     "small moment of wonder",
+     "clean resolved cadence",
+     "polished educational advert ending"
+    ],
+    "negative_styles": [
+     "vocals",
+     "bells",
+     "risers",
+     "whooshes",
+     "sound effects"
+    ],
+    "context_adherence": "high",
+    "conditioning_ref": null,
+    "condition_strength": null
+   }
+  ]
+ },
+ "song_metadata": {
+  "title": "Quiet Clarity",
+  "description": "An understated instrumental advert bed that begins cold and hesitant, then opens into warm, curious teaching music before finishing with a small lift of wonder and a clean resolve.",
+  "genres": [
+   "ambient",
+   "classical",
+   "electronic"
+  ],
+  "languages": [],
+  "is_explicit": false
+ },
+ "words_timestamps": [],
+ "waveform_visual": null,
+ "song_id": "LGhLG5VhsubA7gFJX7SK",
+ "filename": "music.mp3"
+}

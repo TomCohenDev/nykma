@@ -1,0 +1,13 @@
+{
+  "fps": 30,
+  "music": {
+    "script": "node scripts/audio/py-demo-track.mjs",
+    "file": "assets/track.wav"
+  },
+  "markers": [
+    { "name": "drop", "at": "bar:3" }
+  ],
+  "sfx": [
+    { "id": "sweep", "file": "assets/whoosh.wav", "at": "marker:drop-0.3", "gain_db": -6 }
+  ]
+}

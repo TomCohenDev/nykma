@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>nykma capture</title>
+    <link rel="icon" href="data:," />
+    <style>
+      html, body { margin: 0; background: #000; overflow: hidden; }
+      /* Determinism: a stray CSS animation or transition can't reach a capture. */
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/engine/capture.tsx"></script>
+  </body>
+</html>

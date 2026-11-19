@@ -1,0 +1,49 @@
+{
+  "pc-still": {
+    "kind": "image",
+    "model": "google/gemini-nano-banana-2.1",
+    "prompt": "Photorealistic candid photo. A high school student sits at a desk in a softly lit bedroom in the evening, seen over their right shoulder from behind, looking at a large desktop monitor. The monitor shows a flat, evenly lit chroma-key green screen that fills the display edge to edge: no text, no interface, no logos, no reflections, no glare. The whole monitor and its four corners are in frame, sharp; the student's head and shoulder overlap the lower left of the screen a little. An open notebook and a pencil on the desk. Natural warm lamp light, 35mm, shallow depth of field on the background only.",
+    "why": "A real-looking person at a real desk, for the ad to play on their screen: code and Blender can't make that believable.",
+    "settings": {
+      "aspect_ratio": "16:9",
+      "resolution": "2K"
+    },
+    "file": "generated/pc-still.jpg",
+    "sha256": "b32578fad0c7071dae80c7bde4e22bca5992e66ae85764a0976a5c5aca394e5f",
+    "request": "89af179049138137a141e10afc0a5034293c8cc04fe3f6bd76428384e18a30c3",
+    "job": "img-bf223cfc-93fd-40b3-9025-7ef199f64aae",
+    "costUsd": 0.0533,
+    "estimateUsd": 0.0504,
+    "made": "2026-11-05T14:37:39.162Z",
+    "via": "openrouter",
+    "terms": "https://openrouter.ai/terms"
+  },
+  "pc": {
+    "kind": "video",
+    "model": "google/veo-3.1-fast",
+    "prompt": "Locked-off camera, no camera movement, no cuts. The student leans in slightly toward the monitor, rests their chin on one hand, then sits back a little; small, natural movements only. The monitor keeps showing a flat, evenly lit chroma-key green screen, edge to edge, with no text or interface, for the whole shot.",
+    "why": "The same person in motion, so the ad playing on their screen sits in a real moment.",
+    "settings": {
+      "aspect_ratio": "16:9",
+      "resolution": "1080p",
+      "seconds": 6,
+      "audio": false,
+      "first": "generated/pc-still.png"
+    },
+    "file": "generated/pc.mp4",
+    "sha256": "60c1b8680fb1e47eb935e615b80cbff84e7054ef8f20c1383dc15c8cff61779c",
+    "request": "a5daba261f50e9776ff8130b6e83f05d7a7531fef0f3b22a6b229ea9264c9335",
+    "job": "gen-vid-1793889505-wMQ58vgfItasf6jWEDin",
+    "costUsd": 0.6,
+    "estimateUsd": 0.6,
+    "made": "2026-11-05T14:40:15.643Z",
+    "via": "openrouter",
+    "terms": "https://openrouter.ai/terms",
+    "footage": {
+      "src": "ads/screen-demo/gen/footage/pc/#####.jpg",
+      "fps": 24,
+      "frames": 144,
+      "sheet": "public/ads/screen-demo/gen/footage/pc/sheet.jpg"
+    }
+  }
+}

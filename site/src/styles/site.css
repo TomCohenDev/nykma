@@ -1,0 +1,391 @@
+/* nobodyknowsmyapp.com. Colours and fonts are the nykma brand kit's (brands/nykma/brand.md): Ink, Paper and the red Marker that
+   corrects, JetBrains Mono because nykma lives in a terminal, Archivo Black for the few big words. */
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/JetBrainsMono-wght.ttf") format("truetype");
+  font-weight: 100 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Archivo Black";
+  src: url("/fonts/ArchivoBlack-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  --ink: #141414;
+  --paper: #f4efe6;
+  --sheet: #fbf8f2;
+  --marker: #e8301f;
+  --muted: #5d5850;
+  --rule: rgb(20 20 20 / 0.16);
+  --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --display: "Archivo Black", "Arial Black", system-ui, sans-serif;
+  --gutter: clamp(16px, 4vw, 40px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 15px/1.6 var(--mono);
+  font-variant-ligatures: none;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration-color: var(--marker);
+}
+
+:focus-visible {
+  outline: 3px solid var(--marker);
+  outline-offset: 2px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+/* Header and footer */
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 20px;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 17px;
+  text-decoration: none;
+}
+.brand img {
+  width: 26px;
+  height: 26px;
+}
+.top nav {
+  display: flex;
+  gap: 22px;
+}
+.top nav a {
+  text-decoration: none;
+}
+.top nav a[aria-current="page"] {
+  text-decoration: underline;
+  text-decoration-color: var(--marker);
+  text-decoration-thickness: 2px;
+}
+
+.bottom {
+  margin-top: 96px;
+  padding-block: 28px 40px;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+.bottom nav {
+  display: flex;
+  gap: 20px;
+}
+
+/* The big words, and the one red stroke under them */
+
+.headline {
+  font: 400 clamp(30px, 8.6vw, 104px) / 0.98 var(--display);
+  letter-spacing: -0.02em;
+  margin: 56px 0 0;
+}
+.headline .line {
+  display: block;
+}
+.struck {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+  isolation: isolate;
+}
+.struck svg {
+  position: absolute;
+  z-index: -1;
+  left: -2%;
+  bottom: -0.02em;
+  width: 104%;
+  height: 0.22em;
+  overflow: visible;
+}
+.struck path {
+  fill: none;
+  stroke: var(--marker);
+  stroke-width: clamp(6px, 1.1vw, 13px);
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+}
+/* The one moment of motion: the pen draws the stroke left to right, once. */
+@media (prefers-reduced-motion: no-preference) {
+  .struck svg {
+    animation: draw 0.7s 0.25s cubic-bezier(0.6, 0, 0.3, 1) both;
+  }
+}
+@keyframes draw {
+  from {
+    clip-path: inset(-50% 100% -50% 0);
+  }
+  to {
+    clip-path: inset(-50% 0 -50% 0);
+  }
+}
+
+.lede {
+  max-width: 58ch;
+  margin: 36px 0 0;
+  font-size: 16px;
+}
+
+/* Pricing: personal on the left, company and its form on the right */
+
+.plans {
+  display: grid;
+  gap: 56px;
+  margin-top: 72px;
+}
+@media (min-width: 880px) {
+  .plans {
+    grid-template-columns: 5fr 7fr;
+    gap: 64px;
+    align-items: start;
+  }
+}
+
+.plan {
+  min-width: 0;
+}
+.plan h2 {
+  font: 400 30px/1.1 var(--display);
+  margin: 0;
+}
+.plan .price {
+  margin: 8px 0 0;
+  font-weight: 700;
+}
+.plan p {
+  max-width: 60ch;
+}
+.plan ul {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.plan li {
+  padding-left: 1.4em;
+  text-indent: -1.4em;
+  margin-top: 6px;
+}
+.plan li::before {
+  content: "> ";
+  color: var(--muted);
+}
+
+pre.shell {
+  margin: 24px 0 0;
+  padding: 16px 18px;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 8px;
+  overflow-x: auto;
+  font: 400 13.5px/1.7 var(--mono);
+}
+pre.shell .prompt {
+  color: var(--marker);
+  user-select: none;
+}
+
+.company {
+  background: var(--sheet);
+  border: 1.5px solid var(--ink);
+  border-radius: 14px;
+  padding: clamp(20px, 4vw, 36px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+/* The form */
+
+.form {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+}
+.row {
+  display: grid;
+  gap: 18px;
+}
+@media (min-width: 560px) {
+  .row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.field label,
+.field legend {
+  display: block;
+  font-weight: 600;
+  font-size: 13.5px;
+  margin-bottom: 6px;
+  padding: 0;
+}
+.field .hint {
+  font-weight: 400;
+  color: var(--muted);
+}
+.field input,
+.field textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.field textarea {
+  min-height: 104px;
+  resize: vertical;
+}
+.field input:focus-visible,
+.field textarea:focus-visible {
+  outline-offset: 0;
+}
+.field [aria-invalid="true"] {
+  border-color: var(--marker);
+  box-shadow: 0 0 0 1px var(--marker);
+}
+fieldset.field {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sizes label {
+  margin: 0;
+  font-weight: 400;
+}
+.sizes input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.sizes span {
+  display: inline-block;
+  padding: 7px 13px;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+}
+.sizes input:checked + span {
+  background: var(--ink);
+  color: var(--paper);
+}
+.sizes input:focus-visible + span {
+  outline: 3px solid var(--marker);
+  outline-offset: 2px;
+}
+.sizes[aria-invalid="true"] span {
+  border-color: var(--marker);
+}
+
+.trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.send {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+button {
+  font: 700 15px/1 var(--mono);
+  color: var(--paper);
+  background: var(--ink);
+  border: 0;
+  border-radius: 8px;
+  padding: 14px 20px;
+  cursor: pointer;
+}
+button:hover {
+  background: var(--marker);
+}
+button[disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
+.or {
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.status {
+  margin: 0;
+  font-size: 14px;
+}
+.status:empty {
+  display: none;
+}
+.status.error {
+  color: #b3200f;
+  font-weight: 600;
+}
+
+.sent h3 {
+  font: 400 26px/1.15 var(--display);
+  margin: 24px 0 0;
+}
+
+.fine {
+  margin-top: 56px;
+  max-width: 72ch;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+.fine h2 {
+  color: var(--ink);
+  font-size: 15px;
+  margin: 0 0 6px;
+}

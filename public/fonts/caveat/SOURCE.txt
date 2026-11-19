@@ -1,0 +1,7 @@
+Caveat (variable, wght 400-700), Version 2.000. Latin hand font. No Hebrew letters.
+Licence: SIL Open Font License 1.1 (OFL.txt here), commercial use allowed. No Reserved Font Name. fsType 0.
+Copyright 2014 The Caveat Project Authors (https://github.com/googlefonts/caveat)
+Source: Google Fonts, https://github.com/google/fonts/blob/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/caveat/Caveat%5Bwght%5D.ttf
+Only the file name changed (from Caveat[wght].ttf, brackets are awkward in URLs). The bytes are as downloaded.
+sha256 0bdb6b660482d31531b3945849fba5916b3ef8695da7024a9e6b9ee3c4157988
+Fetched 2026-10-31.

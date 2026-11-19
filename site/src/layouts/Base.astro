@@ -1,0 +1,49 @@
+---
+import "../styles/site.css";
+
+interface Props {
+  title: string;
+  description: string;
+  page?: "home" | "pricing";
+}
+const { title, description, page } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const repo = "https://github.com/TomCohenDev/nykma";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/JetBrainsMono-wght.ttf" as="font" type="font/ttf" crossorigin />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="theme-color" content="#f4efe6" />
+  </head>
+  <body>
+    <header class="wrap top">
+      <a class="brand" href="/"><img src="/logo.svg" alt="" width="26" height="26" />nykma</a>
+      <nav aria-label="Site">
+        <a href="/pricing" aria-current={page === "pricing" ? "page" : undefined}>pricing</a>
+        <a href={repo}>github</a>
+      </nav>
+    </header>
+    <main class="wrap">
+      <slot />
+    </main>
+    <footer class="wrap bottom">
+      <span>nobody knows my app</span>
+      <nav aria-label="Footer">
+        <a href={`${repo}/blob/main/LICENSE`}>licence</a>
+        <a href={`${repo}/blob/main/COMMERCIAL.md`}>commercial use</a>
+        <a href="mailto:sales@nobodyknowsmyapp.com">sales@nobodyknowsmyapp.com</a>
+      </nav>
+    </footer>
+  </body>
+</html>

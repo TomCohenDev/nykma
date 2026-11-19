@@ -1,0 +1,161 @@
+---
+import Base from "../../layouts/Base.astro";
+
+const sizes = ["just me", "2–10", "11–50", "51–200", "more than 200"];
+---
+
+<Base
+  title="nykma pricing"
+  description="nykma is free for personal use. Every company needs a commercial licence: tell sales about the team and get a price."
+  page="pricing"
+>
+  <h1 class="headline">
+    <span class="line">free for you.</span>
+    <span class="line"
+      ><span class="struck"
+        >companies pay.<svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"
+          ><path d="M1 6.5 C 18 3.2, 34 8.4, 52 5.6 S 84 3.4, 99 6"></path></svg
+        ></span
+      ></span
+    >
+  </h1>
+  <p class="lede">
+    nykma is an ad maker that runs in Claude Code, on your machine. The code is free to read, run and change for
+    personal use. A company uses it under a commercial licence, at any size.
+  </p>
+
+  <div class="plans">
+    <section class="plan" aria-labelledby="personal">
+      <h2 id="personal">personal</h2>
+      <p class="price">free</p>
+      <ul>
+        <li>ads for yourself, a side project or your own learning</li>
+        <li>read it, change it, share your changes for noncommercial use</li>
+        <li>charities, schools and public research too</li>
+      </ul>
+      <pre class="shell" aria-label="Install commands"><span class="prompt">$ </span>git clone https://github.com/TomCohenDev/nykma
+<span class="prompt">$ </span>cd nykma && bun install</pre>
+      <p>Licensed under PolyForm Noncommercial 1.0.0.</p>
+    </section>
+
+    <section class="plan company" id="sales" aria-labelledby="company-title">
+      <h2 id="company-title">company</h2>
+      <p class="price">ask sales</p>
+      <p>
+        Any company, including a one-person company or a freelancer making ads for clients. One licence covers everyone
+        in the company. Say who you are and how many people will use it, and you'll get a price by email.
+      </p>
+
+      <form class="form" action="/api/contact" method="post" novalidate data-sales>
+        <div class="row">
+          <div class="field">
+            <label for="name">your name</label>
+            <input id="name" name="name" autocomplete="name" maxlength="100" required />
+          </div>
+          <div class="field">
+            <label for="email">work email</label>
+            <input id="email" name="email" type="email" autocomplete="email" maxlength="200" required />
+          </div>
+        </div>
+        <div class="field">
+          <label for="company">company</label>
+          <input id="company" name="company" autocomplete="organization" maxlength="150" required />
+        </div>
+        <fieldset class="field">
+          <legend>people using nykma</legend>
+          <div class="sizes" id="size">
+            {
+              sizes.map((size) => (
+                <label>
+                  <input type="radio" name="size" value={size} required />
+                  <span>{size}</span>
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+        <div class="field">
+          <label for="message">anything else <span class="hint">(optional)</span></label>
+          <textarea id="message" name="message" maxlength="4000" placeholder="what you'll make with it, or a question"
+          ></textarea>
+        </div>
+        <div class="trap" aria-hidden="true">
+          <label for="website">leave this empty</label>
+          <input id="website" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+        <div class="send">
+          <button type="submit">send to sales</button>
+          <span class="or">or email <a href="mailto:sales@nobodyknowsmyapp.com">sales@nobodyknowsmyapp.com</a></span>
+        </div>
+        <p class="status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </div>
+
+  <section class="fine" aria-labelledby="fine">
+    <h2 id="fine">what the licence doesn't cover</h2>
+    <p>
+      nykma calls services that have their own terms: an ElevenLabs voice needs a paid ElevenLabs plan for commercial
+      use, and generated media, stock and the LTX-2.5 video model each carry their own licence. The full list is in <a
+        href="https://github.com/TomCohenDev/nykma/blob/main/COMMERCIAL.md">COMMERCIAL.md</a
+      >.
+    </p>
+  </section>
+</Base>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>("form[data-sales]");
+  if (form) {
+    const status = form.querySelector<HTMLElement>(".status")!;
+    const button = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+
+    const mark = (field: string | undefined) => {
+      form.querySelectorAll("[aria-invalid]").forEach((el) => el.removeAttribute("aria-invalid"));
+      if (!field) return;
+      const el = field === "size" ? form.querySelector<HTMLElement>("#size") : form.querySelector<HTMLElement>(`#${field}`);
+      el?.setAttribute("aria-invalid", "true");
+      (field === "size" ? form.querySelector<HTMLInputElement>("input[name=size]") : (el as HTMLInputElement | null))?.focus();
+    };
+    const fail = (message: string, field?: string) => {
+      status.className = "status error";
+      status.textContent = message;
+      mark(field);
+    };
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const missing = (["name", "email", "company", "size"] as const).find((name) => !String(data.get(name) ?? "").trim());
+      if (missing) {
+        const words = { name: "Add your name.", email: "Add an email address we can reply to.", company: "Add the company's name.", size: "Choose how many people will use nykma." };
+        return fail(words[missing], missing);
+      }
+
+      button.disabled = true;
+      button.textContent = "sending…";
+      status.className = "status";
+      status.textContent = "";
+      try {
+        const response = await fetch(form.action, { method: "POST", body: data, headers: { accept: "application/json" } });
+        const result = (await response.json().catch(() => ({}))) as { ok?: boolean; error?: string; field?: string };
+        if (!response.ok || !result.ok) {
+          fail(result.error ?? "It didn't send. Email sales@nobodyknowsmyapp.com instead.", result.field);
+          return;
+        }
+        const email = String(data.get("email"));
+        const done = document.createElement("div");
+        done.className = "sent";
+        done.innerHTML = `<h3>sent to sales.</h3><p>The reply will come to <strong></strong>. If it doesn't arrive, email <a href="mailto:sales@nobodyknowsmyapp.com">sales@nobodyknowsmyapp.com</a>.</p>`;
+        done.querySelector("strong")!.textContent = email;
+        done.tabIndex = -1;
+        form.replaceWith(done);
+        done.focus();
+      } catch {
+        fail("It didn't send: the connection dropped. Try again, or email sales@nobodyknowsmyapp.com.");
+      } finally {
+        button.disabled = false;
+        button.textContent = "send to sales";
+      }
+    });
+  }
+</script>

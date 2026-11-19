@@ -1,0 +1,541 @@
+{
+  "rival-sheet": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Character reference sheet for an original fictional character (not a real person) with TWELVE arms. He is likeable and comic, not creepy: a frazzled, sweaty, comically intense office guy in his late twenties with a round, rosy, friendly face, expressive eyes, stubble and messy brown hair. His twelve arms are a visual gag, not body horror: each arm has normal human proportions and a neat rolled-up white shirt sleeve, arranged in a tidy symmetrical fan behind him. No gaunt or uncanny face, no extra joints, no spidery limbs, no horror lighting. Loosened red tie, headset, white shirt with sweat patches, brown trousers. Front view, three-quarter view, and three close-up comic face expressions (determined gritted-teeth grin, wide-eyed shock, exhausted). Painted in exactly the same semi-realistic, painterly, cinematic style as the hero in the style reference (chad-sheet): realistic human proportions, skin and fabric textures, visible painterly brushwork, dramatic cinematic lighting with rim light, like key art for a high-end animated film. NOT a 3D cartoon, NOT Pixar-style, no rubbery or toy-like shapes. The two characters must look like they belong in the same film. Plain neutral grey background, no text, no letters, no logos.",
+    "why": "The reference that keeps the rival the same in every still. A painted character code can't paint.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "16:9",
+      "refs": [
+        "generated/chad-sheet.png"
+      ]
+    },
+    "file": "generated/rival-sheet.png",
+    "sha256": "0948ff4ef2c04f3cb6fac8a8d73d89acacaede9d80a836754e0dff3f4431c072",
+    "request": "ac8303ffc162a3699a58d96a0a99e28717b360234974a5db0c8e94aa768e7a8e",
+    "job": "66aca9f6-2886-4a03-beb5-a50eb611073d",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:45:17.171Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly ONE 16:9 landscape character reference sheet, with safe margins for cropping, using the attached character sheet ONLY as the exact painting/rendering/lighting style reference. Original fictional man, different identity from reference: likeable comic frazzled office worker late twenties, round rosy friendly face, expressive eyes, short stubble, messy brown hair, sweaty, comically intense. Realistic adult human proportions. White office shirt with visible sweat patches, neatly rolled sleeves on EVERY arm, loosened red tie, headset with microphone, brown trousers and office shoes. The defining gag: EXACTLY TWELVE ARMS on each full-body depiction, six on each side, clearly countable and separated in a tidy symmetrical radial fan behind his torso. All twelve are ordinary proportional human arms with one normal elbow, forearm and hand each; every arm has its own neat rolled-up white shirt sleeve. Six distinct arms to left, six distinct arms to right, fan arranged at evenly spaced ascending angles, no hidden extra arms or merged limbs. Friendly whimsical visual gag, absolutely no body horror, no spidery limbs or extra joints. Layout: two full-body depictions in left two thirds, one straight front view and one three-quarter view, with enough space so each twelve-arm fan is individually readable and doesn't overlap other figure. Right third: three large close-up head and shoulder portraits vertically stacked of same man: determined gritted-teeth grin, wide-eyed comic shock, exhausted sweaty expression. No panel borders or labels. Maintain coherent same face and outfit in every view. Match reference's semi-realistic painterly cinematic key art: detailed natural skin, realistic textured fabric, visible painterly brushwork, warm dramatic rim light and balanced soft facial illumination, subtle natural shadows, high-end animated-film concept painting with grounded human anatomy. Same film visual universe as supplied reference. NOT 3D cartoon, NOT Pixar, no plastic/rubbery/toy shapes, no gaunt uncanny face, no horror lighting. Neutral plain grey background throughout, clean professional character-sheet composition. Absolutely no text, letters, captions, logos or watermarks."
+  },
+  "rival-frenzy": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "The same character as the character reference (rival-sheet), full body, seated on an office chair, all twelve arms typing on twelve keyboards at once in a neat fan, gritted-teeth comic determination, sweat drops flying, headset askew, a coffee cup taped to one hand, lit green from below by unseen screens. He is likeable and comic, not creepy: a frazzled, sweaty, comically intense office guy in his late twenties with a round, rosy, friendly face, expressive eyes, stubble and messy brown hair. His twelve arms are a visual gag, not body horror: each arm has normal human proportions and a neat rolled-up white shirt sleeve, arranged in a tidy symmetrical fan behind him. No gaunt or uncanny face, no extra joints, no spidery limbs, no horror lighting. Painted in exactly the same semi-realistic, painterly, cinematic style as the hero in the style reference (chad-sheet): realistic human proportions, skin and fabric textures, visible painterly brushwork, dramatic cinematic lighting with rim light, like key art for a high-end animated film. NOT a 3D cartoon, NOT Pixar-style, no rubbery or toy-like shapes. The two characters must look like they belong in the same film. Isolated on a transparent background, no screens, no text.",
+    "why": "The rival at full frenzy, cut out so code can put him in the server farm differently in each ratio.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "1:1",
+      "background": "transparent",
+      "refs": [
+        "generated/rival-sheet.png",
+        "generated/chad-sheet.png"
+      ]
+    },
+    "file": "generated/rival-frenzy.png",
+    "sha256": "3553c30abb0770c39c9b80e5b77ceb0a3b67d6cf30b54f1714e7e0cf0bf7c1c3",
+    "request": "38e8938f05da07746532fc9e4021490214e725d7ea9957d6952ad0e66b304a66",
+    "job": "6b6988c0-9d96-49e9-a34b-901cce0ce2ec",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:47:06.180Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly ONE square 1:1 image, transparent background, single full body character illustration with comfortable margin around every element for square cropping. Reference 1 (rival-sheet) supplies character identity and clothes: messy brown hair, headset, stubble, rolled sleeve white office shirt, loose red tie, brown trousers, dark shoes. Reference 2 (chad-sheet) supplies the exact semi-realistic painterly cinematic visual style: realistic human anatomy and proportions, richly observed skin and fabric texture, visible painterly brushwork, warm rim light, high-end animated film key art. They must belong in the same film. Depict this rival as a LIKEABLE frazzled office guy in his late twenties with round rosy friendly face, expressive eyes, gritted teeth in comic determination, sweat drops flying, headset askew. Full body seated on an office swivel chair, both shoes and entire chair visible. EXACTLY TWELVE normal human arms total, six on each side, neatly organized into a symmetrical radial fan behind and beside him; each arm normal length and anatomy, one elbow and wrist, each with its own neat rolled up white shirt sleeve. EXACTLY TWELVE distinct keyboards, one per hand, arranged in a tidy matching fan of six on each side at staggered heights so every hand and keyboard is legible. All twelve hands typing simultaneously, one hand per keyboard. Keyboards can be supported by discreet slender mounts connected to chair; avoid a large desk obscuring his seated body. A small coffee cup is taped onto the outside of one typing hand, fingers still typing. Gentle green light from unseen screens below illuminates face, hands and shirt, combined with cinematic warm rim light; no screens visible. Comic multitasking visual gag, charming intensity, no body horror, no extra joints, no spidery limbs, no gaunt or uncanny face, no horror lighting. NOT 3D cartoon, NOT Pixar style, no rubber or toy shapes. Isolated cutout on actual alpha transparent background, no backdrop, no ground plane. No text, captions, logos or watermarks. Single scene, not a reference sheet or collage."
+  },
+  "rival-stride": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "The same character as the character reference (rival-sheet), full body, seen from a very low worm's-eye angle close to the floor, striding straight toward the camera with comic over-the-top menace, one big foot stepping toward the lens with strong foreshortening, chin up, chest puffed, a cocky grin, all twelve arms fanned symmetrically behind him with fists clenched, tie flying, green and red rim light. He is likeable and comic, not creepy: a frazzled, sweaty, comically intense office guy in his late twenties with a round, rosy, friendly face, expressive eyes, stubble and messy brown hair. His twelve arms are a visual gag, not body horror: each arm has normal human proportions and a neat rolled-up white shirt sleeve, arranged in a tidy symmetrical fan behind him. No gaunt or uncanny face, no extra joints, no spidery limbs, no horror lighting. Painted in exactly the same semi-realistic, painterly, cinematic style as the hero in the style reference (chad-sheet): realistic human proportions, skin and fabric textures, visible painterly brushwork, dramatic cinematic lighting with rim light, like key art for a high-end animated film. NOT a 3D cartoon, NOT Pixar-style, no rubbery or toy-like shapes. The two characters must look like they belong in the same film. Isolated on a transparent background, no text.",
+    "why": "His half of the menacing approach: striding toward the hero, seen from a low angle.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "background": "transparent",
+      "refs": [
+        "generated/rival-sheet.png",
+        "generated/chad-sheet.png"
+      ]
+    },
+    "file": "generated/rival-stride.png",
+    "sha256": "1fe103479170ef8ccab542b8c0ffa03dd14bbd8af14dd62e6d0cd24c56939451",
+    "request": "72f5c8c8a925fb441b4ced57dbd754a8da070cb31ed51d801a56ef5987e43759",
+    "job": "d9149831-c6a8-4238-862f-435e2e047091",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:48:37.455Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly ONE image, portrait 9:16 composition with a little safe margin at every edge. Transparent background, isolated full-body character, no scenery, no text, no logos, no watermark. Reference image 1 (rival-sheet) defines the character identity and wardrobe: frazzled sweaty office man late twenties, messy brown hair, stubble, black call-center headset with mic, white shirt with neat rolled-up sleeves, sweat patches, loosened red tie, brown trousers, belt and dark leather office shoes. Make his face round, rosy, friendly, expressive, likeable and comically intense. Reference image 2 (chad-sheet) defines the precise rendering style: semi-realistic painterly cinematic high-end animated film key art with realistic human anatomy, textured skin and fabric, visible painterly brushwork, sophisticated cinematic light. These characters must belong in the same film. NOT Pixar, NOT a 3D cartoon, NOT toy-like or rubbery. One full-body rival character striding straight toward camera from an extremely low worm's-eye camera at floor level. A large forward-stepping shoe projects toward the lens with dramatic strong perspective foreshortening; keep entire shoe and all character limbs inside frame. Chin raised, chest puffed out, cocky friendly grin and comic over-the-top menace. Exactly TWELVE arms total, SIX on each side, fanned symmetrically and tidily behind him, all twelve fists clenched. Clearly separate each of six arms per side into a readable fan with normal human proportions, one normal elbow and wrist per arm, each attached naturally around the sides of torso with its own neat rolled-up white sleeve. Twelve arms are a humorous visual gag, never body horror. Tie flies with motion. Green rim light on one side and red rim light on the other, balanced with flattering cinematic key light showing face, sweat and cloth texture. No gaunt or uncanny face, no extra joints, no spidery limbs, no horror lighting. Entire figure including hair, twelve clenched fists, and both shoes visible, transparent alpha around all edges. Strong vertical framing and cinematic dynamic stride."
+  },
+  "rival-shock": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "The same character as the character reference (rival-sheet), bust shot, jaw dropped in big comic shock, eyes wide, a bead of sweat on his temple, all twelve hands thrown up in a neat fan around him. He is likeable and comic, not creepy: a frazzled, sweaty, comically intense office guy in his late twenties with a round, rosy, friendly face, expressive eyes, stubble and messy brown hair. His twelve arms are a visual gag, not body horror: each arm has normal human proportions and a neat rolled-up white shirt sleeve, arranged in a tidy symmetrical fan behind him. No gaunt or uncanny face, no extra joints, no spidery limbs, no horror lighting. Painted in exactly the same semi-realistic, painterly, cinematic style as the hero in the style reference (chad-sheet): realistic human proportions, skin and fabric textures, visible painterly brushwork, dramatic cinematic lighting with rim light, like key art for a high-end animated film. NOT a 3D cartoon, NOT Pixar-style, no rubbery or toy-like shapes. The two characters must look like they belong in the same film. Isolated on a transparent background, no text.",
+    "why": "His reactions: laughing at the one finger, then the 'masaka' as his counter breaks.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "1:1",
+      "background": "transparent",
+      "refs": [
+        "generated/rival-sheet.png",
+        "generated/chad-sheet.png"
+      ]
+    },
+    "file": "generated/rival-shock.png",
+    "sha256": "539281d8e67701044102c0a24c76c50c114524158afb555b5025e0d078cd99c1",
+    "request": "4b88949f7a90b2ede57d4b1270c0a4e43cbcde2847850eb8883ee617065fd668",
+    "job": "a96853dd-267e-4f81-96b2-1923aa605ab5",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:50:26.243Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly ONE final image, square 1:1 composition, transparent background. The attached first image (rival-sheet) is the CHARACTER identity reference; the second image (chad-sheet) is the exact PAINTING STYLE reference. One single isolated bust portrait of the rival character, not a sheet, no panels. Same messy brown hair, stubble, office headset with boom microphone, rumpled white button-down shirt with neatly rolled sleeves and loosened dark red tie as rival-sheet, but retain a round rosy friendly face, late twenties, likeable frazzled comic office guy. Jaw dropped in enormous comic shock, wide expressive eyes, raised brows, visible bead of sweat on temple. EXACTLY TWELVE ARMS AND TWELVE HANDS TOTAL: six normal human-proportioned arms on each side, arranged in a tidy symmetrical fan behind the bust, all twelve open hands thrown upward in surprise. Plan the six clearly separated hands on either side at distinct evenly spaced heights/angles so every hand can be counted; all hands fully visible with normal five-finger anatomy and room around them. Each arm has one ordinary elbow and wrist and a neat rolled-up white shirt sleeve. Arms form an elegant readable visual gag, friendly and comic, no horror, no spidery limbs, no extra joints. Central face large and readable, chest/bust at lower center; keep entire fan within square with generous small margin for cropping. Paint in EXACTLY the semi-realistic painterly cinematic aesthetic of the hero in chad-sheet: realistic human anatomy, nuanced skin and woven fabric texture, visible sophisticated brushwork, cinematic sculpted warm light and golden rim light, rich subtle shadows, high-end animated film key art. Same film world and rendering as second reference. NOT Pixar, NOT a 3D cartoon, NOT plastic, NOT toy-like, NOT rubbery. No gaunt face, no uncanny expression, no horror lighting. Truly transparent alpha background, no backdrop, no floor, no text, no captions, no logos, no watermark."
+  },
+  "rival-defeat": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "One tired, normal human hand in a neat rolled-up white shirt sleeve (same character as the reference) sticking straight up, fingers drooping comically like a white flag, a small cartoon wisp of smoke above it. Friendly and funny, not creepy: normal proportions, normal finger length. Semi-realistic cinematic digital painting: realistic textures, painterly brushwork, warm bright cinematic lighting, rich colour, like key art for a high-end animated comedy film, with bold anime-inspired staging and big comic expressions. Isolated on a transparent background, no text.",
+    "why": "The aftermath: one tired hand above the pile.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "1:1",
+      "background": "transparent",
+      "refs": [
+        "generated/rival-sheet.png"
+      ]
+    },
+    "file": "generated/rival-defeat.png",
+    "sha256": "9f670c29607fa732ddabd1bc160b3f77e1d45684d22db293c14b1bd09dbf3661",
+    "request": "f2002098f589c5e87e3180cad4d4cac441a36f10bc46cbbacf59d429fc5da817",
+    "job": "92617aaf-cffa-4b38-9700-f4b270dd9586",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:34:45.513Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one square 1:1 image, isolated on a genuinely transparent background. Use the attached reference only for the character's warm light skin tone, normal human hand anatomy, rolled white office-shirt sleeve, and high-end animated comedy cinematic painting style. Show ONLY ONE forearm and ONE tired normal human hand, forearm sticking vertically straight up from a neatly rolled-up white shirt sleeve, wrist and fingers flopping forward limply in comic surrender like a white flag. Five anatomically correct digits, normal proportions and normal finger lengths, a relaxed thumb and gently curled drooping fingers, clearly readable friendly funny exhausted gesture, never creepy. Small whimsical cartoon wisp of pale smoke floating just above the hand, with enough contrast to read as an isolated asset. No face, body, additional hands or arms, flag, props, text, captions, logos, or watermark. Semi-realistic cinematic digital painting with realistic skin and cotton textures, painterly brushwork, warm bright golden cinematic lighting and rich color, premium animated comedy film key art with bold anime-inspired staging. Center the complete hand and sleeve with comfortable clear margins on all sides in the square composition, including above the smoke. Transparent background, no scenery, no ground plane."
+  },
+  "farm-bg": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "An endless aisle of server racks and stacked computer monitors stretching to the horizon, cables hanging from the ceiling like jungle vines, cold green and red status lights, haze and volumetric light. A tall metal door at the far end of the aisle. Wide, symmetrical, deep perspective, empty of people. All monitor screens are blank glowing rectangles. Semi-realistic cinematic matte painting, painterly, dramatic lighting. No text, no letters, no logos.",
+    "why": "The rival's server farm, the world of the first half. Painted anime background art, not something code draws well.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "16:9"
+    },
+    "file": "generated/farm-bg.png",
+    "sha256": "46ea4d3f97b61a6438dbfd6e7313d330ad1b9fe93702ea8dcd66d7a5024ca23b",
+    "request": "56c6d6cf60412af4708e52b996de5cb7cd6bba898c983cf5db823b104aba5b91",
+    "job": "cdb329d6-d416-4855-b692-f46d1bde566a",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:17:31.343Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one image, widescreen 16:9 composition with a little extra breathing room around the edges for cropping. An endless aisle of server racks and stacked computer monitors stretching toward the horizon, with strong centered symmetrical composition and dramatic deep one-point perspective. Thick and thin cables hang from the ceiling like jungle vines, arching and trailing over the aisle. Cold green and red status lights punctuate the dark metal racks. All monitor screens are blank glowing rectangles, entirely without interface elements or markings. Haze and volumetric light give the immense space atmosphere and depth. A tall metal door stands at the far end of the aisle at the vanishing point, discernible through the haze. Empty of people. Semi-realistic cinematic matte painting, painterly surfaces, dramatic lighting, richly detailed industrial environment. No text, no letters, no numbers, no logos, no captions, no watermarks."
+  },
+  "chad-sheet": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Character reference sheet for an original fictional character (not a real person): an impossibly calm, confident young man in his twenties, sharp jaw, tousled dark hair, relaxed half-smile, plain dark hoodie under a long open charcoal coat, one hand in his pocket and a smartphone in the other. Front view, three-quarter view, and three close-up face expressions (calm, smug, focused). Semi-realistic cinematic digital painting: realistic proportions, skin and fabric textures, painterly brushwork, dramatic cinematic lighting and rim light, rich colour, like key art for a high-end animated film, with bold anime-inspired staging and expression. Plain neutral grey background, no text, no letters, no logos.",
+    "why": "The reference that keeps the hero the same in every still.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "16:9"
+    },
+    "file": "generated/chad-sheet.png",
+    "sha256": "e28f0caa32565c562462c3174176d196207a487f219cb5a4e530f122f5ad34ec",
+    "request": "f4fe759f02c1bee68a9f4fbfe9b0e61f6dbf260e0d3e012a9d33a6e9d436793c",
+    "job": "c41bc527-3feb-4b07-98ee-b6f514e03642",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:18:36.218Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one image, a character reference sheet in a 16:9 landscape composition, with a little safe breathing room at every edge for cropping. Original fictional young man in his twenties, impossibly calm and confident, sharp jaw, tousled dark hair, relaxed half-smile. Plain dark hoodie beneath a long open charcoal coat, one hand in his pocket and a smartphone in the other. Show five clearly separated depictions of the SAME consistent character: a full-body front view on the left, a full-body three-quarter view in the center, and three large close-up face portraits arranged neatly on the right showing calm, smug, and focused expressions. Both full-body views include his complete silhouette and shoes. Closeups are distinct and readable, maintaining identical facial structure, hairstyle, age and costume. Semi-realistic cinematic digital painting with realistic anatomy and proportions, detailed skin and fabric textures, visible sophisticated painterly brushwork, dramatic cinematic lighting and rim light, rich colour, premium high-end animated film key art quality, bold anime-inspired staging and expressive faces without exaggerated anatomy. Plain neutral grey background across the entire sheet. Elegant balanced layout without borders or decorative graphics. No text, no captions, no letters, no labels, no logos, no watermarks. Smartphone is plain and unbranded with no visible writing."
+  },
+  "chad-walk": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "The same character as the reference, full body, walking straight toward the camera, coat and hair blowing back in a strong wind, one hand in pocket, the other holding a smartphone at his side with the screen facing away. Strong violet rim light from behind. Semi-realistic cinematic digital painting: realistic proportions, skin and fabric textures, painterly brushwork, dramatic cinematic lighting and rim light, rich colour, like key art for a high-end animated film, with bold anime-inspired staging and expression. Isolated on a transparent background, no text.",
+    "why": "The entrance through the door; code adds the purple backlight and the wind.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "background": "transparent",
+      "refs": [
+        "generated/chad-sheet.png"
+      ]
+    },
+    "file": "generated/chad-walk.png",
+    "sha256": "0384c8a11f0e9d03712490f6a337e857c8c62eb7a2e3ab15decc6ee810e5b697",
+    "request": "e3afcb100cb1376a32e610c895d0ec92df696f5cd84065a9c4a25517e615ed07",
+    "job": "deba8333-1d21-4ebf-9e48-5a56cd460344",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:19:33.076Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one image, portrait 9:16 composition with modest crop-safe margin around entire figure. Use the attached character sheet solely as identity and wardrobe reference. Show ONE full-body instance of the same handsome adult young man, preserving facial identity, tousled dark brown hair, angular face, confident expression, tall lean realistic proportions, long charcoal textured wool overcoat over black hoodie, black trousers, black leather boots. He is walking straight toward the camera with an assertive cinematic stride, looking directly forward, coat tails and hair blowing backward in strong wind. One hand in his trouser pocket; other arm relaxed at his side holding a smartphone, with screen facing away from viewer (only plain dark phone back visible). Both boots fully visible. Strong luminous violet rim lighting from behind defines hair, shoulders, arms, coat edges and legs, with cinematic front fill preserving face details. Semi-realistic cinematic digital painting, realistic skin and fabric textures, expressive painterly brushwork, rich colour, dramatic lighting, premium animated-film key art, bold anime-inspired staging and confident expression. Isolated cutout on true transparent alpha background. No scenery, no ground plane, no background colour, no reference sheet layout, no extra figures, no text, captions, logos, watermarks or graphic elements."
+  },
+  "chad-stride": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "The same character as the reference, full body, seen from a low three-quarter side angle, mid-stride walking calmly forward to the left, one hand in his coat pocket, the other holding a smartphone loosely, head turned slightly toward the viewer with a cold half-smile, coat tails flaring, violet rim light. Exaggerated foreshortening. Semi-realistic cinematic digital painting: realistic proportions, skin and fabric textures, painterly brushwork, dramatic cinematic lighting and rim light, rich colour, like key art for a high-end animated film, with bold anime-inspired staging and expression. Isolated on a transparent background, no text.",
+    "why": "His half of the menacing approach: a low-angle stride; code adds the crackling purple aura.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "background": "transparent",
+      "refs": [
+        "generated/chad-sheet.png"
+      ]
+    },
+    "file": "generated/chad-stride.png",
+    "sha256": "046d103a2352fc675e676b9a2a2af595d450e870a155f0e9ea2b8ab4f158d5b3",
+    "request": "d008f22809963c9d138d465aceab0b4c02032a659aa3baff9b2829f933498cde",
+    "job": "538ac055-a382-4fbd-bb40-90fd64d6436d",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:20:44.453Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly ONE image: a single full-body character isolated on a truly transparent background, portrait aspect ratio 9:16, with comfortable clear margin around hair, boots and flaring coat for cropping. Use the attached reference sheet to faithfully match the SAME adult male character's identity, face, tousled dark wavy hair, handsome angular jaw, dark eyes, tall lean athletic realistic physique, charcoal long textured wool overcoat, black hooded sweatshirt, black trousers and black leather boots. Do not create a reference sheet or multiple views. One character only. Show him from a dramatic LOW three-quarter SIDE camera angle, mid-stride walking calmly forward toward the LEFT of the frame. Exaggerated cinematic foreshortening, nearer forward boot and leg projecting toward the low camera while preserving convincing anatomy and realistic proportions. One hand tucked in his coat pocket; the other holding a plain dark smartphone loosely down at his side. Head turned slightly toward the viewer, cold confident half-smile, bold anime-inspired expression and staging. Coat tails flare behind him with walking motion. Violet rim light tracing hair, shoulders, sleeves and sweeping coat edges; rich restrained cinematic key light renders his face legibly. Semi-realistic cinematic digital painting, realistic skin and fabric textures with visible sophisticated painterly brushwork, rich colour, dramatic cinematic lighting, premium animated film key art. Complete head-to-toe figure including both boots, no cropping. Transparent background only, no scenery, no ground plane, no text, captions, logos, watermark, border or graphic elements."
+  },
+  "chad-finger": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "The same character as the reference, close-up bust, calm smug half-smile, eyes half closed, raising ONE index finger beside his face, exactly one finger extended, the other fingers curled. Hard dramatic side light with a violet rim. Semi-realistic cinematic digital painting: realistic proportions, skin and fabric textures, painterly brushwork, dramatic cinematic lighting and rim light, rich colour, like key art for a high-end animated film, with bold anime-inspired staging and expression. Isolated on a transparent background, no text.",
+    "why": "The one-finger close-up, the ad's central image.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "1:1",
+      "background": "transparent",
+      "refs": [
+        "generated/chad-sheet.png"
+      ]
+    },
+    "file": "generated/chad-finger.png",
+    "sha256": "136425174e33849dd4d338cdfadb95a2cdd7b45b23d3c784ad844baafdf91210",
+    "request": "dcf0d97741279c690304e66f303e35815850e9556631fc2424f188b7917aa272",
+    "job": "dcdf6e02-c1db-46cc-9341-cefe1a92e687",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:22:08.223Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one square 1:1 image with transparent background. Use the attached character reference to faithfully preserve the SAME young adult male character: tousled dark brown hair, strong angular jaw, thick dark eyebrows, warm olive skin, handsome realistic facial proportions, black hoodie under charcoal textured overcoat. Single close-up bust portrait, not a sheet or collage. Calm smug half-smile, eyes half closed, confident anime-inspired expression. Raise ONE hand beside his face with exactly ONE finger extended: the index finger points vertically upward; middle, ring and little fingers fully curled into palm and thumb folded across curled fingers. Anatomically correct hand, clearly readable gesture, no other hands visible. Hard dramatic side light and a vivid violet rim light. Semi-realistic cinematic digital painting, realistic skin and fabric textures, painterly brushwork, rich colour, premium animated film key art, bold anime-inspired staging. Head, hair and raised finger fully in frame with a little clear transparent room around top and sides for square cropping. Isolated clean alpha transparency, no environment, no text, captions, logos or watermarks."
+  },
+  "chad-swipe": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "The same character as the reference, dynamic low angle, intense focused eyes, holding a smartphone out toward the camera with his RIGHT arm. The hand is an anatomically correct RIGHT hand with exactly five fingers: the phone rests in his palm, four fingers wrap around the back and edge of the phone, and his right thumb lies across the screen mid-swipe. The wrist and forearm run naturally into his right coat sleeve. The phone screen faces the camera and is a flat, evenly lit chroma-key green filling the display edge to edge, no interface. Semi-realistic cinematic digital painting: realistic proportions, skin and fabric textures, painterly brushwork, dramatic cinematic lighting with a violet rim light, like key art for a high-end animated film. Isolated on a transparent background, no text.",
+    "why": "The attack pose; the phone's screen is filled in code with the Gomlin card.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "1:1",
+      "background": "transparent",
+      "refs": [
+        "generated/chad-sheet.png"
+      ]
+    },
+    "file": "generated/chad-swipe.png",
+    "sha256": "7b155f1bd85b6a630a9d152299a5dc3729505523e92ee2521dc0131e42cdfa6d",
+    "request": "87487bb78556605ddfd18e8d1e9a4d7f41837f4f47bef7bd256092c1b58920eb",
+    "job": "70abf342-234e-41e2-9d69-ff9a8bd50e94",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:36:06.839Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly ONE square 1:1 image, isolated on true transparent background, with small safe margins at all edges. Use attached character sheet as identity reference: same adult young man, angular handsome face, tousled dark brown hair, intense focused eyes, black hoodie beneath textured long charcoal coat. Single dynamic low-angle cinematic composition, approximately waist-up, with his RIGHT arm thrust toward camera holding a smartphone in strong natural foreshortening. Preserve facial identity. Anatomically correct RIGHT hand with exactly five fingers total: phone rests in his right palm; four fingers curl around the BACK and edge of phone, right thumb lies across FRONT screen mid-swipe. Correct right-hand anatomy, naturally continuous wrist and forearm into RIGHT coat sleeve, his right shoulder on viewer's left. Screen faces camera, clearly visible and large, flat uniformly lit pure chroma key green edge-to-edge within display, no interface, no icons, no text, no screen glare or gradient. Thumb partially occludes green screen naturally. Realistic proportions, detailed skin and woven fabric textures with painterly brushwork, semi-realistic cinematic digital painting like high-end animated film key art, dramatic lighting with violet rim light. Entire silhouette comfortably inside square with room for cropping. No background, no scenery, no typography, no captions, no logo, no watermark. One character and one phone only."
+  },
+  "hand-phone": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "Close-up of one realistic male hand holding a modern Android smartphone upright, thumb resting on the screen ready to swipe, sleeve of a dark hoodie under a charcoal coat, matching the reference. The phone screen is a flat, evenly lit chroma-key green filling the display edge to edge, no interface, no reflections. Semi-realistic cinematic digital painting: realistic proportions, skin and fabric textures, painterly brushwork, dramatic cinematic lighting and rim light, rich colour, like key art for a high-end animated film, with bold anime-inspired staging and expression. Isolated on a transparent background, no text.",
+    "why": "The close-up hand for the swipe rush; code fills the screen with the rebuilt Gomlin feed.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "background": "transparent",
+      "refs": [
+        "generated/chad-sheet.png"
+      ]
+    },
+    "file": "generated/hand-phone.png",
+    "sha256": "bbc2c82da4cbc7bffd83302df5b31ca9f2f0a0cf4471ce57998e4af78f02d44b",
+    "request": "8068cf167ed97f7355ad23f64bb1c187c75b94fab09ddf818c25b1e885394851",
+    "job": "0bc6f705-4a8f-4df0-a3fc-6d9790b19304",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:24:36.398Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Generate exactly one image, portrait 9:16 composition with extra safe margin around the subject for cropping. Transparent background. Close-up isolated asset of ONE anatomically realistic adult male hand holding a modern unbranded Android smartphone upright, its display facing the viewer, thumb resting naturally on the lower side of the screen ready to swipe, other fingers wrapped naturally behind the phone. Show the wrist and a short forearm section in a dark black hoodie sleeve under a textured charcoal wool coat sleeve, matching the attached character reference's clothes, warm skin tone, cinematic golden rim lighting and artistic rendering. No face, no body, no second hand. Phone and hand fully within frame with generous small edge margins; forearm ends neatly near bottom. Slim dark phone bezel, modern rounded rectangular Android phone. The entire visible display is a perfectly flat uniform chroma key green (#00FF00) edge to edge within the bezel, no UI, icons, lettering, camera hole, reflections, gradients or highlights on the green display. Thumb may naturally occlude a small portion of the screen. Semi-realistic cinematic digital painting with realistic hand proportions, detailed skin and fabric textures, painterly brushwork, dramatic cinematic lighting and warm rim light, rich colour, premium high-end animated film key art with bold anime-inspired staging. Match the attached reference's visual style and sleeve fabrics. Crisp clean silhouette against true transparent alpha background. No background, no text, captions, logos, watermarks, or additional objects."
+  },
+  "chad-blow": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "The same character as the reference, bust, eyes closed, coolly blowing on the tip of his raised index finger as if it were a smoking gun barrel, a thin wisp of smoke from the fingertip, violet rim light. Semi-realistic cinematic digital painting: realistic proportions, skin and fabric textures, painterly brushwork, dramatic cinematic lighting and rim light, rich colour, like key art for a high-end animated film, with bold anime-inspired staging and expression. Isolated on a transparent background, no text.",
+    "why": "The aftermath gag: he blows on his fingertip like a gun barrel.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "1:1",
+      "background": "transparent",
+      "refs": [
+        "generated/chad-sheet.png"
+      ]
+    },
+    "file": "generated/chad-blow.png",
+    "sha256": "9b3d01830ab7bdb69da0415b2a78c14f56a918f00bfee27ffe3e9e3ecd795eeb",
+    "request": "2378fdf1dff46c9ace27a81376a51fd90cef209661114e6a73db6d2ce03c9d76",
+    "job": "cf148eb7-d5ed-481e-aee4-e293dfbc5664",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:26:06.664Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one square 1:1 image, isolated on a fully transparent background. Use the attached character sheet as identity reference: same handsome adult young man, tousled wavy dark brown hair, angular face, strong jaw, straight nose, thick dark brows, warm olive skin, black hoodie under a textured charcoal overcoat. Single bust portrait only, head, shoulders, upper chest and raised hand. Eyes closed, cool confident expression, lips gently pursed as he blows across the tip of his raised index finger as if it were a smoking gun barrel. Clearly readable natural hand anatomy: index finger upright near his lips, remaining fingers curled, thumb relaxed; fingertip at mouth height with a small gap between lips and fingertip. A thin delicate wisp of smoke rises from the fingertip, slightly drifting with his breath. No actual gun. Violet rim light crisply tracing hair, face, coat and hand, dramatic cinematic key lighting, rich restrained colors. Semi-realistic cinematic digital painting, realistic human proportions, detailed skin and woven fabric textures, visible refined painterly brushwork, premium high-end animated film key art quality with bold anime-inspired staging and expression. Preserve character identity and clothes from reference. Compose comfortably within square with a little transparent margin around hair, shoulders, hand and smoke so cropping to 1:1 loses nothing essential. No text, captions, logo, watermark, background scene, or additional figures."
+  },
+  "farm-bg-v": {
+    "kind": "image",
+    "model": "codex",
+    "prompt": "The same place as the reference image, framed as a tall vertical composition: an endless aisle of server racks and stacked computer monitors receding to the horizon, cables hanging from a high ceiling like jungle vines, cold green and red status lights, haze and volumetric light, wet reflective floor in the foreground. A tall metal door at the far end of the aisle, centred. Symmetrical, deep one-point perspective, empty of people. All monitor screens are blank glowing rectangles. Semi-realistic cinematic matte painting, painterly, dramatic lighting. No text, no letters, no logos.",
+    "why": "The same server farm framed vertically, so the 9:16 layout has a sharp background instead of a 2x upscaled crop.",
+    "settings": {
+      "via": "codex",
+      "aspect_ratio": "9:16",
+      "refs": [
+        "generated/farm-bg.png"
+      ]
+    },
+    "file": "generated/farm-bg-v.png",
+    "sha256": "3f529322fdb259285d5aa8f4806fa0672a9aadd4c246f899069868e1c5d6fab6",
+    "request": "bbb70063d98ece623d4d473aaf2d12684591f568c7154bfbe92a536806331c78",
+    "job": "491f5909-2559-4a9a-aeb4-241643238fe3",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T14:51:35.142Z",
+    "via": "codex",
+    "terms": "https://openai.com/policies/row-terms-of-use/",
+    "revisedPrompt": "Create exactly one image, portrait 9:16 composition with a little crop-safe room around edges. Use the attached reference as the same location and closely preserve its architecture, industrial server-farm atmosphere, colors and cinematic painterly style, reframing the scene vertically. An apparently endless aisle of tall server racks and stacked old computer monitors recedes toward a centered tall metal door at the far end. Strong symmetrical deep one-point perspective. High cavernous industrial ceiling densely draped with heavy hanging cables like jungle vines, overhead steel trusses, suspended lamps. Cold green monitor glow and small red and green status lights, atmospheric haze and dramatic volumetric light beams. Wet reflective metal floor dominates the foreground with grates, puddles and green and red reflections. Empty of people. All monitor screens are completely blank glowing pale green rectangles, absolutely no interface or symbols. Semi-realistic cinematic matte painting, rich painterly detail, dramatic lighting, dark teal-green palette with restrained red accents. No text, no letters, no numbers, no logos, no watermarks."
+  },
+  "rival-frenzy-v": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "The man types frantically, all twelve hands hammering their keyboards in a fast blur, shoulders shaking, head bobbing, sweat drops flying off his face, a manic gritted-teeth grin. He stays seated in the chair in the same place. Semi-realistic painted anime style, the same character and painting as the first frame. Locked-off camera, no zoom. The flat solid blue background stays perfectly flat and unchanged, no shadows on it.",
+    "why": "The rival's twelve arms hammering keyboards: the farm opening and the frenzy close-up. Keyed on this PC, code adds the farm, the form panel and the lettering.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "1:1",
+      "resolution": "720p",
+      "seed": 4101,
+      "seconds": 6,
+      "audio": false,
+      "first": "first/rival-frenzy-v.png"
+    },
+    "file": "generated/rival-frenzy-v.mp4",
+    "sha256": "9d6d1dd5a54015fac13bae8147cfa420f3c86fe51c15cb09a887adce7a76a052",
+    "request": "d8d16e51282e66b4662d16e53a3e07a7a2308a215f19e44c1a4d56986c822969",
+    "job": "f76c4846-aaee-40e1-91fe-7535053639ef",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T17:11:38.022Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/etzba-achat/gen/footage/rival-frenzy-v/#####.jpg",
+      "fps": 24,
+      "frames": 145,
+      "sheet": "public/ads/etzba-achat/gen/footage/rival-frenzy-v/sheet.jpg"
+    }
+  },
+  "rival-stride-v": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "The man strides slowly and menacingly toward the camera, heavy steps, chest puffed, cocky grin, his twelve fists pumping in the air one after another, tie flapping. He stays centred in the frame. Semi-realistic painted anime style, the same character and painting as the first frame. Locked-off camera, no zoom. The flat solid blue background stays perfectly flat and unchanged, no shadows on it.",
+    "why": "His half of the menacing approach. Code adds the split background, the speed lines, the katakana and the balloon.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "9:16",
+      "resolution": "720p",
+      "seed": 4102,
+      "seconds": 8,
+      "audio": false,
+      "first": "first/rival-stride-v.png"
+    },
+    "file": "generated/rival-stride-v.mp4",
+    "sha256": "09e938803419d2f445e704a70fb638b2932fbc6b2b7da078856cc6c7e4f12bbc",
+    "request": "529cac560b3f9cc50c03dfd383342532c9851d41e54f616466b946fd4c2cd806",
+    "job": "59b75174-1b2a-4fd5-aa96-921131c6acd1",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T17:16:52.135Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/etzba-achat/gen/footage/rival-stride-v/#####.jpg",
+      "fps": 24,
+      "frames": 193,
+      "sheet": "public/ads/etzba-achat/gen/footage/rival-stride-v/sheet.jpg"
+    }
+  },
+  "rival-laugh-v": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "The man throws his head back and laughs maniacally, shoulders shaking, all twelve fists waving in the air. Semi-realistic painted anime style, the same character and painting as the first frame. Locked-off camera, no zoom. The flat solid blue background stays perfectly flat and unchanged, no shadows on it.",
+    "why": "The laugh on \"One finger?! Baka!\"",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "1:1",
+      "resolution": "720p",
+      "seed": 4103,
+      "seconds": 3,
+      "audio": false,
+      "first": "first/rival-laugh-v.png"
+    },
+    "file": "generated/rival-laugh-v.mp4",
+    "sha256": "02b1b7d19980226d1f97072b1506daf070c60806a3fdd2aafa4e8ad43ce6c72a",
+    "request": "bf4a1ef92a795ed57574329d72fdcd77be7b14c00aa307660477cd9279209616",
+    "job": "561b018d-f3a5-4cf4-ad15-b702c5c7cf79",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T17:20:36.119Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/etzba-achat/gen/footage/rival-laugh-v/#####.jpg",
+      "fps": 24,
+      "frames": 73,
+      "sheet": "public/ads/etzba-achat/gen/footage/rival-laugh-v/sheet.jpg"
+    }
+  },
+  "chad-walk-v": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "The young man walks calmly straight toward the camera, his long coat and hair blowing back in a strong wind, one hand in his pocket, the phone in the other hand. Semi-realistic painted anime style, the same character and painting as the first frame. Locked-off camera, no zoom. The flat solid green background stays perfectly flat and unchanged, no shadows on it.",
+    "why": "The hero's walk-in from the door. Code adds the farm, the purple light and the aura.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "9:16",
+      "resolution": "720p",
+      "seed": 4104,
+      "seconds": 4,
+      "audio": false,
+      "first": "first/chad-walk-v.png"
+    },
+    "file": "generated/chad-walk-v.mp4",
+    "sha256": "167e97da5ed08823631efb2ce8780141737927907a6a33e473897569d5f195b7",
+    "request": "6ef77ed8403276d090b48a4343e20a77fc6d130cecb04ed0dea49dc1171c56f7",
+    "job": "bc4e256a-ee7a-42cf-ab7f-7383636154c7",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T17:24:52.601Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/etzba-achat/gen/footage/chad-walk-v/#####.jpg",
+      "fps": 24,
+      "frames": 97,
+      "sheet": "public/ads/etzba-achat/gen/footage/chad-walk-v/sheet.jpg"
+    }
+  },
+  "chad-stride-v": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "The young man strides calmly forward with slow confident steps, coat tails flaring, one hand in his coat pocket, a cold half-smile, his head turning slightly toward the camera. He stays centred in the frame. Semi-realistic painted anime style, the same character and painting as the first frame. Locked-off camera, no zoom. The flat solid green background stays perfectly flat and unchanged, no shadows on it.",
+    "why": "His half of the menacing approach. Code flips him to face the rival and adds the aura and the katakana.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "9:16",
+      "resolution": "720p",
+      "seed": 4105,
+      "seconds": 8,
+      "audio": false,
+      "first": "first/chad-stride-v.png"
+    },
+    "file": "generated/chad-stride-v.mp4",
+    "sha256": "016b8a3e8ad0298d40e6a38a7dfd8b9d1c2c86fff2f1aa4f8c802bf16e1bf515",
+    "request": "0af1772661e55ceebfca95f23b50669318ca794efc7c24cfb865eb847618655f",
+    "job": "add8dd95-4376-4925-91e1-7a9ae0c5d492",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T17:29:22.610Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/etzba-achat/gen/footage/chad-stride-v/#####.jpg",
+      "fps": 24,
+      "frames": 193,
+      "sheet": "public/ads/etzba-achat/gen/footage/chad-stride-v/sheet.jpg"
+    }
+  },
+  "chad-finger-v": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "The young man keeps exactly one index finger raised beside his face, his smug half-smile slowly widening, his eyes opening, his hair stirring in a gentle wind. Semi-realistic painted anime style, the same character and painting as the first frame. Locked-off camera, no zoom. The flat solid green background stays perfectly flat and unchanged, no shadows on it.",
+    "why": "The one-finger close-up. Code adds the purple aura, the glint and the balloon.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "1:1",
+      "resolution": "1080p",
+      "seed": 4106,
+      "seconds": 4,
+      "audio": false,
+      "first": "first/chad-finger-v.png"
+    },
+    "file": "generated/chad-finger-v.mp4",
+    "sha256": "41ad04e526c02804d7590c02f1aa13c2c88d45492884b92b402caf1b533db315",
+    "request": "95f3bd121d0036e1a8339c6d680709e426fbfea8b1969d045f3dafa002cdb44a",
+    "job": "2e1bccb1-0e58-41c5-ba0e-3eb7589427df",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T17:32:58.348Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/etzba-achat/gen/footage/chad-finger-v/#####.jpg",
+      "fps": 24,
+      "frames": 97,
+      "sheet": "public/ads/etzba-achat/gen/footage/chad-finger-v/sheet.jpg"
+    }
+  },
+  "chad-blow-v": {
+    "kind": "video",
+    "model": "ltx-2.5-q4",
+    "prompt": "The young man coolly blows on the tip of his raised index finger, the thin wisp of smoke curling up and away, then his eyes open with a smirk. Semi-realistic painted anime style, the same character and painting as the first frame. Locked-off camera, no zoom. The flat solid green background stays perfectly flat and unchanged, no shadows on it.",
+    "why": "The fingertip blow. Code adds the streak badge and the balloon.",
+    "settings": {
+      "via": "local",
+      "aspect_ratio": "1:1",
+      "resolution": "1080p",
+      "seed": 4107,
+      "seconds": 3,
+      "audio": false,
+      "first": "first/chad-blow-v.png"
+    },
+    "file": "generated/chad-blow-v.mp4",
+    "sha256": "9167b7829bbc35e1dc5d4b17cea23fbdf29f9524035f2a7b452619b367a7bdbc",
+    "request": "6fea5408e57d59ae50fa4e88dbc0661772a706ccb55c09d07d43d19a68a5b7ea",
+    "job": "1ce7d975-53ed-4cb0-a0a5-291d3c375bba",
+    "costUsd": 0,
+    "estimateUsd": 0,
+    "made": "2026-11-11T17:36:07.513Z",
+    "via": "local",
+    "terms": "https://github.com/Lightricks/LTX-2/blob/main/LICENSE-2_x",
+    "footage": {
+      "src": "ads/etzba-achat/gen/footage/chad-blow-v/#####.jpg",
+      "fps": 24,
+      "frames": 73,
+      "sheet": "public/ads/etzba-achat/gen/footage/chad-blow-v/sheet.jpg"
+    }
+  }
+}

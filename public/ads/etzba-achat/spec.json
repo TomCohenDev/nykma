@@ -1,0 +1,163 @@
+{
+  "fps": 30,
+  "duration": 45.9667,
+  "music": {
+    "file": "music-edit-cut.wav",
+    "gain_db": -8,
+    "made_from": {
+      "generated": "gen/music.mp3 (ElevenLabs music_v2_5, 49 s)",
+      "edit": "music to the beat at 24.85 s, silence to 30.25 s, the Final Surge from 25.65 s with 2 bars (33.54-36.70 s) cut out, 152 bpm grid",
+      "prompt": "Instrumental 1990s anime opening theme, J-rock: driving drums, distorted guitar riff, synth brass stabs, 150 bpm, mixed to sit under dialogue. Opens mid-riff at full energy. Around 13.5 seconds it drops to a slow, ominous stomping beat with low brass, one heavy hit per step, building tension for eight seconds. A sudden full stop around 25 seconds for four seconds of near silence with one held string note, then three huge drum-and-brass hits and an all-out fast chorus, landing a big final chord at 46 seconds that rings out to the end.",
+      "cut": "first look note: the opening glasses scene is cut, so the ad starts 3.543 s (14 bars at 152 bpm) into music-edit.wav; n1 is dropped"
+    }
+  },
+  "voices": [
+    {
+      "id": "r1",
+      "voice_id": "SOYHLrjzK2X1ezoPC6cr",
+      "model_id": "eleven_v3",
+      "at": 0.057,
+      "text": "[shouting, deep] Apply! Apply! APPLY!"
+    },
+    {
+      "id": "r2",
+      "voice_id": "SOYHLrjzK2X1ezoPC6cr",
+      "model_id": "eleven_v3",
+      "at": 3.407,
+      "text": "[deep, maniacal] Nobody out-applies Twelve-Arms-sama!"
+    },
+    {
+      "id": "n2",
+      "voice_id": "BQOei2tk6QCBMHQWPhbj",
+      "model_id": "eleven_v3",
+      "at": 7.057,
+      "text": "[deep, ominous] Until... he walked in."
+    },
+    {
+      "id": "r3",
+      "voice_id": "SOYHLrjzK2X1ezoPC6cr",
+      "model_id": "eleven_v3",
+      "at": 10.357,
+      "text": "[deep, outraged] Nani?! ONE hand?! In MY farm?!"
+    },
+    {
+      "id": "h1",
+      "voice_id": "bfGb7JTLUnZebZRiFYyq",
+      "model_id": "eleven_v3",
+      "at": 14.957,
+      "text": "[deep, calm] One hand is generous... Twelve-chan."
+    },
+    {
+      "id": "r4",
+      "voice_id": "SOYHLrjzK2X1ezoPC6cr",
+      "model_id": "eleven_v3",
+      "at": 18.657,
+      "text": "[laughs maniacally] One finger?! Baka!"
+    },
+    {
+      "id": "h2",
+      "voice_id": "bfGb7JTLUnZebZRiFYyq",
+      "model_id": "eleven_v3",
+      "at": 22.857,
+      "text": "[deep, slow] One finger... is all I need."
+    },
+    {
+      "id": "h3",
+      "voice_id": "bfGb7JTLUnZebZRiFYyq",
+      "model_id": "eleven_v3",
+      "at": 27.457,
+      "text": "[shouting, deep] RIGHT... SWIPE!"
+    },
+    {
+      "id": "r5",
+      "voice_id": "SOYHLrjzK2X1ezoPC6cr",
+      "model_id": "eleven_v3",
+      "at": 30.257,
+      "text": "[deep, panicking] M-masaka... my counter can't keep up!"
+    },
+    {
+      "id": "h4",
+      "voice_id": "bfGb7JTLUnZebZRiFYyq",
+      "model_id": "eleven_v3",
+      "at": 33.857,
+      "text": "[deep, smug] Mine fits in a pocket, Twelve-kun."
+    },
+    {
+      "id": "n3",
+      "voice_id": "BQOei2tk6QCBMHQWPhbj",
+      "model_id": "eleven_v3",
+      "at": 36.557,
+      "text": "[deep] Name, email, phone, resume. One swipe."
+    },
+    {
+      "id": "n4",
+      "voice_id": "BQOei2tk6QCBMHQWPhbj",
+      "model_id": "eleven_v3",
+      "at": 43.057,
+      "text": "[deep] Gomlin."
+    }
+  ],
+  "mix": {
+    "duck_db": 10,
+    "fade_out": 1.2
+  },
+  "sfx": [
+    {
+      "id": "door",
+      "text": "Anime impact: a massive heavy metal door blasting open, deep boom with a cinematic whoosh tail",
+      "duration": 0.8,
+      "at": 6.707,
+      "gain_db": -2
+    },
+    {
+      "id": "stomp",
+      "text": "Anime dramatic footstep stomp, deep heavy low-end thud with a short rumble, menacing",
+      "duration": 0.5,
+      "at": 10.262,
+      "gain_db": -5
+    },
+    {
+      "id": "stomp2",
+      "file": "gen/sfx.stomp.mp3",
+      "at": 11.446,
+      "gain_db": -5
+    },
+    {
+      "id": "stomp3",
+      "file": "gen/sfx.stomp.mp3",
+      "at": 12.63,
+      "gain_db": -5
+    },
+    {
+      "id": "stomp4",
+      "file": "gen/sfx.stomp.mp3",
+      "at": 13.814,
+      "gain_db": -5
+    },
+    {
+      "id": "stomp5",
+      "file": "gen/sfx.stomp.mp3",
+      "at": 14.998,
+      "gain_db": -5
+    },
+    {
+      "id": "stomp6",
+      "file": "gen/sfx.stomp.mp3",
+      "at": 16.183,
+      "gain_db": -5
+    },
+    {
+      "id": "impact",
+      "text": "Anime impact frame hit: huge sharp cinematic bass slam with a bright crack, single hit",
+      "duration": 0.7,
+      "at": 26.657
+    },
+    {
+      "id": "swipe",
+      "text": "Anime sword-slash swoosh, fast sharp air slice, single",
+      "duration": 0.5,
+      "at": "word:h3:swipe-0.05",
+      "gain_db": -3
+    }
+  ]
+}
