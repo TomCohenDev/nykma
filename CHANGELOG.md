@@ -4,6 +4,11 @@ Newest first. `spec.md` says how nykma works now. This file says what changed an
 
 ## 2026-11-19
 
+### Added: the public repo, TomCohenDev/nykma
+- **Why.** The user asked for the repo to go public and the site to go live.
+- **Repos.** This repo was renamed `TomCohenDev/nykma-private` (its remote here is updated). `TomCohenDev/nykma` is new and public, made from `bun run export-public` with its own history and commits under the GitHub no-reply address. It has a description, the site as its homepage, topics, Discussions, secret scanning with push protection, private vulnerability reporting, and a ruleset that stops force pushes and deleting `main`.
+- **The domain isn't attached yet.** nobodyknowsmyapp.com already had proxied DNS records and a Cloudflare Access login in front of it, set up outside nykma. Attaching the Worker failed on the records, and the user decides what happens to them, so the site stays on its workers.dev preview (`site/README.md`).
+
 ### Changed: the domain is nobodyknowsmyapp.com, set up on Cloudflare
 - **Why.** The domain the user bought is nobodyknowsmyapp.com (nykma for short), not nykma.com. Every link, the licence notice, the brand kit's URL and the sales address now use it.
 - **Cloudflare.** Email Routing is on for the domain, and `sales@nobodyknowsmyapp.com` forwards to the user's inbox. The Worker is deployed to its workers.dev preview with `SALES_TO` set as a secret. A test request through the live form arrived in the inbox. The domain isn't attached yet, because the pages link to the public repo, which doesn't exist yet (`site/README.md`).

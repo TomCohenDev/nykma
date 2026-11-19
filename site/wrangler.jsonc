@@ -13,8 +13,8 @@
     "run_worker_first": ["/api/*"]
   },
   "send_email": [{ "name": "SALES" }],
-  // Preview only, on workers.dev, until the public repo exists (the pages link to it). To go live, uncomment the
-  // routes: the next deploy attaches nobodyknowsmyapp.com and www.nobodyknowsmyapp.com.
+  // On workers.dev until the domain is free: nobodyknowsmyapp.com still has other DNS records and a Cloudflare Access
+  // login in front of it (site/README.md). Then set workers_dev to false, uncomment the routes and deploy.
   "workers_dev": true,
   // "routes": [
   //   { "pattern": "nobodyknowsmyapp.com", "custom_domain": true },
