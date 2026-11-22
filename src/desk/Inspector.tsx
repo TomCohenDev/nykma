@@ -31,13 +31,18 @@ export type SourceElement = {
   style: Field[];
   props: Field[];
   attrs?: { name: string; value: string; editable: boolean }[];
+  /** A wrapper around one component (a ready-made element): the component and the values it takes. */
+  params?: { component: string; props: Field[] };
+  /** A child in JSX, so the desk can take it out. */
+  removable?: boolean;
 };
 export type SourceChange =
   | { kind: "text"; value: string }
   | { kind: "literal"; value: string }
   | { kind: "style"; name: string; value: number | string | null }
   | { kind: "prop"; name: string; value: number | string }
-  | { kind: "attr"; name: string; value: string | null };
+  | { kind: "attr"; name: string; value: string | null }
+  | { kind: "param"; name: string; value: number | string };
 /** Saves one change. `at` is another literal than the element's own: where its text is written. */
 export type EditSource = (change: SourceChange, label: string, at?: { loc: string; hash: string }) => Promise<void>;
 
@@ -141,6 +146,8 @@ type Props = {
   onEdited: () => void;
   /** Only one thing is in the video, so it can't be taken out. */
   onlyOne?: boolean;
+  /** Takes the selected element out of the code (Delete). Only for an element that's a child in JSX. */
+  onRemove?: () => void;
   /** The ad's knobs, and saving one. */
   tune: Tune;
   onKnob: (id: string, scope: "all" | Ratio, value: unknown, label: string) => Promise<void>;
@@ -493,6 +500,20 @@ export function Inspector(props: Props) {
           )}
         </header>
         {failed && <p className="ins-error">{failed}</p>}
+        {source?.params && !parts && (
+          <Section title="Parameters" sub={<code>{source.params.component}</code>}>
+            {source.params.props.length === 0 && <p className="ins-note">It takes no values here.</p>}
+            {source.params.props.map((field) => (
+              <Row key={field.name} label={field.name}>
+                {field.editable ? (
+                  <Edit dir="auto" wide={field.kind === "string"} kind={field.kind === "number" ? "number" : "string"} value={field.value ?? ""} focus={field.name === "text" ? props.textFocus : undefined} onSave={(value) => onEdit({ kind: "param", name: field.name, value }, `${source.params!.component} ${field.name} → ${clip(String(value), 30)}`)} />
+                ) : (
+                  <code className="ins-code">{clip(field.code, 40)}</code>
+                )}
+              </Row>
+            ))}
+          </Section>
+        )}
         {parts && <p className="ins-note">The parts bin draws this element, and every ad shares it, so it isn't edited here. Pick the element around it, or ask the agent.</p>}
 
         {(el.text || source?.text) && (
@@ -609,6 +630,14 @@ export function Inspector(props: Props) {
         <Section title="Effects" right={<button className="ghost small" onClick={props.onEffects}>{props.effects ? "Edit" : "Add"}</button>}>
           <p className="ins-note">{props.effects || "No effects on this element. Add an entrance, a loop or an exit."}</p>
         </Section>
+
+        {props.onRemove && !parts && (
+          <div className="ins-remove">
+            <button className="ghost small boxed danger" onClick={props.onRemove} title="Take it out of the code (Delete). Ctrl+Z brings it back">
+              Remove element
+            </button>
+          </div>
+        )}
 
         {source && (other().length > 0 || computedFields().length > 0 || source.props.length > 0) && (
           <Section title="More from the code" open={false}>

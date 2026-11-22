@@ -24,3 +24,11 @@ site/dist/
 site/.astro/
 site/.wrangler/
 site/.dev.vars
+
+# Ads are the user's own work and stay on this machine (spec.md §12). The ads the repo already tracks stay tracked;
+# a new ad's folders, its pitch and hand-off, and its registry line in src/ads/local.ts are never committed or exported.
+/src/ads/*/
+/src/ads/local.ts
+/public/ads/*/
+/queue/*/
+!/queue/_template/

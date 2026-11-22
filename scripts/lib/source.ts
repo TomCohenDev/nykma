@@ -6,7 +6,10 @@
  *   elementAt(loc, texts?, slug?)  the element at that tag: text, style fields, props and data-* attributes, the file's
  *                                  hash, and with `texts` (what the element and its parents show) the string literals in
  *                                  the ad's folder that text comes from, wherever they're defined
- *   editSource(loc, hash, edit)    replaces, adds or removes one literal. Only src/ads/: src/parts/ is shared by every ad
+ *   editSource(loc, hash, edit)    replaces, adds or removes one literal, or removes an element that's a JSX child. Only
+ *                                  src/ads/: src/parts/ is shared by every ad
+ *   addElement(request)            adds an element to a scene's JSX, from the desk's Add tab (spec.md §10.14)
+ *   readyElements(slug)            the ad's own ready-made elements, from src/ads/<slug>/elements.tsx
  *   undoSource(slug?)              the desk's Ctrl+Z: one step back in the ad's history (history.ts)
  *
  * Lines and columns are 1-based and count UTF-16 code units, as JS strings do. Only the literal's own range is
@@ -56,13 +59,19 @@ export type ElementInfo = {
   attrs: AttrInfo[];
   /** Only when the request sent text: best first, at most 6. */
   texts?: TextMatch[];
+  /** A wrapper around one component (an element from the Add tab): that component and its props, set by a `param` edit. */
+  params?: { component: string; props: Field[] };
+  /** It's a child in JSX, so a `remove` edit can take it out without breaking the code. */
+  removable: boolean;
 };
 export type SourceEdit =
   | { kind: "text"; value: string }
   | { kind: "literal"; value: string }
   | { kind: "style"; name: string; value: number | string | null }
   | { kind: "prop"; name: string; value: number | string }
-  | { kind: "attr"; name: string; value: string | null };
+  | { kind: "attr"; name: string; value: string | null }
+  | { kind: "param"; name: string; value: number | string }
+  | { kind: "remove" };
 /** loc: the element's (or for a literal edit, the literal's new) location. hash: the edited file's new hash. */
 export type EditReply = { ok: true; hash: string; loc: string; file: string };
 
@@ -263,8 +272,28 @@ function analyse(element: Node, code: string) {
     textInfo = { value: "", editable: false, code: short(code.slice(children[0].start, children[children.length - 1].end)) };
   }
   const styleMode: StyleMode = styleObject ? "object" : styleAttr || spread ? "other" : "none";
-  return { opening, style, props, attrs, text, textInfo, styleAttr, styleObject, styleMode, spread };
+
+  // A wrapper around a single component: its literal props are the element's parameters.
+  let params: { component: string; props: Target[] } | undefined;
+  const only = children.length === 1 && children[0].type === "JSXElement" ? children[0] : undefined;
+  const childName = only?.openingElement?.name;
+  if (only && childName?.type === "JSXIdentifier" && /^[A-Z]/.test(childName.name)) {
+    params = { component: childName.name, props: [] };
+    for (const attr of only.openingElement.attributes as Node[]) {
+      if (attr.type !== "JSXAttribute" || attr.name.type !== "JSXIdentifier") continue;
+      const name = attrName(attr);
+      if (name === "key" || /^on[A-Z]/.test(name)) continue;
+      const value = attr.value as Node | null;
+      if (value?.type === "Literal") params.props.push({ field: field(name, src(value), value), range: [value.start, value.end], context: "jsx-attr" });
+      else if (value?.type === "JSXExpressionContainer" && value.expression.type !== "JSXEmptyExpression")
+        params.props.push({ field: field(name, src(value.expression), value.expression), range: [value.expression.start, value.expression.end], context: "expression" });
+    }
+  }
+  return { opening, style, props, attrs, text, textInfo, styleAttr, styleObject, styleMode, spread, params };
 }
+
+/** An element that's a child of other JSX, so taking it out leaves the code whole. */
+const isJsxChild = (parents: Node[]) => ["JSXElement", "JSXFragment"].includes(parents[parents.length - 1]?.type);
 
 /** The enclosing component: the nearest named function, preferring a capitalised one. */
 function componentOf(parents: Node[]) {
@@ -554,7 +583,7 @@ export function elementAt(loc: string, texts: string[] = [], slug?: string): Ele
   const { file, rel, line, col, slug: own } = fileOf(loc);
   const code = readFileSync(file, "utf8");
   const { element, parents } = find(rel, code, line, col);
-  const { style, props, attrs, textInfo, styleMode } = analyse(element, code);
+  const { style, props, attrs, textInfo, styleMode, params } = analyse(element, code);
   const ad = own ?? (slug && /^[a-z0-9][a-z0-9_-]*$/i.test(slug) && existsSync(join(ADS, slug)) ? slug : undefined);
   const asked = texts.map((text) => String(text).slice(0, 300)).filter((text) => text.trim()).slice(0, 6);
   return {
@@ -570,6 +599,8 @@ export function elementAt(loc: string, texts: string[] = [], slug?: string): Ele
     props: props.map((target) => target.field),
     attrs: attrs.map((attr) => attr.info),
     ...(asked.length ? { texts: ad ? textsIn(ad, asked, rel) : [] } : {}),
+    ...(params ? { params: { component: params.component, props: params.props.map((target) => target.field) } } : {}),
+    removable: isJsxChild(parents),
   };
 }
 
@@ -674,10 +705,30 @@ const shown = (value: unknown) => (typeof value === "string" ? `"${short(value.r
 
 /** One edit to an element, as the new code and a label for the history. */
 function editElement(code: string, rel: string, line: number, col: number, edit: Exclude<SourceEdit, { kind: "literal" }>) {
-  const { element } = find(rel, code, line, col);
+  const { element, parents } = find(rel, code, line, col);
   const parts = analyse(element, code);
-  const value = edit.value;
   const replace = (target: Target, next: number | string) => code.slice(0, target.range[0]) + write(next, target.context) + code.slice(target.range[1]);
+
+  if (edit.kind === "remove") {
+    if (!isJsxChild(parents)) throw new SourceError(400, "The code uses this element as a value (in a condition or a list), so the desk can't take it out. Ask the agent.");
+    // Its own lines go with it when nothing else is on them.
+    let from = element.start;
+    let to = element.end;
+    const lineStart = code.lastIndexOf("\n", from - 1) + 1;
+    const rest = /^[ \t]*\r?\n/.exec(code.slice(to));
+    if (/^[ \t]*$/.test(code.slice(lineStart, from)) && rest) (from = lineStart), (to += rest[0].length);
+    const text = analyse(element, code).textInfo?.value;
+    return { after: code.slice(0, from) + code.slice(to), label: `Removed ${hostTag(element)}${text ? ` ${shown(text)}` : ""}` };
+  }
+  const value = edit.value;
+
+  if (edit.kind === "param") {
+    if (typeof value !== "number" && typeof value !== "string") throw new SourceError(400, "A value is a number or a string.");
+    const target = parts.params?.props.findLast((item) => item.field.name === edit.name);
+    if (!target) throw new SourceError(400, `The element has no parameter ${edit.name}.`);
+    if (!target.field.editable) throw new SourceError(400, `${edit.name} isn't a plain value here: change it in the code.`);
+    return { after: replace(target, value), label: `${parts.params!.component} ${edit.name} ${shown(target.field.value)} → ${shown(value)}` };
+  }
 
   if (edit.kind === "text" || edit.kind === "prop") {
     if (typeof value !== "number" && typeof value !== "string") throw new SourceError(400, "A value is a number or a string.");
@@ -727,7 +778,7 @@ function editElement(code: string, rel: string, line: number, col: number, edit:
     if (value === null) return { after: code, label: "" };
     return { after: addAttribute(code, parts.opening, attrCode(edit.name, value)), label: `${edit.name} → ${shown(value)}` };
   }
-  throw new SourceError(400, "An edit is text, literal, style, prop or attr.");
+  throw new SourceError(400, "An edit is text, literal, style, prop, attr, param or remove.");
 }
 
 /** Writes the edit and records it in the ad's history. A history that can't be saved doesn't undo the edit. */
@@ -754,11 +805,13 @@ export function editSource(loc: string, hash: string, edit: SourceEdit, label?: 
   const reply: EditReply = { ok: true, hash: hashOf(after), loc: `${rel}:${line}:${col}`, file: rel };
   if (after === before) return reply;
   // Every edit is inside the element, after its `<`, so the element keeps its line and column. An edit that would
-  // break the file isn't written.
+  // break the file isn't written. A removed element is gone, so then the file only has to parse.
   try {
-    find(rel, after, line, col);
+    if (edit.kind === "remove") {
+      if (!parse(rel, after)) throw new Error();
+    } else find(rel, after, line, col);
   } catch {
-    throw new SourceError(400, "That value would break the file, so it wasn't written.");
+    throw new SourceError(400, edit.kind === "remove" ? "Taking it out would break the file, so it wasn't done." : "That value would break the file, so it wasn't written.");
   }
   commit(slug, file, rel, before, after, cleanLabel(label) ?? auto, `${rel}:${line}:${col}:${edit.kind}:${"name" in edit ? edit.name : ""}`);
   return reply;
@@ -797,4 +850,315 @@ export function undoSource(slug?: string): HistoryMove & { ok: true; file?: stri
   const file = moved.changed[0];
   const text = file && existsSync(resolve(ROOT, file)) ? readFileSync(resolve(ROOT, file), "utf8") : undefined;
   return { ok: true, ...moved, ...(file ? { file } : {}), ...(text !== undefined ? { hash: hashOf(text) } : {}) };
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Adding an element (spec.md §10.14): the desk's Add tab writes a new element into a scene's JSX, as the last child of
+// what the scene returns, so it draws on top. Everything else the desk does to an element then works on it.
+
+/** What the desk can add: plain text, a label (text on a pill), a box, or one of the ad's ready-made elements. */
+export type AddKind = "text" | "label" | "box" | "element";
+export type AddRequest = {
+  slug: string;
+  /** The scene's id, and the scene frame (as its `useFrame()` counts) the element should be fully in by. */
+  scene: string;
+  at: number;
+  /** The scene's length in frames, and the video's fps: the element stays two seconds, or to the end of a short scene. */
+  length: number;
+  fps: number;
+  /** Where its centre goes, as a fraction of the frame's width and height. */
+  x: number;
+  y: number;
+  kind: AddKind;
+  text?: string;
+  dir?: "rtl" | "ltr";
+  /** The ad's look, from the frame: its font, its colours. */
+  style?: { fontFamily?: string; fontWeight?: number | string; fontSize?: number; color?: string; letterSpacing?: string; accent?: string; paper?: string };
+  /** For kind "element": the id of one of readyElements(slug). */
+  element?: string;
+};
+/** One of the ad's ready-made elements, from `export const elements` in src/ads/<slug>/elements.tsx. */
+export type ReadyElement = { id: string; name: string; component: string; hint?: string; props: Field[] };
+
+const READY_FILE = "elements.tsx";
+const unwrapExpression = (node: Node | null | undefined): Node | undefined => {
+  let at = node ?? undefined;
+  while (at && (at.type === "ParenthesizedExpression" || TS_EXPRESSION.has(at.type))) at = at.expression;
+  return at;
+};
+const keyOf = (prop: Node) => (prop.type === "Property" && !prop.computed ? keyName(prop) : undefined);
+const valueOf = (object: Node, key: string) => (object.properties as Node[]).find((prop) => keyOf(prop) === key)?.value as Node | undefined;
+
+/** The list in src/ads/<slug>/elements.tsx: `export const elements = [{ id, name, component, hint?, props? }]`. */
+export function readyElements(slug: string): ReadyElement[] {
+  if (!/^[a-z0-9][a-z0-9_-]*$/i.test(slug)) throw new SourceError(400, "That isn't an ad's name.");
+  const file = join(ADS, slug, READY_FILE);
+  if (!existsSync(file)) return [];
+  const code = readFileSync(file, "utf8");
+  const program = parse(file, code);
+  if (!program) throw new SourceError(409, `src/ads/${slug}/${READY_FILE} doesn't parse right now.`);
+  let list: Node | undefined;
+  walk(program, (node) => {
+    if (list) return false;
+    if (node.type === "VariableDeclarator" && node.id?.type === "Identifier" && node.id.name === "elements") list = unwrapExpression(node.init);
+  });
+  if (list?.type !== "ArrayExpression") return [];
+  const out: ReadyElement[] = [];
+  for (const item of list.elements as Node[]) {
+    const object = unwrapExpression(item);
+    if (object?.type !== "ObjectExpression") continue;
+    const text = (key: string) => {
+      const found = literal(valueOf(object, key));
+      return found?.kind === "string" ? String(found.value) : undefined;
+    };
+    const componentNode = valueOf(object, "component");
+    const component = componentNode?.type === "Identifier" ? componentNode.name : text("component");
+    const id = text("id");
+    if (!id || !component) continue;
+    const propsNode = unwrapExpression(valueOf(object, "props"));
+    const props: Field[] =
+      propsNode?.type === "ObjectExpression"
+        ? (propsNode.properties as Node[]).filter((prop) => keyOf(prop)).map((prop) => field(keyOf(prop)!, code.slice(prop.value.start, prop.value.end), prop.value))
+        : [];
+    out.push({ id, name: text("name") ?? id, component, ...(text("hint") ? { hint: text("hint") } : {}), props });
+  }
+  return out;
+}
+
+const FUNCTION = new Set(["FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression"]);
+
+/** The function a top-level name is declared as in a module: `function X`, `const X = () =>`, exported or not. */
+function declaredFunction(program: Node, name: string): Node | undefined {
+  for (const statement of program.body as Node[]) {
+    const decl = statement.type === "ExportNamedDeclaration" || statement.type === "ExportDefaultDeclaration" ? statement.declaration : statement;
+    if (!decl) continue;
+    if (decl.type === "FunctionDeclaration" && decl.id?.name === name) return decl;
+    if (decl.type === "VariableDeclaration")
+      for (const declarator of decl.declarations as Node[]) {
+        const init = unwrapExpression(declarator.init);
+        if (declarator.id?.type === "Identifier" && declarator.id.name === name && init && FUNCTION.has(init.type)) return init;
+      }
+  }
+  return undefined;
+}
+
+/** Where a name is imported from in a module: the path as written, and the name it has there. */
+function importedFrom(program: Node, name: string): { from: string; imported: string } | undefined {
+  for (const statement of program.body as Node[]) {
+    if (statement.type !== "ImportDeclaration") continue;
+    for (const spec of statement.specifiers as Node[])
+      if (spec.local?.name === name) return { from: String(statement.source.value), imported: spec.type === "ImportDefaultSpecifier" ? "default" : (spec.imported?.name ?? spec.imported?.value ?? name) };
+  }
+  return undefined;
+}
+
+type Located = { file: string; rel: string; code: string; program: Node; fn: Node; name: string };
+
+/** A component used in `rel`, followed through one import to the file in the ad's folder that declares it. */
+function locate(slug: string, file: string, code: string, program: Node, name: string): Located | undefined {
+  const here = declaredFunction(program, name);
+  if (here) return { file, rel: toRel(file), code, program, fn: here, name };
+  const imported = importedFrom(program, name);
+  if (!imported || !imported.from.startsWith(".")) return undefined;
+  const base = resolve(file, "..", imported.from);
+  const target = [base, `${base}.tsx`, `${base}.ts`, `${base}.jsx`, `${base}.js`, join(base, "index.tsx")].find((path) => existsSync(path) && statSync(path).isFile());
+  if (!target || !target.startsWith(join(ADS, slug) + sep)) return undefined;
+  const otherCode = readFileSync(target, "utf8");
+  const other = parse(target, otherCode);
+  if (!other) throw new SourceError(409, `${toRel(target)} doesn't parse right now. Fix it in the code first.`);
+  let fn: Node | undefined;
+  if (imported.imported === "default") {
+    const statement = (other.body as Node[]).find((node) => node.type === "ExportDefaultDeclaration");
+    const decl = statement?.declaration;
+    fn = decl && FUNCTION.has(decl.type) ? decl : decl?.type === "Identifier" ? declaredFunction(other, decl.name) : undefined;
+  } else fn = declaredFunction(other, imported.imported);
+  return fn ? { file: target, rel: toRel(target), code: otherCode, program: other, fn, name: imported.imported } : undefined;
+}
+
+/** The scene's component: `{ id: "<scene>", component: X }` in the ad's folder, or the registry's `component` for an ad with one. */
+function sceneComponent(slug: string, scene: string): Located {
+  const dir = join(ADS, slug);
+  if (!existsSync(dir)) throw new SourceError(404, "No such ad.");
+  for (const file of codeFiles(dir)) {
+    const code = readFileSync(file, "utf8");
+    if (!code.includes(scene)) continue;
+    const program = parse(file, code);
+    if (!program) continue;
+    let name: string | undefined;
+    walk(program, (node) => {
+      if (name) return false;
+      if (node.type !== "ObjectExpression") return;
+      const id = literal(valueOf(node, "id"));
+      const component = valueOf(node, "component");
+      if (id?.value === scene && component?.type === "Identifier") name = component.name;
+    });
+    if (name) {
+      const found = locate(slug, file, code, program, name);
+      if (found) return found;
+      throw new SourceError(404, `The scene "${scene}" draws ${name}, which isn't written in the ad's folder. Ask the agent to add it.`);
+    }
+  }
+  // An ad with one component: the registry names it, or this machine's src/ads/local.ts.
+  for (const registry of [join(ROOT, "src", "registry.ts"), join(ADS, "local.ts")]) {
+    if (!existsSync(registry)) continue;
+    const code = readFileSync(registry, "utf8");
+    const program = parse(registry, code);
+    let name: string | undefined;
+    if (program)
+      walk(program, (node) => {
+        if (name || node.type !== "ObjectExpression") return;
+        const component = valueOf(node, "component");
+        if (literal(valueOf(node, "slug"))?.value === slug && component?.type === "Identifier") name = component.name;
+      });
+    const found = program && name ? locate(slug, registry, code, program, name) : undefined;
+    if (found) return found;
+  }
+  throw new SourceError(404, `The desk couldn't find the code that draws the scene "${scene}". Ask the agent to add it.`);
+}
+
+/** The JSX a component returns last: the element new things are added inside. */
+function returnedJsx(fn: Node): Node | undefined {
+  if (fn.type === "ArrowFunctionExpression" && fn.body?.type !== "BlockStatement") return unwrapExpression(fn.body);
+  let last: Node | undefined;
+  walk(fn.body, (node) => {
+    if (node !== fn.body && FUNCTION.has(node.type)) return false;
+    if (node.type === "ReturnStatement") last = unwrapExpression(node.argument);
+  });
+  return last;
+}
+
+const pct = (value: number) => `${numberCode(Math.round(Math.min(Math.max(value, 0), 1) * 1000) / 10)}%`;
+/** A style={{ ... }} object as code. Numbers stay numbers (React adds px); strings are quoted. */
+const styleCode = (style: Record<string, number | string | undefined>) =>
+  `{{ ${Object.entries(style)
+    .filter(([, value]) => value !== undefined && value !== "")
+    .map(([key, value]) => `${styleKey(key)}: ${valueCode(value as number | string)}`)
+    .join(", ")} }}`;
+
+/** Its entrance just before the frame it was dropped on, its exit two seconds later, or none near a scene's end. */
+function timing(at: number, length: number, fps: number) {
+  const fade = 8;
+  const steps: string[] = [];
+  if (at >= fade) steps.push(`in:fade@${Math.round(at - fade)}+${fade}`);
+  const out = Math.round(at + 2 * fps);
+  if (length > 0 && out + fade + Math.round(fps / 2) < length) steps.push(`out:fade@${out}+${fade}`);
+  return steps.join(" ");
+}
+
+const cssColor = (value: unknown, fallback: string) => (typeof value === "string" && /^(#[0-9a-f]{3,8}|rgba?\([\d.,\s%]+\)|hsla?\([\d.,\s%deg]+\))$/i.test(value.trim()) ? value.trim() : fallback);
+const fontFamily = (value: unknown) => (typeof value === "string" && value.length < 200 && !/[{};<>]/.test(value) ? value : undefined);
+
+/** The new element's code, on one line. */
+function elementCode(request: AddRequest, ready?: ReadyElement) {
+  const look = request.style ?? {};
+  const place = { position: "absolute", left: pct(request.x), top: pct(request.y), transform: "translate(-50%, -50%)", zIndex: 50 };
+  const fx = timing(request.at, request.length, request.fps);
+  const attrs = [fx ? `data-fx="${fx}"` : ""];
+  const text = (fallback: string) => write(String(request.text ?? "").trim() || fallback, "jsx-text");
+  const font = {
+    fontFamily: fontFamily(look.fontFamily),
+    fontSize: typeof look.fontSize === "number" && look.fontSize > 0 ? Math.round(Math.min(look.fontSize, 400)) : 72,
+    fontWeight: Number(look.fontWeight) >= 100 && Number(look.fontWeight) <= 1000 ? Number(look.fontWeight) : 800,
+    color: cssColor(look.color, "#ffffff"),
+    letterSpacing: typeof look.letterSpacing === "string" && /^-?[\d.]+(px|em)$/.test(look.letterSpacing) ? look.letterSpacing : undefined,
+  };
+  const dir = request.dir === "rtl" ? `dir="rtl"` : "";
+  switch (request.kind) {
+    case "text":
+      return `<div ${[dir, ...attrs].filter(Boolean).join(" ")} style=${styleCode({ ...place, ...font, lineHeight: 1.1, whiteSpace: "nowrap", textAlign: "center" })}>${text(request.dir === "rtl" ? "טקסט חדש" : "New text")}</div>`;
+    case "label": {
+      const paper = cssColor(look.paper, "#ffffff");
+      const fontSize = Math.round(font.fontSize * 0.6);
+      return `<div ${[dir, ...attrs].filter(Boolean).join(" ")} style=${styleCode({ ...place, ...font, fontSize, color: cssColor(look.color, "#171923"), backgroundColor: paper, padding: "0.3em 0.8em 0.38em", borderRadius: 999, lineHeight: 1.1, whiteSpace: "nowrap" })}>${text(request.dir === "rtl" ? "תווית" : "Label")}</div>`;
+    }
+    case "box":
+      return `<div ${attrs.filter(Boolean).join(" ")} style=${styleCode({ ...place, width: 480, height: 270, backgroundColor: cssColor(look.accent, "#655EE4"), borderRadius: 32 })} />`;
+    case "element": {
+      if (!ready) throw new SourceError(400, "Which of the ad's elements?");
+      const props = ready.props
+        .filter((prop) => prop.editable && prop.value !== undefined)
+        .map((prop) => `${prop.name}=${write(prop.value!, "jsx-attr")}`)
+        .join(" ");
+      return `<div ${attrs.filter(Boolean).join(" ")} style=${styleCode(place)}><${ready.component}${props ? ` ${props}` : ""} /></div>`;
+    }
+  }
+  throw new SourceError(400, "An element is text, a label, a box or one of the ad's own.");
+}
+
+export function addElement(request: AddRequest): EditReply {
+  const slug = String(request?.slug ?? "");
+  if (!/^[a-z0-9][a-z0-9_-]*$/i.test(slug)) throw new SourceError(400, "That isn't an ad's name.");
+  for (const key of ["at", "length", "fps", "x", "y"] as const) if (!Number.isFinite(Number(request[key]))) throw new SourceError(400, `${key} should be a number.`);
+  const ready = request.kind === "element" ? readyElements(slug).find((item) => item.id === request.element) : undefined;
+  if (request.kind === "element" && !ready) throw new SourceError(404, `The ad has no ready-made element "${request.element}".`);
+  const where = sceneComponent(slug, String(request.scene ?? ""));
+  if (!where.file.startsWith(ADS + sep)) throw new SourceError(403, "That scene is drawn outside the ad's folder.");
+  const root = returnedJsx(where.fn);
+  if (!root || (root.type !== "JSXElement" && root.type !== "JSXFragment"))
+    throw new SourceError(400, `${where.name} doesn't end by returning JSX (it returns a condition or a value), so the desk can't tell where to add to it. Ask the agent.`);
+  const closing = root.type === "JSXElement" ? root.closingElement : root.closingFragment;
+
+  const before = where.code;
+  const eol = before.includes("\r\n") ? "\r\n" : "\n";
+  const jsx = elementCode({ ...request, at: Number(request.at), length: Number(request.length), fps: Number(request.fps), x: Number(request.x), y: Number(request.y) }, ready);
+  let after: string;
+  let at: number;
+  if (closing) {
+    // On its own line before the closing tag, indented like the children before it; inline when the tag isn't on its own line.
+    const lineStart = before.lastIndexOf("\n", closing.start - 1) + 1;
+    const ownLine = /^[ \t]*$/.test(before.slice(lineStart, closing.start));
+    const kids = (root.children as Node[]).filter((child) => child.type !== "JSXText" || child.raw.trim());
+    const lastKid = kids[kids.length - 1];
+    const kidIndent = lastKid ? /^[ \t]*/.exec(before.slice(before.lastIndexOf("\n", lastKid.start - 1) + 1))![0] : undefined;
+    const indent = before.slice(lineStart, closing.start);
+    const childIndent = kidIndent && kidIndent.length > indent.length ? kidIndent : `${indent}  `;
+    if (ownLine) {
+      after = before.slice(0, lineStart) + childIndent + jsx + eol + before.slice(lineStart);
+      at = lineStart + childIndent.length;
+    } else {
+      after = before.slice(0, closing.start) + jsx + before.slice(closing.start);
+      at = closing.start;
+    }
+  } else {
+    // The scene returns one element with no children (`=> <Part start={…} />`): it goes into a fragment with the new one
+    // beside it. The fragment adds no box, so the new element is placed on the frame as before.
+    const lineStart = before.lastIndexOf("\n", root.start - 1) + 1;
+    const lead = before.slice(lineStart, root.start);
+    const indent = /^[ \t]*/.exec(lead)![0];
+    const own = /^[ \t]*$/.test(lead);
+    const inner = own ? `${indent}  ` : `${indent}    `;
+    const head = own ? `<>${eol}${inner}` : `(${eol}${indent}  <>${eol}${inner}`;
+    const tail = own ? `${eol}${indent}</>` : `${eol}${indent}  </>${eol}${indent})`;
+    const middle = `${before.slice(root.start, root.end)}${eol}${inner}`;
+    after = before.slice(0, root.start) + head + middle + jsx + tail + before.slice(root.end);
+    at = root.start + head.length + middle.length;
+  }
+
+  // A ready-made element is imported from ./elements unless the scene's file has it already.
+  if (ready && !declaredFunction(where.program, ready.component) && !importedFrom(where.program, ready.component) && !where.file.endsWith(sep + READY_FILE)) {
+    let from = relative(resolve(where.file, ".."), join(ADS, slug, READY_FILE)).split(sep).join("/").replace(/\.tsx$/, "");
+    if (!from.startsWith(".")) from = `./${from}`;
+    const imports = (where.program.body as Node[]).filter((node) => node.type === "ImportDeclaration");
+    const same = imports.find((node) => node.source.value === from && (node.specifiers as Node[]).some((spec) => spec.type === "ImportSpecifier"));
+    let insert: { at: number; text: string };
+    if (same) {
+      const named = (same.specifiers as Node[]).filter((spec) => spec.type === "ImportSpecifier");
+      insert = { at: named[named.length - 1].end, text: `, ${ready.component}` };
+    } else {
+      const last = imports[imports.length - 1];
+      insert = last ? { at: last.end, text: `${eol}import { ${ready.component} } from "${from}";` } : { at: 0, text: `import { ${ready.component} } from "${from}";${eol}` };
+    }
+    after = after.slice(0, insert.at) + insert.text + after.slice(insert.at);
+    if (insert.at <= at) at += insert.text.length;
+  }
+
+  const { line, col } = lineCol(lineStarts(after), at);
+  try {
+    find(where.rel, after, line, col);
+  } catch {
+    throw new SourceError(400, "Adding it would break the file, so it wasn't written.");
+  }
+  const what = request.kind === "element" ? ready!.name : request.kind === "box" ? "a box" : `${request.kind} ${shown(String(request.text ?? "").trim() || "new")}`;
+  commit(slug, where.file, where.rel, before, after, `Added ${what} to "${request.scene}"`, `add:${where.rel}:${line}:${col}`);
+  return { ok: true, hash: hashOf(after), loc: `${where.rel}:${line}:${col}`, file: where.rel };
 }

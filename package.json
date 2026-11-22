@@ -5,7 +5,7 @@
   "license": "PolyForm-Noncommercial-1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --open /desk.html",
+    "dev": "vite --open /",
     "animatic": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/animatic.ts",
     "stills": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/stills.ts",
     "sheet": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/sheet.ts",

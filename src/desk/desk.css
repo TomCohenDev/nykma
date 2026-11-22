@@ -127,6 +127,18 @@ textarea {
   color: inherit;
 }
 
+/* A select with a see-through background (the brief's brand picker) opens its list on the browser's white, with the
+   desk's pale text on it. Every list gets the desk's own panel and text instead. */
+option,
+optgroup {
+  color: var(--text-1);
+  background-color: var(--bg-2);
+}
+
+option:disabled {
+  color: var(--text-4);
+}
+
 button {
   cursor: pointer;
 }
@@ -482,20 +494,6 @@ input[type="range"] {
   height: 12px;
   border-radius: 4px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
-}
-
-.sidebar-foot {
-  margin-top: auto;
-  padding: 10px 8px 0;
-  font-size: 12px;
-}
-
-.sidebar-foot a {
-  color: var(--text-3);
-}
-
-.sidebar-foot a:hover {
-  color: var(--text);
 }
 
 .shell-main {
@@ -1737,7 +1735,7 @@ body.resizing .board {
   overflow-wrap: anywhere;
 }
 
-.composer {
+.chat-composer {
   padding: 8px 10px 10px;
   border-top: 1px solid var(--line-soft);
 }

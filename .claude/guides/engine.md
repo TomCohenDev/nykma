@@ -21,7 +21,7 @@ export function Hook({ ratio }: AdProps) {
 }
 ```
 
-In `src/registry.ts`, one line per take, with only the brief's ratios:
+In `src/ads/local.ts` (gitignored, from `local.example.ts`; `src/registry.ts` only holds the ads the repo already has), one line per take, with only the brief's ratios:
 
 ```ts
 defineAd({ slug: "launch", ratios: ["1x1"], scenes: [{ id: "hook", name: "The hook", component: Hook, frames: 90 }, …] })

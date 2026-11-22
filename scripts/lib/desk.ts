@@ -64,6 +64,9 @@
  *   POST /api/source/edit { loc, hash, edit, label? }   changes, adds or removes one literal in src/ads/ (409 with the
  *                                        hash if the file changed)
  *   POST /api/source/undo { slug? }         the same as /api/history/undo
+ *   GET  /api/elements?slug=                the ad's ready-made elements, from src/ads/<slug>/elements.tsx (source.ts)
+ *   POST /api/source/add { slug, scene, at, length, fps, x, y, kind, text?, dir?, style?, element? }   adds an element
+ *                                        to the scene's JSX (spec.md §10.14); answers with its loc and the file's hash
  *   GET  /api/history?slug=                 the ad's change history: the desk's writes to story, tune and code (history.ts)
  *   POST /api/history/undo | /api/history/redo { slug } | /api/history/goto { slug, position }   moves through it,
  *                                        never over a file changed since (409)
@@ -93,7 +96,7 @@ import { codexAccount, findCodex } from "./codex.ts";
 import { localStatus, startComfy, stopComfy, type LocalStatus } from "./local.ts";
 import { NotConnected, search as searchStock, take as takeStock, testStockKey } from "./stock-run.ts";
 import { isRatio, isSource, type Kind } from "./stock.ts";
-import { editSource, elementAt, sourceFailure, undoSource } from "./source.ts";
+import { addElement, editSource, elementAt, readyElements, sourceFailure, undoSource } from "./source.ts";
 import { goto as historyGoto, historyOf, record, redo as historyRedo, undo as historyUndo, writeAtomic, type FileChange, type HistoryKind } from "./history.ts";
 import { home as keyHome, isService, keyHint, readKey, removeKey, saveKey, SECRET_ENV, SERVICES } from "./keys.ts";
 import { act as actOnPost, approve as approvePosts, connect as connectProvider, disconnect, draft as publishDraft, forgetProvider, loginOutcome, optionsFor, publishState, reveal, saveProvider, startPublishing } from "./publish/index.ts";
@@ -1274,6 +1277,13 @@ export function deskApi(server: ViteDevServer) {
           return send(res, ...sourceFailure(error));
         }
       }
+      if (path === "/api/elements") {
+        try {
+          return send(res, 200, { elements: readyElements(url.searchParams.get("slug") ?? "") });
+        } catch (error) {
+          return send(res, ...sourceFailure(error));
+        }
+      }
       if (path === "/api/history") {
         const slug = url.searchParams.get("slug") ?? "";
         if (!NAME.test(slug) || !existsSync(join(ADS, slug))) return send(res, 404, { error: "No such ad." });
@@ -1304,10 +1314,18 @@ export function deskApi(server: ViteDevServer) {
     const byScript = (path === "/api/publish/approve" || path === "/api/publish/job") && req.headers["x-nykma-token"] === DESK_TOKEN;
     if (!byScript && !sameOrigin(req)) return send(res, 403, { error: path.startsWith("/api/publish/") ? "Only the desk page or bun run publish can do this." : "Only the desk page can do this." });
     if (path === "/api/upload") return upload(req, res, url.searchParams);
-    if (path === "/api/source/edit" || path === "/api/source/undo")
+    if (path === "/api/source/edit" || path === "/api/source/undo" || path === "/api/source/add")
       return void readBody(req)
         .then((body) =>
-          send(res, 200, path === "/api/source/undo" ? undoSource(body.slug ? String(body.slug) : undefined) : editSource(String(body.loc ?? ""), String(body.hash ?? ""), body.edit, body.label)),
+          send(
+            res,
+            200,
+            path === "/api/source/undo"
+              ? undoSource(body.slug ? String(body.slug) : undefined)
+              : path === "/api/source/add"
+                ? addElement(body as never)
+                : editSource(String(body.loc ?? ""), String(body.hash ?? ""), body.edit, body.label),
+          ),
         )
         .catch((error) => send(res, ...sourceFailure(error)));
     if (path.startsWith("/api/history/"))

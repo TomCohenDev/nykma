@@ -9,10 +9,19 @@
  *                  { nykma: "select", loc }                 keep reporting this element's box as frames change
  *                  { nykma: "preview", loc, style }         show style values on that element before they're saved
  *                  { nykma: "preview", loc: null, restore }  end it: put the old values back, or keep them (saved)
- *                  { nykma: "pickAt", x, y }                pick the element at that point of the stage (viewer)
+ *                  { nykma: "pickAt", x, y }                a click at that point of the stage (viewer), as below
+ *                  { nykma: "hoverAt", x, y }               the pointer is there, over the desk's selection box
+ *                  { nykma: "stackAt", x, y }               list every tagged element at that point (right click)
+ *                  { nykma: "sample", id }                  the ad's look on this frame, for a new element (Add tab)
+ *                  { nykma: "layers", id }                  every tagged element on this frame, for the Layers tab
+ *                  { nykma: "pickLoc", loc } | { nykma: "hoverLoc", loc }   select or outline an element by its tag
  *   frame → desk   { nykma: "board", type: "ready", frames, fps } | { type: "error", message }
  *                  { type: "frame", frame } while playing, { type: "ended" }
- *                  { type: "hover", el } | { type: "pick", el } | { type: "box", loc, box }
+ *                  { type: "hover", el, under } | { type: "pick", el } | { type: "box", loc, box }
+ *                  { type: "stack", x, y, items } | { type: "edit" } (a double click: edit the selection's text)
+ *                  { type: "sample", id, sample } | { type: "layers", id, layers }
+ * A click picks the topmost tagged element at the point. A click on the selected element, or a second click on the same
+ * spot, goes one down instead, so whatever sits behind a full-frame veil can still be reached; hover shows that one.
  * The registry is imported dynamically, so even an ad that fails to load reports back instead of a blank frame.
  */
 import { Component, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
@@ -67,6 +76,41 @@ const COMPUTED = ["fontSize", "fontWeight", "color", "fill", "letterSpacing", "l
 
 const tagged = (el: Element | null) => el?.closest<HTMLElement | SVGElement>("[data-nk]") ?? null;
 
+/** Whether an element shows at all: not hidden, and neither it nor anything around it at opacity 0. */
+const showing = (el: Element) => {
+  const check = (el as Element & { checkVisibility?: (options: object) => boolean }).checkVisibility;
+  return check ? check.call(el, { opacityProperty: true, visibilityProperty: true }) : true;
+};
+
+/** Every tagged element at a point of the window that shows, topmost first, one per tag. A see-through one isn't hit. */
+function stackAt(stage: HTMLElement, x: number, y: number) {
+  const seen = new Set<string>();
+  const stack: (HTMLElement | SVGElement)[] = [];
+  for (const hit of document.elementsFromPoint(x, y)) {
+    const el = tagged(hit);
+    if (!el || !stage.contains(el) || seen.has(el.dataset.nk!) || !showing(hit)) continue;
+    seen.add(el.dataset.nk!);
+    stack.push(el);
+  }
+  return stack;
+}
+
+/** Where the last click landed, so a second click on the same spot goes one further down. */
+let lastClick = { x: NaN, y: NaN };
+const SAME_SPOT = 4;
+
+/**
+ * What a click at this point picks: the topmost element, or the one under the selection when the selection is the
+ * topmost here or the click is on the same spot as the last one. Past the bottom of the stack it wraps to the top.
+ */
+function targetAt(stage: HTMLElement, x: number, y: number, selected: string | null) {
+  const stack = stackAt(stage, x, y);
+  const i = selected ? stack.findIndex((el) => el.dataset.nk === selected) : -1;
+  const same = Math.hypot(x - lastClick.x, y - lastClick.y) <= SAME_SPOT;
+  if (i >= 0 && stack.length > 1 && (i === 0 || same)) return { el: stack[(i + 1) % stack.length], under: true };
+  return { el: stack[0] ?? null, under: false };
+}
+
 function describe(el: HTMLElement | SVGElement, stage: HTMLElement, video: Video): Picked {
   const origin = stage.getBoundingClientRect();
   const k = origin.width / video.width;
@@ -98,6 +142,123 @@ function describe(el: HTMLElement | SVGElement, stage: HTMLElement, video: Video
   };
 }
 
+/** The ad's look on this frame: its biggest text's font, and its colours. A new element starts from it. */
+export type Sample = {
+  headline: { fontFamily: string; fontWeight: string; fontSize: number; color: string; letterSpacing: string } | null;
+  /** The most saturated fill, and the lightest one (what a label sits on). */
+  accent: string | null;
+  paper: string | null;
+};
+
+const rgba = (value: string) => {
+  const m = /rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?/.exec(value);
+  return m ? { r: +m[1] / 255, g: +m[2] / 255, b: +m[3] / 255, a: m[4] === undefined ? 1 : +m[4] } : null;
+};
+
+function sampleStyle(stage: HTMLElement, video: Video): Sample {
+  const origin = stage.getBoundingClientRect();
+  const k = origin.width / video.width;
+  let best: { size: number; el: Element } | null = null;
+  let accent: { sat: number; color: string } | null = null;
+  let paper: { light: number; color: string } | null = null;
+  for (const el of stage.querySelectorAll("*")) {
+    const rect = el.getBoundingClientRect();
+    if (rect.width < 2 || rect.height < 2 || rect.right < origin.left || rect.left > origin.right || rect.bottom < origin.top || rect.top > origin.bottom) continue;
+    const style = getComputedStyle(el);
+    if (style.visibility === "hidden" || Number(style.opacity) < 0.05) continue;
+    const own = [...el.childNodes].some((node) => node.nodeType === Node.TEXT_NODE && (node.textContent ?? "").trim().length > 1);
+    if (own && el instanceof HTMLElement && el.offsetHeight > 0) {
+      // Its size as seen, after any scale above it.
+      const size = (parseFloat(style.fontSize) * rect.height) / el.offsetHeight / k;
+      if (!best || size > best.size) best = { size, el };
+    }
+    const fill = rgba(style.backgroundColor);
+    if (fill && fill.a > 0.6 && (rect.width * rect.height) / (k * k) > 4000) {
+      const max = Math.max(fill.r, fill.g, fill.b);
+      const min = Math.min(fill.r, fill.g, fill.b);
+      const light = (max + min) / 2;
+      const sat = max === min ? 0 : (max - min) / (1 - Math.abs(2 * light - 1));
+      if (sat > 0.3 && light > 0.2 && light < 0.8 && (!accent || sat > accent.sat)) accent = { sat, color: style.backgroundColor };
+      if (light > 0.9 && (!paper || light > paper.light)) paper = { light, color: style.backgroundColor };
+    }
+  }
+  const head = best ? getComputedStyle(best.el) : null;
+  return {
+    headline: best && head ? { fontFamily: head.fontFamily, fontWeight: head.fontWeight, fontSize: Math.round(best.size), color: head.color, letterSpacing: head.letterSpacing === "normal" ? "" : head.letterSpacing } : null,
+    accent: accent?.color ?? null,
+    paper: paper?.color ?? null,
+  };
+}
+
+/**
+ * What a layer looks like, for its thumbnail: its fill (a colour, a gradient or an image), a picture it shows (an <img>,
+ * or an <svg> as a data URL), the first letters of its text in its colour and weight, and its box as fractions of the
+ * frame (for a container with nothing of its own to show).
+ */
+export type Look = {
+  fill?: { color?: string; image?: string; radius?: number };
+  src?: string;
+  glyph?: { text: string; color: string; weight: string };
+  box: { x: number; y: number; w: number; h: number };
+};
+/** One row of the Layers tab: a tagged element (all the elements with its tag, for one drawn in a list). */
+export type Layer = { loc: string; tag: string; text: string; depth: number; count: number; shown: boolean; look: Look };
+
+const SVG_MAX = 12_000;
+
+function lookOf(el: HTMLElement | SVGElement, rect: DOMRect, origin: DOMRect, own: string, svgBudget: { left: number }): Look {
+  const style = getComputedStyle(el);
+  const look: Look = {
+    box: { x: (rect.left - origin.left) / origin.width, y: (rect.top - origin.top) / origin.height, w: rect.width / origin.width, h: rect.height / origin.height },
+  };
+  const color = /rgba?\([^)]*\)/.test(style.backgroundColor) && !/,\s*0\)$/.test(style.backgroundColor) && style.backgroundColor !== "transparent" ? style.backgroundColor : undefined;
+  // A url() or a gradient, but not one so long it would bloat the list.
+  const image = style.backgroundImage !== "none" && style.backgroundImage.length < 2000 ? style.backgroundImage : undefined;
+  // Its corner as a share of its shorter side, so the thumbnail rounds the same way at its own size.
+  const side = el instanceof HTMLElement ? Math.min(el.offsetWidth, el.offsetHeight) : 0;
+  if (color || image) look.fill = { color, image, radius: side > 0 ? Math.min((parseFloat(style.borderTopLeftRadius) || 0) / side, 0.5) : 0 };
+  if (el instanceof HTMLImageElement && (el.currentSrc || el.src)) look.src = el.currentSrc || el.src;
+  else if (el instanceof SVGSVGElement && svgBudget.left > 0) {
+    const markup = new XMLSerializer().serializeToString(el);
+    if (markup.length <= SVG_MAX) {
+      look.src = `data:image/svg+xml,${encodeURIComponent(markup)}`;
+      svgBudget.left--;
+    }
+  }
+  const text = own.replace(/\s+/g, " ").trim();
+  if (text) look.glyph = { text: [...text].slice(0, 2).join(""), color: style.color, weight: style.fontWeight };
+  return look;
+}
+
+/** Every tagged element on this frame, in the page's order, with how deep it sits among them. Inside an <svg> only the svg itself. */
+function layersOf(stage: HTMLElement): Layer[] {
+  const origin = stage.getBoundingClientRect();
+  const byLoc = new Map<string, Layer>();
+  const list: Layer[] = [];
+  const svgBudget = { left: 30 };
+  for (const el of stage.querySelectorAll<HTMLElement | SVGElement>("[data-nk]")) {
+    if (el.parentElement?.closest("svg") || el.tagName === "STYLE" || el.tagName === "SCRIPT") continue;
+    const loc = el.dataset.nk!;
+    const rect = el.getBoundingClientRect();
+    const onFrame = rect.width > 0.5 && rect.height > 0.5 && rect.right > origin.left && rect.left < origin.right && rect.bottom > origin.top && rect.top < origin.bottom;
+    const shown = onFrame && showing(el);
+    const seen = byLoc.get(loc);
+    if (seen) {
+      seen.count++;
+      seen.shown ||= shown;
+      continue;
+    }
+    let depth = 0;
+    for (let at = tagged(el.parentElement); at && stage.contains(at); at = tagged(at.parentElement)) depth++;
+    const own = [...el.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE).map((node) => node.textContent ?? "").join(" ");
+    const text = (own.trim() ? own : el.querySelector("[data-nk]") ? "" : (el.textContent ?? "")).replace(/\s+/g, " ").trim().slice(0, 60);
+    const layer = { loc, tag: el.tagName.toLowerCase(), text, depth, count: 1, shown, look: lookOf(el, rect, origin, own, svgBudget) };
+    byLoc.set(loc, layer);
+    list.push(layer);
+  }
+  return list;
+}
+
 const sound = new Sound();
 
 /** Values shown on an element before they're saved: what each property was, so a cancelled drag can put it back. */
@@ -126,6 +287,8 @@ function Scene({ video, viewer }: { video: Video; viewer: boolean }) {
   const [selected, setSelected] = useState<string | null>(null);
   const playback = useRef<{ stop: () => void } | null>(null);
   const hovered = useRef<string | null>(null);
+  const chosen = useRef<string | null>(null);
+  chosen.current = selected;
 
   useEffect(() => {
     const stop = () => {
@@ -166,13 +329,36 @@ function Scene({ video, viewer }: { video: Video; viewer: boolean }) {
         if (data.loc && data.style) preview(String(data.loc), data.style);
         else endPreview(data.restore !== false);
       }
-      else if (data.nykma === "pickAt") {
+      else if (data.nykma === "layers") {
+        const root = document.querySelector<HTMLElement>("[data-nykma-stage]");
+        tell({ type: "layers", id: data.id, layers: root ? layersOf(root) : [] });
+      } else if (data.nykma === "pickLoc" || data.nykma === "hoverLoc") {
+        const root = document.querySelector<HTMLElement>("[data-nykma-stage]");
+        const el = root && data.loc ? root.querySelector<HTMLElement | SVGElement>(`[data-nk="${CSS.escape(String(data.loc))}"]`) : null;
+        if (data.nykma === "hoverLoc") return tell({ type: "hover", el: el && root ? describe(el, root, video) : null, under: false });
+        if (!el || !root) return;
+        chosen.current = el.dataset.nk!;
+        setSelected(el.dataset.nk!);
+        tell({ type: "pick", el: describe(el, root, video) });
+      } else if (data.nykma === "sample") {
+        const root = document.querySelector<HTMLElement>("[data-nykma-stage]");
+        tell({ type: "sample", id: data.id, sample: root ? sampleStyle(root, video) : null });
+      } else if (data.nykma === "pickAt" || data.nykma === "hoverAt" || data.nykma === "stackAt") {
         const root = document.querySelector<HTMLElement>("[data-nykma-stage]");
         if (!root) return;
         const box = root.getBoundingClientRect();
         const k = box.width / video.width;
-        const el = tagged(document.elementFromPoint(box.left + Number(data.x) * k, box.top + Number(data.y) * k));
-        if (el && root.contains(el)) {
+        const x = box.left + Number(data.x) * k;
+        const y = box.top + Number(data.y) * k;
+        if (data.nykma === "stackAt") return tell({ type: "stack", x: Number(data.x), y: Number(data.y), items: stackAt(root, x, y).map((el) => describe(el, root, video)) });
+        const { el, under } = targetAt(root, x, y, chosen.current);
+        if (data.nykma === "hoverAt") {
+          hovered.current = el?.dataset.nk ?? null;
+          return tell({ type: "hover", el: el ? describe(el, root, video) : null, under });
+        }
+        lastClick = { x, y };
+        if (el) {
+          chosen.current = el.dataset.nk!;
           setSelected(el.dataset.nk!);
           tell({ type: "pick", el: describe(el, root, video) });
         } else tell({ type: "pick", el: null });
@@ -212,11 +398,12 @@ function Scene({ video, viewer }: { video: Video; viewer: boolean }) {
     const stage = () => document.querySelector<HTMLElement>("[data-nykma-stage]");
     const onMove = (event: PointerEvent) => {
       const root = stage();
-      const el = tagged(document.elementFromPoint(event.clientX, event.clientY));
-      const loc = el && root?.contains(el) ? el.dataset.nk! : null;
+      if (!root) return;
+      const { el, under } = targetAt(root, event.clientX, event.clientY, chosen.current);
+      const loc = el?.dataset.nk ?? null;
       if (loc === hovered.current) return;
       hovered.current = loc;
-      tell({ type: "hover", el: el && loc && root ? describe(el, root, video) : null });
+      tell({ type: "hover", el: el ? describe(el, root, video) : null, under });
     };
     const onLeave = () => {
       hovered.current = null;
@@ -226,20 +413,36 @@ function Scene({ video, viewer }: { video: Video; viewer: boolean }) {
       event.preventDefault();
       event.stopPropagation();
       const root = stage();
-      const el = tagged(document.elementFromPoint(event.clientX, event.clientY));
-      if (el && root?.contains(el)) {
+      if (!root) return;
+      // The second click of a double click keeps the selection and edits its text.
+      if (event.detail > 1) return void (chosen.current && tell({ type: "edit" }));
+      const { el } = targetAt(root, event.clientX, event.clientY, chosen.current);
+      lastClick = { x: event.clientX, y: event.clientY };
+      hovered.current = null;
+      if (el) {
+        chosen.current = el.dataset.nk!;
         setSelected(el.dataset.nk!);
-        tell({ type: "pick", el: describe(el, root, video), alt: event.altKey, double: event.detail > 1 });
+        tell({ type: "pick", el: describe(el, root, video) });
       } else tell({ type: "pick", el: null });
+    };
+    const onMenu = (event: MouseEvent) => {
+      event.preventDefault();
+      const root = stage();
+      if (!root) return;
+      const box = root.getBoundingClientRect();
+      const k = box.width / video.width;
+      tell({ type: "stack", x: (event.clientX - box.left) / k, y: (event.clientY - box.top) / k, items: stackAt(root, event.clientX, event.clientY).map((el) => describe(el, root, video)) });
     };
     document.addEventListener("pointermove", onMove);
     document.documentElement.addEventListener("mouseleave", onLeave);
     document.addEventListener("click", onClick, true);
+    document.addEventListener("contextmenu", onMenu);
     document.body.style.cursor = "default";
     return () => {
       document.removeEventListener("pointermove", onMove);
       document.documentElement.removeEventListener("mouseleave", onLeave);
       document.removeEventListener("click", onClick, true);
+      document.removeEventListener("contextmenu", onMenu);
     };
   }, [viewer, picking, video]);
 

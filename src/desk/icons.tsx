@@ -31,6 +31,13 @@ export const FitIcon = (p: P) => (
     <path d="M2.5 5.5v-3h3m5 0h3v3m0 5v3h-3m-5 0h-3v-3" />
   </Icon>
 );
+export const LayersIcon = (p: P) => (
+  <Icon {...p}>
+    <path d="M8 2.2l6 3.3-6 3.3-6-3.3z" />
+    <path d="M2 8.4l6 3.3 6-3.3" />
+    <path d="M2 11.2l6 3.3 6-3.3" />
+  </Icon>
+);
 export const LayoutIcon = (p: P) => (
   <Icon {...p}>
     <rect x="1.5" y="3" width="3.5" height="3" rx=".75" />

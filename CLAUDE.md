@@ -9,7 +9,7 @@ A bare-bones local ad maker. One agent (`.claude/agents/ad-agent.md`) has an ide
 ## Commands
 
 ```bash
-bun run dev                                    # the desk: dashboard, viewer, timeline, inspector and chat (the scrubbing preview is at /)
+bun run dev                                    # the desk at http://localhost:5173/: dashboard, viewer, timeline, inspector and chat
 bun run history <brand>                        # the ideas a brand's ads have used, and the user's notes for it (free)
 bun run animatic <slug>                        # pitch slideshow from pitch.md (free)
 bun run claims <slug>                          # the pitch's claims against brand.md -> queue/<date>-<brand>-<slug>/claims.md (a few cents)
@@ -58,6 +58,7 @@ These hold for anyone touching `src/`, agent or not, because breaking them break
 
 - Post or schedule only when the user asks, and only with `bun run publish` (spec.md §10.12), which posts through the desk on the accounts connected on its Publishing page. Don't open `.env` or `.env.local`, and never read `~/.config/nykma/`.
 - Don't spend ElevenLabs credits or generated-media budget beyond what the user approved.
+- A new ad never goes to git, private or public: its folders are gitignored, and it registers in `src/ads/local.ts`, not `src/registry.ts` (spec.md §12). Don't commit or export ad files when you commit nykma's own changes.
 
 ## Changing nykma
 

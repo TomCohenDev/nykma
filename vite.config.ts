@@ -23,7 +23,14 @@ export default defineConfig({
     // The desk's API exists only on the dev server. Renders never load it.
     {
       name: "nykma-desk",
-      configureServer: (server) => void server.middlewares.use(deskApi(server)),
+      configureServer: (server) => {
+        // The desk is the dev server's home page. The old scrubbing preview stays at /index.html.
+        server.middlewares.use((req, _res, next) => {
+          if (req.url === "/" || req.url?.startsWith("/?")) req.url = `/desk.html${req.url.slice(1)}`;
+          next();
+        });
+        server.middlewares.use(deskApi(server));
+      },
     },
   ],
   // Every page and every ad is scanned up front, so a package is never discovered late. A late one makes Vite rebuild

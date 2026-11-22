@@ -1,6 +1,10 @@
 /**
  * Every ad, one line each. `bun run <script> <id>` finds them here. All fields: `Ad` in src/engine/ad.ts.
  *
+ *
+ * The ads listed here are the ones the repo already holds. A new ad is the user's own and stays on this machine: its
+ * folders are gitignored, and its line goes in src/ads/local.ts (also gitignored, made from local.example.ts), which
+ * is added below when it exists. A fresh clone has no local.ts and builds without it (spec.md §12).
  */
 import { PartsDemo } from "./ads/parts-demo/PartsDemo";
 import { PyDemo, cues as pyDemoCues } from "./ads/py-demo/PyDemo";
@@ -46,6 +50,10 @@ const ads: Ad[] = [
   defineAd({ slug: "three-tries", scenes: threeTriesScenes, fps: 30, lang: "he", cues: threeTriesCues, thumbnail: ThreeTriesThumb, ratios: ["9x16", "1x1", "16x9"] }),
   defineAd({ slug: "etzba-achat", scenes: etzbaAchatScenes, fps: 30, lang: "en", cues: etzbaAchatCues, thumbnail: EtzbaAchatThumb, ratios: ["9x16", "1x1", "16x9"] }),
 ];
+
+// This machine's own ads, from the gitignored src/ads/local.ts. A glob, so a clone without the file still builds.
+const local = import.meta.glob<{ ads?: Ad[] }>("./ads/local.ts", { eager: true });
+ads.push(...(local["./ads/local.ts"]?.ads ?? []));
 
 export const videos = ads.flatMap(videosOf);
 

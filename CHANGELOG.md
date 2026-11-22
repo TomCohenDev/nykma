@@ -4,6 +4,74 @@ Newest first. `spec.md` says how nykma works now. This file says what changed an
 
 ## 2026-11-22
 
+### Changed: a README that shows what nykma does
+- **Why.** The user wanted a much more impressive README on GitHub, with a video of everything nykma can do, in the spirit of ComfyUI's.
+- **What.** A centred header with badges and a looping 20-second GIF that links to a 70-second MP4 tour (`docs/media/`), a gallery of six public ads, a features section (the agent, ads in code, the desk), desk shortcuts, and the setup, flow, commands and layout as before. The tour: real ads from public brands (whos-sarah, etzba-achat, mashal, lo-maamin, under-pressure, pag-tokef, spring-moves, madrich, lc-lesson, newton-lesson), then the desk on under-pressure: the brief, every ratio, Layers, Add, dragging with snapping, effects, the timeline and the agent, with captions in nykma's own fonts and colours. The desk was recorded from the public export (no private brands or projects) with Playwright and cut with ffmpeg; it's silent.
+- **Spec** §12 says where the showcase lives and how it was made.
+
+### Changed: new ads stay on this machine
+- **Why.** The user doesn't want the ads they make pushed to the private or the public repo.
+- **The rule** (spec.md §12, CLAUDE.md, `.claude/guides/build.md`, `engine.md`). The ads git already tracks stay; every new ad is never committed or exported. `.gitignore` leaves out new folders under `src/ads/`, `public/ads/` and `queue/` (keeping `queue/_template/`), and a new ad registers in the gitignored `src/ads/local.ts` (from `src/ads/local.example.ts`) instead of `src/registry.ts`, which adds it through `import.meta.glob`, so a clone without it still builds. The desk's Add tab looks for a one-component ad's scene there too.
+- **This push** leaves out the desk test edits in kmo-avoda and three-tries, and kmo-avoda's `elements.tsx`; they stay on this machine.
+- **Tested.** Typecheck; the desk loads all 43 ads through the changed registry.
+
+### Changed: the dashboard's brief box
+- **Dark dropdowns.** The brand picker's list opened white with the desk's pale text on it, because its select is see-through. Every `option` in the desk now takes the panel colour and text colour (`desk.css`).
+- **No pitch price line.** "A pitch costs a few cents. Nothing is built until you say go." is gone from under the brief, at the user's ask; with Pitch first off it still says the agent builds straight away.
+
+### Fixed: the agent panel
+- **Why.** The user said the chat on the right acted strangely and its text couldn't really be selected.
+- **Cause.** The dashboard's brief box and the chat's footer both used the class `composer`, and the brief's styles in `studio.css` load after the chat's in `desk.css`, so on the project page the chat footer became the brief's rounded card (16 px padding, an 18 px margin, a focus ring) and its text box lost its padding and grew to 18 px type. While the agent worked, each new line also scrolled the chat to the bottom, pulling text out from under a selection.
+- **What.** The brief is now `.brief`, `.brief-opts` and `.brief-hint`; the chat's footer is `.chat-composer`. The chat stays where it is while you press in it or hold a selection there.
+- **Tested.** In a headless desk: the chat footer and text box take their own styles again, a drag selects a paragraph on mathbooklm-three-tries and the selection holds through the chat's polling, and the dashboard's brief looks as it did.
+
+### Changed: a click beside the video deselects
+- **Why.** The user expected a click outside the selected element to let go of it.
+- **What** (spec.md §10.3, `src/desk/Viewer.tsx`). A press on the viewer's canvas round the frames clears the selection; a click on nothing inside a frame already did. Tested in a headless desk on kmo-avoda.
+
+### Added: snapping in the viewer
+- **Why.** The user wanted elements to snap into place while dragging.
+- **What** (spec.md §10.3, `src/desk/Viewer.tsx`). Moving snaps an element's edges and centre to the frame's edges and centre lines, the safe areas and the other elements on the frame (from the Layers list, leaving out its own parents and children); scaling snaps an edge to the same lines, or the size to 100%. Magenta guides show the lines. **Snap** and its ▾ menu in the viewer bar turn it off or choose the targets; Ctrl drags freely.
+- **Tested.** Typecheck. In a headless desk on kmo-avoda: a move shows guides and holds the element on a line for several steps before letting go, Ctrl shows none, a corner drag snaps its scale; Escape each time, and no entry was written by the test.
+
+### Added: thumbnails in the Layers tab
+- **Why.** The user wanted to tell elements apart in the list at a glance.
+- **What** (spec.md §10.15). Each row has a 24 px thumbnail of what the element shows: its fill, its image or drawing, the first letters of its text in its colour and weight, or for an empty container a map of where its box sits in the frame. `board.html` adds a `look` to each layer.
+- **Tested.** Typecheck. In a headless board frame on kmo-avoda at frames 249 and 300: the backdrop's gradient, the phone screen's fill, the white "הוגש!" pill with its letters, the app icon's SVG and maps for the phone's wrappers. Not looked at in the desk.
+
+### Fixed: resizing and moving with the mouse
+- **Why.** Resizing text with a corner shrank it but wouldn't grow it, lost the cursor, and jumped huge when the pointer left the video. Dragging a corner outward left the selection box, so the pointer was over the ad's iframe, which took the moves; the desk heard nothing until the pointer came out of the frame, far away.
+- **What** (`src/desk/Viewer.tsx`). A drag captures the pointer (`setPointerCapture`), and the frames take no pointer while it's held. Escape, or a pointer the browser cancels, puts the element back, also when the keyboard was in the ad's frame (its forwarded Escape used to clear the selection instead, and the release then saved). A press on a corner without a drag no longer picks the element under it.
+- **Tested.** In a headless desk on kmo-avoda: a corner dragged outward over the video reads 120% to 219% step by step and 84% back inward, and Escape leaves the ad's file unchanged. An earlier run, before the Escape fix, saved a scale to kmo-avoda; it was undone through the desk's history.
+
+### Added: the Layers tab
+- **Why.** The user wanted a list of every selectable element on the frame, so things are easier to select than by clicking in the viewer.
+- **What** (spec.md §10.15, `src/desk/LayersPanel.tsx`). A Layers tab on the left lists the tagged elements on the frame under the playhead as a tree; a click selects one, hovering outlines it. `board.html` answers `layers`, `pickLoc` and `hoverLoc`. The left tabs now show icons, with the open one named, so five fit.
+- **Clicks skip what can't be seen.** Testing it showed kmo-avoda's veil at opacity 0 on frame 249 still taking the viewer's clicks. The viewer now passes over elements that are see-through or hidden on the frame; the Layers tab lists them under Show hidden.
+- **Tested.** Typecheck. In a headless board frame on kmo-avoda at frame 249: the list has the ad's elements nested as in the code, with the preload images as one ×8 row and the veil marked hidden, `pickLoc` selects by tag, and a click at the centre now picks the phone, not the veil. The tab itself has not been looked at in a browser.
+
+### Changed: the desk is the dev server's home page
+- **Why.** The user wanted the dashboard at `http://localhost:5173/` and no link to the scrubbing preview.
+- **What.** `vite.config.ts` serves `desk.html` for `/`, and `bun run dev` opens `/`. The sidebar's "Scrubbing preview" link is gone; the old preview page still loads at `/index.html`. Renders are unchanged: they load `capture.html`.
+
+### Added: adding elements from the desk
+- **Why.** The user wanted to put things on the video themselves, by dragging and dropping, such as a line of text over the streak bar at 10 s in kmo-avoda. They wanted ready-made pieces that already have the ad's font and look, made when the ad is made, that they then fill in with their own values.
+- **The Add tab** (spec.md §10.14, `src/desk/AddPanel.tsx`). Heading, Text, Label and Box take their look from the frame under the playhead (a new `sample` message to `board.html`). The ad's own pieces come from `src/ads/<slug>/elements.tsx`. Drag one onto the viewer, or click to put it in the middle.
+- **Written into the code** (`addElement` in `scripts/lib/source.ts`, `POST /api/source/add`, `GET /api/elements`). It goes in as the scene's last child, placed in percent and timed with `data-fx` from the playhead, so the inspector, dragging, effects, history and renders all treat it as part of the ad. New edits: `param` (a ready-made element's props, shown as Parameters) and `remove` (Remove element, or Delete, for an element that's a child in JSX).
+- **Scenes that return one element.** three-tries' scenes are each `=> <Part start={…} />`, with no children to add to, and the desk refused them. It now wraps such a root in a fragment with the new element beside it. Tested on a copy of three-tries' `moves` and on a `return <Inner />;`.
+- **Agent.** `.claude/guides/build.md` now asks for `elements.tsx` with three to six pieces in each new ad. kmo-avoda has four: a note under the streak, its line, its white pill and a purple tag. No eval was run for this guide change.
+- **Tested.** Typecheck. `addElement` on a copy of kmo-avoda's streak scene for all four kinds (typechecks after, the import added once) and on a throwaway ad (arrow components, an inline closing tag, JSX-unsafe text, a `param` edit and a `remove`). In a headless board frame, the sample reads Noto Sans Hebrew in the ad's ink at frames 60, 249 and 300. Dragging and dropping in the desk itself has not been tried in a browser.
+
+### Changed: reaching elements behind others in the viewer, and a margin round the frame
+- **Why.** In kmo-avoda at 8.29 s a veil covers the whole frame. Once it was selected, its box took every click, so nothing behind it could be picked without moving the veil first. And an element that fills the frame had its outline, corners and label cut off at the frame's edge.
+- **Picking** (spec.md §10.3, `src/board/frame.tsx`, `src/desk/Viewer.tsx`). A click on the selection, or again on the same spot, picks the next element down (`elementsFromPoint`, one per tag), wrapping to the top. Hovering the selection outlines that one with a "Behind" label, and a right click lists every element at the point. The board frame takes `hoverAt` and `stackAt` messages and answers `stack` and `edit`. A click on the selection waits 280 ms to tell it from a double click, which still edits the text.
+- **Margin.** The viewer clips only the video, not the frame round it, so outlines can show outside the edge. A full-frame selection's outline stands 4 px off the edge, and the frames sit on a dotted canvas with more room round them.
+- **Tested.** Typecheck. In a headless board frame on kmo-avoda at frame 249: the stack at the centre is the veil, then the phone's layers. Four clicks on one spot step down through them, a hover over the veil reports the phone as "under", and a click elsewhere goes back to the topmost. The desk's own look (margin, list, labels) has not been checked in a browser.
+
+### Removed: the "Your move" row on the dashboard
+- **Why.** The user didn't want the row of cards under the brief box (Pitch waiting for you, First look ready, Agent working).
+- **What.** `Moves` is gone from `src/desk/Dashboard.tsx`, with its styles in `studio.css`; the library comes straight after the brief (spec.md §10.1). The same projects still show their state on their library cards, and a pitch is answered in its project.
+
 ### Changed: queue folders carry the brand
 - **Why.** The user wanted each ad in `queue/` named with its brand, `<date>-<brand>-<slug>`, so it is easy to tell apart and find later, and work that is no brand's ad named with a label that says what it is.
 - **The rule** (spec.md §7.4, `ad-agent.md` step 3). A new folder is `queue/<date>-<brand>-<slug>/`, the brand as its folder in `brands/`; non-brand work takes one plain word (`benchmark`). `scripts/lib/queue.ts` has `folderParts()` and `folderSlug()`, which read the brand and slug back (longest kit name first, so a kit name with a dash works), and `queueFolder()` finds both the new names and older `<date>-<slug>` ones. The desk, `publish`, `eval` and `brandFor()` use them in place of `folder.slice(11)`; the desk falls back to the folder's brand when a pitch has no `brand:` line.

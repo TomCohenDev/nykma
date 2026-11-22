@@ -175,9 +175,13 @@ export function Chat({ query, title, subtitle, quick = [], chips = [], onRemoveC
   useEffect(() => input.current?.focus(), [focusKey]);
 
   const size = runs.reduce((sum, run) => sum + run.log.length + (run.partial?.length ?? 0), runs.length);
+  // New lines keep the chat at the bottom, unless you're reading up in it or selecting its text.
+  const selecting = useRef(false);
   useLayoutEffect(() => {
     const box = scroller.current;
-    if (box && pinned.current) box.scrollTop = box.scrollHeight;
+    const selection = getSelection();
+    const holdsSelection = selection && !selection.isCollapsed && box?.contains(selection.anchorNode);
+    if (box && pinned.current && !selecting.current && !holdsSelection) box.scrollTop = box.scrollHeight;
   }, [size]);
 
   useLayoutEffect(() => {
@@ -259,10 +263,19 @@ export function Chat({ query, title, subtitle, quick = [], chips = [], onRemoveC
         )}
       </header>
 
-      <div className="chat-scroll" ref={scroller} onScroll={(event) => {
-        const box = event.currentTarget;
-        pinned.current = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
-      }}>
+      <div
+        className="chat-scroll"
+        ref={scroller}
+        onScroll={(event) => {
+          const box = event.currentTarget;
+          pinned.current = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+        }}
+        onPointerDown={() => {
+          selecting.current = true;
+          const done = () => ((selecting.current = false), window.removeEventListener("pointerup", done));
+          window.addEventListener("pointerup", done);
+        }}
+      >
         {runs.length ? (
           <ol className="turns">
             {runs.map((run) => (
@@ -274,7 +287,7 @@ export function Chat({ query, title, subtitle, quick = [], chips = [], onRemoveC
         )}
       </div>
 
-      <footer className="composer">
+      <footer className="chat-composer">
         {quick.length > 0 && (
           <div className="quick">
             {quick.map((item) => (

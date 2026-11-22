@@ -49,11 +49,6 @@ export function Shell({ page, state, go, children }: { page: "projects" | "brand
             </li>
           ))}
         </ul>
-        <div className="sidebar-foot">
-          <a href="/" target="_blank" rel="noreferrer">
-            Scrubbing preview ↗
-          </a>
-        </div>
       </nav>
       <main className="shell-main">{children}</main>
     </div>
@@ -117,7 +112,7 @@ function Composer({ brands, go, focusKey }: { brands: BrandKit[]; go: Go; focusK
   };
   const kit = brands.find((item) => item.name === brand);
   return (
-    <form className="composer" onSubmit={submit}>
+    <form className="brief" onSubmit={submit}>
       <textarea
         ref={box}
         dir="auto"
@@ -129,7 +124,7 @@ function Composer({ brands, go, focusKey }: { brands: BrandKit[]; go: Go; focusK
         }}
         placeholder="What should the next ad be about? A 15-second ad that shows the free plan solving one real homework problem…"
       />
-      <div className="composer-opts">
+      <div className="brief-opts">
         <label className="opt">
           <span className="swatch-dot" style={{ background: kit?.colours[3] ?? kit?.colours[0] ?? "#555" }} />
           <select value={brand} onChange={(event) => setBrand(event.target.value)} aria-label="Brand">
@@ -164,7 +159,7 @@ function Composer({ brands, go, focusKey }: { brands: BrandKit[]; go: Go; focusK
             Cover image
           </label>
         )}
-        <span className="composer-hint">{pitch ? "A pitch costs a few cents. Nothing is built until you say go." : "No pitch: the agent builds straight away and stops at the first look."}</span>
+        <span className="brief-hint">{pitch ? "" : "No pitch: the agent builds straight away and stops at the first look."}</span>
         <button className="primary" disabled={!text.trim() || sending}>
           {sending ? "Starting…" : pitch ? "Pitch it" : "Build it"} <kbd>Ctrl ↵</kbd>
         </button>
@@ -329,77 +324,6 @@ function Poster({ project, ratio, height = CARD_H }: { project: Project; ratio: 
 
 const FILTERS = ["all", "pitch", "first-look", "checked", "ready", "dropped", "code"] as const;
 
-/** What's waiting for you: pitches to answer, first looks to watch, ads to post, and what the agent is doing. */
-function Moves({ projects, go }: { projects: Project[]; go: Go }) {
-  const [sent, setSent] = useState<Record<string, string>>({});
-  const say = (project: Project, text: string) => {
-    setSent((now) => ({ ...now, [project.key]: text }));
-    post("/api/ask", { folder: project.folder, text }).then(() => go(`#/p/${encodeURIComponent(project.key)}`));
-  };
-  const live = projects.filter((project) => project.state !== "dropped" && project.state !== "code");
-  const moves = [
-    ...live.filter((project) => project.running).map((project) => ({ project, kind: "working" as const })),
-    ...live.filter((project) => !project.running && project.state === "pitch" && project.ad?.idea).map((project) => ({ project, kind: "pitch" as const })),
-    ...live.filter((project) => !project.running && project.state === "first-look").map((project) => ({ project, kind: "look" as const })),
-  ]
-    .sort((a, b) => b.project.updated - a.project.updated)
-    .slice(0, 4);
-  if (!moves.length) return null;
-  const label = { working: "Agent working", pitch: "Pitch waiting for you", look: "First look ready" };
-  return (
-    <section className="moves" aria-label="Your move">
-      {moves.map(({ project, kind }) => {
-        const ratio = ratioOf(project);
-        const open = () => go(`#/p/${encodeURIComponent(project.key)}`);
-        return (
-          <div key={project.key} className={`move ${kind}`}>
-            <button className="move-thumb" style={{ width: Math.round(96 * (SIZES[ratio].width / SIZES[ratio].height)) }} onClick={open} tabIndex={-1}>
-              <Poster project={project} ratio={ratio} height={96} />
-            </button>
-            <div className="move-body">
-              <span className="move-kind">
-                <span className={kind === "working" ? "working-dot" : "dot"} />
-                {label[kind]}
-              </span>
-              <button className="move-name" onClick={open}>
-                {project.slug}
-              </button>
-              <p className="move-text" dir="auto">
-                {kind === "pitch" ? project.ad?.idea.split("\n")[0] : [project.brand, ago(project.updated)].filter(Boolean).join(" · ")}
-              </p>
-              <div className="move-acts">
-                {kind === "pitch" &&
-                  (sent[project.key] ? (
-                    <span className="move-sent">Sent: {sent[project.key]}</span>
-                  ) : (
-                    <>
-                      <button className="primary small" onClick={() => say(project, "go")}>
-                        Go
-                      </button>
-                      <button className="ghost small boxed" onClick={() => say(project, "another idea")}>
-                        Another idea
-                      </button>
-                    </>
-                  ))}
-                {kind === "look" && (
-                  <button className="ghost small boxed" onClick={open}>
-                    Watch it
-                  </button>
-                )}
-                {kind === "working" && (
-                  <button className="ghost small boxed" onClick={open}>
-                    Follow along
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </section>
-  );
-}
-
 export function ProjectsPage({ state, projects, go }: { state: State; projects: Project[]; go: Go }) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("all");
   const [brand, setBrand] = useState("");
@@ -426,7 +350,6 @@ export function ProjectsPage({ state, projects, go }: { state: State; projects: 
         </button>
       </header>
       <Composer brands={state.brands.filter((kit) => kit.made)} go={go} focusKey={focusKey} />
-      <Moves projects={projects} go={go} />
       <div className="filters">
         {FILTERS.filter((key) => key === "all" || counts[key]).map((key) => (
           <button key={key} aria-pressed={filter === key} onClick={() => setFilter(key)}>

@@ -11,8 +11,10 @@ import { HistoryPanel, useHistory } from "./History";
 import { Inspector, placementOf, saveKnob, useElementSource, type EditSource, type Tune } from "./Inspector";
 import { PublishDialog } from "./Publish";
 import { Scrubber, Timeline, timecode, type Clip } from "./Timeline";
-import { Viewer, type Picked, type Transform, type ViewerApi } from "./Viewer";
-import { BackIcon, CloseIcon, FileIcon, FilmIcon, FrameIcon, ImageIcon, PlayIcon, PauseIcon, PlusIcon, RenderIcon, SendIcon, SparkIcon } from "./icons";
+import { Viewer, type Layer, type Picked, type Sample, type Snap, type Transform, type ViewerApi } from "./Viewer";
+import { AddPanel, type AddItem } from "./AddPanel";
+import { LayersPanel } from "./LayersPanel";
+import { BackIcon, CloseIcon, FileIcon, FilmIcon, FrameIcon, ImageIcon, LayersIcon, PlayIcon, PauseIcon, PlusIcon, RenderIcon, SendIcon, SparkIcon } from "./icons";
 import { Markdown } from "./md";
 import { imageSeconds, type Story, type StoryImage } from "../engine/ad";
 import type { StoryTransition } from "../engine/transitions";
@@ -238,9 +240,31 @@ export function ProjectView({ project, run, go, refresh, registryError }: Props)
   const [playing, setPlaying] = useState(false);
   const [picking, setPicking] = useState(true);
   const [safe, setSafe] = useState(() => localStorage.getItem("nykma.safe") === "1");
+  // Snapping while dragging, and what to: remembered on this browser.
+  const [snap, setSnap] = useState<Snap>(() => {
+    try {
+      return { on: true, frame: true, safe: true, elements: true, ...JSON.parse(localStorage.getItem("nykma.snap") ?? "{}") };
+    } catch {
+      return { on: true, frame: true, safe: true, elements: true };
+    }
+  });
+  const [snapMenu, setSnapMenu] = useState(false);
+  useEffect(() => {
+    try {
+      localStorage.setItem("nykma.snap", JSON.stringify(snap));
+    } catch {
+      /* fine without it */
+    }
+  }, [snap]);
   const [selection, setSelection] = useState<Selection>(null);
   const [rightTab, setRightTab] = useState<"inspect" | "effects" | "history" | "agent">(() => (project?.running || run || !project || project.state === "pitch" ? "agent" : "inspect"));
-  const [leftTab, setLeftTab] = useState<"scenes" | "media" | "files">("scenes");
+  const [leftTab, setLeftTab] = useState<"scenes" | "layers" | "add" | "media" | "files">("scenes");
+  // The Layers tab: the selectable elements on the frame under the playhead, read from the viewer.
+  const [layers, setLayers] = useState<Layer[] | null>(null);
+  // The Add tab: a tile being dragged, the ad's look under the playhead, and a new element waiting to be seen once.
+  const [adding, setAdding] = useState(false);
+  const [sample, setSample] = useState<Sample | null>(null);
+  const placing = useRef<{ loc: string; hash: string; x: number; y: number } | null>(null);
   const [reader, setReader] = useState<string>();
   const [publishing, setPublishing] = useState(false);
   const [note, setNote] = useState<string>();
@@ -482,6 +506,100 @@ export function ProjectView({ project, run, go, refresh, registryError }: Props)
     setSourceKey((key) => key + 1);
     refresh();
   };
+  /* ── Adding an element (spec.md §10.14): written into the scene's code at the playhead ── */
+  const sceneHere = (() => {
+    if (!take || !project) return "Open an ad that has code to add to it.";
+    const i = clipAt(frame);
+    const clip = clips[i];
+    if (!clip || clip.kind !== "scene") return "Move the playhead onto a scene from the code: an image or a clip can't hold elements.";
+    return { name: clip.name, clip, i };
+  })();
+  useEffect(() => {
+    if (leftTab !== "add" || playing || !take) return;
+    const timer = setTimeout(() => void viewerApi.current?.sample(ratioShown).then(setSample), 250);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leftTab, frame, playing, ratioShown, reloadKey, sourceKey, historyKey]);
+  // The Layers tab reads the frame when the playhead stops, and again every so often for changes made elsewhere.
+  useEffect(() => {
+    if (leftTab !== "layers" || playing || !take) return;
+    let last = "";
+    const read = () =>
+      void viewerApi.current?.layers(ratioShown).then((next) => {
+        const key = JSON.stringify(next);
+        if (key !== last) (last = key), setLayers(next);
+      });
+    const first = setTimeout(read, 120);
+    const every = setInterval(read, 1500);
+    return () => (clearTimeout(first), clearInterval(every));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leftTab, frame, playing, ratioShown, reloadKey, take?.name]);
+  const addElement = async (item: AddItem, ratio: Ratio = ratioShown, x = 0.5, y = 0.5) => {
+    if (typeof sceneHere === "string" || !project || !take) return setError(typeof sceneHere === "string" ? sceneHere : "");
+    setPlaying(false);
+    const { clip, i } = sceneHere;
+    const look = (await viewerApi.current?.sample(ratio)) ?? sample;
+    const head = look?.headline;
+    const within = (value: number, low: number, high: number) => Math.round(Math.min(Math.max(value, low), high));
+    const size = head ? (item.size === "text" ? within(head.fontSize * 0.5, 40, 84) : within(head.fontSize, 64, 160)) : item.size === "text" ? 56 : 96;
+    try {
+      const reply = await post<{ loc: string; hash: string }>("/api/source/add", {
+        slug: project.slug,
+        scene: clip.id,
+        at: frame - starts[i] + (clip.trimIn ?? 0),
+        length: clip.full ?? (clip.trimIn ?? 0) + clip.frames,
+        fps,
+        x,
+        y,
+        kind: item.kind,
+        element: item.element,
+        dir: take.dir,
+        style: {
+          fontFamily: head?.fontFamily,
+          fontWeight: head?.fontWeight,
+          fontSize: size,
+          color: head?.color,
+          // Its spacing as a share of its size, so it holds at the new size.
+          letterSpacing: head?.letterSpacing?.endsWith("px") && head.fontSize ? `${Math.round((parseFloat(head.letterSpacing) / head.fontSize) * 1000) / 1000}em` : undefined,
+          accent: look?.accent,
+          paper: look?.paper,
+        },
+      });
+      placing.current = { loc: reply.loc, hash: reply.hash, x: x * SIZES[ratio].width, y: y * SIZES[ratio].height };
+      setPicking(true);
+      setSelection({ kind: "el", ratio, stale: true, el: { loc: reply.loc, knobs: [], tag: "div", text: "", box: { x: 0, y: 0, width: 0, height: 0 }, font: "", size: 0, weight: "", color: "", knobInfo: {}, path: [], svg: false, local: 1, computed: {} } });
+      setRightTab("inspect");
+      if (item.kind === "text" || item.kind === "label") setTextFocus((key) => key + 1);
+      changed();
+    } catch (failure) {
+      setError((failure as Error).message);
+    }
+  };
+  /** A new element whose parent isn't the whole frame lands off the drop point; one translate puts it back. */
+  const settlePlaced = (el: Picked) => {
+    const want = placing.current;
+    if (!want || el.loc !== want.loc || !el.box.width) return;
+    placing.current = null;
+    const dx = want.x - (el.box.x + el.box.width / 2);
+    const dy = want.y - (el.box.y + el.box.height / 2);
+    if (Math.abs(dx) <= 3 && Math.abs(dy) <= 3) return;
+    const k = el.local || 1;
+    post("/api/source/edit", { loc: want.loc, hash: want.hash, edit: { kind: "style", name: "translate", value: `${Math.round(dx / k)}px ${Math.round(dy / k)}px` }, label: "Put it where it was dropped" }).then(
+      () => (loadSource(), changed()),
+      () => {},
+    );
+  };
+  const removeSelected = async () => {
+    if (!source?.removable || selection?.kind !== "el") return;
+    try {
+      await post("/api/source/edit", { loc: source.loc, hash: source.hash, edit: { kind: "remove" } });
+      setSelection(null);
+      changed();
+    } catch (failure) {
+      setError((failure as Error).message);
+    }
+  };
+
   const preview = (style: Record<string, string> | null, restore = true) => {
     if (!picked) return;
     if (style) viewerApi.current?.preview(picked.loc, style);
@@ -557,6 +675,7 @@ export function ProjectView({ project, run, go, refresh, registryError }: Props)
     else if (event.key === "End") seek(total - 1);
     else if (event.key.toLowerCase() === "v" && !event.ctrlKey && !event.metaKey) setPicking((on) => !on);
     else if (event.key === "Escape") setSelection(null);
+    else if (event.key === "Delete" && selection?.kind === "el" && source?.removable) void removeSelected();
     else if ((event.key.toLowerCase() === "z" || event.key.toLowerCase() === "y") && (event.ctrlKey || event.metaKey))
       void travel(event.key.toLowerCase() === "y" || event.shiftKey ? "redo" : "undo");
     else return;
@@ -658,12 +777,15 @@ export function ProjectView({ project, run, go, refresh, registryError }: Props)
 
       <aside className="studio-left">
         <div className="ptabs">
-          {(["scenes", "media", "files"] as const).map((tab) => (
-            <button key={tab} className={`ptab${leftTab === tab ? " on" : ""}`} onClick={() => setLeftTab(tab)}>
-              {tab === "scenes" ? <FilmIcon size={14} /> : tab === "media" ? <ImageIcon size={14} /> : <FileIcon size={14} />}
-              {tab === "scenes" ? (take?.kind === "asset" ? "Images" : "Scenes") : tab === "media" ? "Media" : "Files"}
-            </button>
-          ))}
+          {(["scenes", "layers", "add", "media", "files"] as const).map((tab) => {
+            const label = tab === "scenes" ? (take?.kind === "asset" ? "Images" : "Scenes") : tab === "layers" ? "Layers" : tab === "add" ? "Add" : tab === "media" ? "Media" : "Files";
+            return (
+              <button key={tab} className={`ptab${leftTab === tab ? " on" : ""}`} onClick={() => setLeftTab(tab)} title={label} aria-label={label}>
+                {tab === "scenes" ? <FilmIcon size={14} /> : tab === "layers" ? <LayersIcon size={14} /> : tab === "add" ? <PlusIcon size={14} /> : tab === "media" ? <ImageIcon size={14} /> : <FileIcon size={14} />}
+                <span className="ptab-label">{label}</span>
+              </button>
+            );
+          })}
         </div>
         <div className="studio-left-body">
           {leftTab === "scenes" && (
@@ -739,6 +861,29 @@ export function ProjectView({ project, run, go, refresh, registryError }: Props)
               {!info && project && <p className="panel-empty">The ad isn't in the registry yet, so the timeline shows the pitch's storyboard.</p>}
               {registryError && <p className="panel-error">The registry didn't load: {registryError}</p>}
             </>
+          )}
+          {leftTab === "layers" && (
+            <LayersPanel
+              layers={take ? layers : null}
+              aspect={SIZES[ratioShown].width / SIZES[ratioShown].height}
+              selectedLoc={selection?.kind === "el" ? selection.el.loc : undefined}
+              onPick={(loc) => {
+                setPicking(true);
+                viewerApi.current?.pickLoc(loc, ratioShown);
+              }}
+              onHover={(loc) => viewerApi.current?.hoverLoc(loc, ratioShown)}
+            />
+          )}
+          {leftTab === "add" && (
+            <AddPanel
+              slug={take ? project?.slug : undefined}
+              version={historyKey}
+              sample={sample}
+              scene={sceneHere}
+              onDragging={setAdding}
+              onAdd={(item) => void addElement(item)}
+              onAsk={say}
+            />
           )}
           {leftTab === "media" && project && (
             <GeneratedPanel
@@ -826,6 +971,31 @@ Change its prompt or settings in public/ads/${project.slug}/gen.json to match, r
               Safe areas
             </button>
           </div>
+          <div className="seg snap-seg">
+            <button aria-pressed={snap.on} disabled={!take} onClick={() => setSnap((now) => ({ ...now, on: !now.on }))} title="Snap a dragged element to the frame, the safe areas and other elements (hold Ctrl to drag freely)">
+              Snap
+            </button>
+            <button className="snap-more" aria-expanded={snapMenu} disabled={!take} onClick={() => setSnapMenu((open) => !open)} title="What to snap to">
+              ▾
+            </button>
+            {snapMenu && (
+              <div className="snap-menu" role="menu" onPointerLeave={() => setSnapMenu(false)}>
+                {(
+                  [
+                    ["frame", "The frame's edges and centre"],
+                    ["safe", "The safe areas"],
+                    ["elements", "Other elements' edges and centres"],
+                  ] as const
+                ).map(([key, label]) => (
+                  <label key={key}>
+                    <input type="checkbox" checked={snap[key]} onChange={(event) => setSnap((now) => ({ ...now, [key]: event.target.checked, on: true }))} />
+                    {label}
+                  </label>
+                ))}
+                <p>Hold Ctrl while dragging to place it freely.</p>
+              </div>
+            )}
+          </div>
         </div>
         {take && take.frames > 0 ? (
           <Viewer
@@ -835,6 +1005,7 @@ Change its prompt or settings in public/ads/${project.slug}/gen.json to match, r
             playing={playing}
             picking={picking}
             safe={safe}
+            snap={snap}
             reloadKey={reloadKey}
             selectedLoc={selection?.kind === "el" ? selection.el.loc : undefined}
             onFrame={setFrame}
@@ -843,6 +1014,7 @@ Change its prompt or settings in public/ads/${project.slug}/gen.json to match, r
             onSelected={(el) => {
               // After a breadcrumb pick only the loc is known; the viewer's next report fills in the rest.
               if (selection?.kind === "el" && selection.stale && el.loc === selection.el.loc) setSelection({ ...selection, el, stale: false });
+              settlePlaced(el);
             }}
             onPick={(el, ratio) => {
               if (!el) return setSelection(null);
@@ -854,6 +1026,15 @@ Change its prompt or settings in public/ads/${project.slug}/gen.json to match, r
             placement={placement}
             onTransform={transform}
             onEditText={() => (setRightTab("inspect"), setTextFocus((key) => key + 1))}
+            adding={adding}
+            onAdd={(ratio, x, y, what) => {
+              setAdding(false);
+              try {
+                void addElement(JSON.parse(what) as AddItem, ratio, x, y);
+              } catch {
+                /* not something the Add tab dragged */
+              }
+            }}
           />
         ) : take ? (
           <div className="viewer-area empty-viewer">
@@ -962,6 +1143,7 @@ Change its prompt or settings in public/ads/${project.slug}/gen.json to match, r
             onToggleStory={toggleStory}
             onRemoveImage={removeImage}
             onEdited={() => setError("")}
+            onRemove={source?.removable ? () => void removeSelected() : undefined}
             onlyOne={story.order.length <= 1}
           />
         </div>
