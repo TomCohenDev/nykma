@@ -1,5 +1,5 @@
 // bun run validate <id> [--brand <brand>]   Free checks on a rendered ad. A slug checks every ratio and take; an id with a
-// ratio checks that one. Writes queue/<date>-<slug>/validate.md (out/<slug>/ with no queue folder). Exits 1 on any failure.
+// ratio checks that one. Writes queue/<date>-<brand>-<slug>/validate.md (out/<slug>/ with no queue folder). Exits 1 on any failure.
 //
 // bun run validate <id> --layout   Only the checks that read the page (Layout, and Hebrew direction and fonts), with no
 // render needed: what the agent runs on its own before a first look. Writes out/<slug>/layout.md, not the queue's
@@ -768,7 +768,7 @@ const folder = queueFolder(slug);
 const { brand, asked } = brandFor(folder, values.brand as string | undefined);
 const skipped: string[] = [];
 
-if (!folder) skipped.push(`no queue/<date>-${slug}/ folder, so post.md, the README's claim table and Deliberate lines weren't read. Report goes in out/${slug}/.`);
+if (!folder) skipped.push(`no queue/<date>-<brand>-${slug}/ folder, so post.md, the README's claim table and Deliberate lines weren't read. Report goes in out/${slug}/.`);
 if (!brand) skipped.push(`${asked ? `brand "${asked}" isn't in brands/` : "no brand named in pitch.md or README.md"}, so Brand and Truth checks that need brand.md didn't run.`);
 
 const scratch = join(outDir(slug), ".validate");

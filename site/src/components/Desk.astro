@@ -22,7 +22,7 @@ const chapters: { name: string; steps: [string, string][]; term: [Kind, string][
       ["in", "make an ad about the free plan for myapp"],
       ["dim", "reading brands/myapp/brand.md and the ideas used before"],
       ["out", "three explorers, six ideas, picked one"],
-      ["ok", "pitch ready: queue/2026-11-22-free-plan/pitch.md, animatic.mp4"],
+      ["ok", "pitch ready: queue/2026-11-22-myapp-free-plan/pitch.md, animatic.mp4"],
       ["dim", "waiting for your go"],
     ],
   },
@@ -65,7 +65,7 @@ const chapters: { name: string; steps: [string, string][]; term: [Kind, string][
     ],
     term: [
       ["sh", 'bun run publish free-plan --to instagram,youtube --at "2026-11-27 18:00"'],
-      ["dim", "Scheduling for Fri 27 Nov 18:00: queue/2026-11-22-free-plan/"],
+      ["dim", "Scheduling for Fri 27 Nov 18:00: queue/2026-11-22-myapp-free-plan/"],
       ["dim", "  Instagram @myapp · free-plan-9x16.mp4 · caption from post.md"],
       ["dim", "  YouTube myapp · free-plan-16x9.mp4 · title and caption from post.md"],
       ["ok", "Approved 2 posts. The desk posts them at 18:00."],
@@ -638,16 +638,42 @@ const nav = [
     font-size: 11.5px;
     transform: translateX(-20px);
   }
+  /* Between chapters: the two cross-fade, and the cursor glides on to where the next one starts. */
   .dk-ch {
     position: absolute;
     left: 0;
     right: 0;
     top: 34px;
     bottom: 0;
-    display: none;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+      visibility 0s linear 0.8s;
   }
   .dk-ch.is-active {
-    display: block;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+      visibility 0s;
+  }
+  .dk-steps.is-in,
+  .dk-term.is-in {
+    animation: dk-fade 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  @keyframes dk-fade {
+    from {
+      opacity: 0;
+    }
+  }
+  .is-still .dk-ch,
+  .is-still .dk-ch.is-active {
+    transition: none;
+  }
+  .is-still .dk-steps.is-in,
+  .is-still .dk-term.is-in {
+    animation: none;
   }
 
   /* the cursor */
@@ -660,6 +686,7 @@ const nav = [
     height: 0;
     pointer-events: none;
     will-change: transform;
+    transition: opacity 0.25s ease;
   }
   .dk-cursor svg {
     position: absolute;

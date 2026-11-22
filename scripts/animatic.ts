@@ -1,4 +1,4 @@
-// bun run animatic <slug> [--ratio 9x16]   Turns the table in queue/<date>-<slug>/pitch.md into queue/.../animatic.mp4.
+// bun run animatic <slug> [--ratio 9x16]   Turns the table in queue/<date>-<brand>-<slug>/pitch.md into queue/.../animatic.mp4.
 // Free: images with a slow push-in, captions in the brand font, OS speech for the voice, a click on each beat.
 import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -226,7 +226,7 @@ const shape = (ratio ?? "16x9") as Ratio;
 if (!RATIOS.includes(shape)) throw new Error(`no ratio "${ratio}". Have: ${RATIOS.join(", ")}`);
 
 const folder = queueFolder(slug);
-if (!folder) throw new Error(`no queue/<date>-${slug}/ folder. Write the pitch there first; queue/_template/ has the format.`);
+if (!folder) throw new Error(`no queue/<date>-<brand>-${slug}/ folder. Write the pitch there first; queue/_template/ has the format.`);
 const pitch = readPitch(folder);
 if (!pitch) throw new Error(`${folder} has no pitch.md`);
 if (pitch.problems.length) throw new Error(`pitch.md:\n  ${pitch.problems.join("\n  ")}`);

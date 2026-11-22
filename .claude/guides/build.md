@@ -48,4 +48,4 @@ Stills can't show motion. Check it on a contact sheet (`bun run sheet <id>`): on
 
 ## First look
 
-When the build looks right on stills and `validate --layout` passes, run `bun run render <slug> --ratio all` (every ratio the registry line lists), copy everything it wrote (the MP4s, the `-silent.mp4` videos, the MP3, and the thumbnails when the ad has them) to `queue/<YYYY-MM-DD>-<slug>/`, reply with the paths, and stop.
+When the build looks right on stills and `validate --layout` passes, run `bun run render <slug> --ratio all` (every ratio the registry line lists), copy everything it wrote (the MP4s, the `-silent.mp4` videos, the MP3, and the thumbnails when the ad has them) to `queue/<YYYY-MM-DD>-<brand>-<slug>/`, reply with the paths, and stop.

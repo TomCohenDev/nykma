@@ -88,7 +88,7 @@ nykma/
 ├─ scripts/                  # render, stills, sheet, animatic, review, validate, hand-trace, brand-check, history, eval, audio/*.mjs
 ├─ public/                   # shared sfx, fonts; public/ads/<slug>/ for an ad's audio, images and copied brand files; gen/ inside it is gitignored
 ├─ queue/_template/          # the pitch.md, README.md and post.md every ad starts from
-├─ queue/<date>-<slug>/      # hand-off (§7.4): pitch.md, README.md, post.md, review.md, validate.md, renders (mp4s gitignored)
+├─ queue/<date>-<brand>-<slug>/      # hand-off (§7.4): pitch.md, README.md, post.md, review.md, validate.md, renders (mp4s gitignored)
 └─ out/                      # scratch renders and stills (gitignored)
 ```
 
@@ -376,12 +376,12 @@ you: "make an ad about X for <brand>"
 you: "go" / "change the opening" / "try another idea"
  ─▶ build ─▶ look at stills ─▶ render ─▶ first look ─▶ stops   (no checks yet)
 you: "change the ending" ─▶ the agent fixes ─▶ re-render ─▶ first look again
-you: "check it" ─▶ reviewer ─▶ adjust ─▶ re-render ─▶ validate (free) ─▶ queue/<date>-<slug>/
-you: "skip the checks" ─▶ queue/<date>-<slug>/, marked unchecked
+you: "check it" ─▶ reviewer ─▶ adjust ─▶ re-render ─▶ validate (free) ─▶ queue/<date>-<brand>-<slug>/
+you: "skip the checks" ─▶ queue/<date>-<brand>-<slug>/, marked unchecked
 you: "drop it" ─▶ stops, nothing more is spent
 ```
 
-### 7.1 Pitch first (`queue/<date>-<slug>/pitch.md`)
+### 7.1 Pitch first (`queue/<date>-<brand>-<slug>/pitch.md`)
 
 **Before the pitch, the idea is looked for in different places.** Language models given the same brief tend to land on the same likely idea, and asking one context for "something original" changes little. Sampling several independent ideas and choosing afterwards does. So:
 
@@ -427,7 +427,7 @@ Once you say go:
 - It checks its own work with stills and contact sheets (looking at them, as in mathbooklm-ad) before any full render.
 - ElevenLabs runs only within the credits shown in the pitch. Anything beyond that, it asks first.
 
-**First look: the agent stops again.** It runs `bun run validate <slug> --layout` first (the Layout and Hebrew checks only, straight from the code with no render, free and a few seconds, written to `out/<slug>/layout.md`) and fixes what fails: text over text, outside the safe area, too small for a phone. Then it renders every ratio, copies the MP4s to `queue/<date>-<slug>/`, and replies with their paths. That layout pass is the agent's own look, not the checks: neither the reviewer nor the full validators have run. You watch the real ad before any time goes into checking it, because checks are wasted on an ad you'd change or drop. You answer with one of:
+**First look: the agent stops again.** It runs `bun run validate <slug> --layout` first (the Layout and Hebrew checks only, straight from the code with no render, free and a few seconds, written to `out/<slug>/layout.md`) and fixes what fails: text over text, outside the safe area, too small for a phone. Then it renders every ratio, copies the MP4s to `queue/<date>-<brand>-<slug>/`, and replies with their paths. That layout pass is the agent's own look, not the checks: neither the reviewer nor the full validators have run. You watch the real ad before any time goes into checking it, because checks are wasted on an ad you'd change or drop. You answer with one of:
 
 - **Notes** ("change the ending"): the agent fixes the ad, re-renders only the ratios that changed, and stops at a new first look. There's no limit on rounds.
 - **"Check it"**: the reviewer and validators run (§7.3), and the ad goes to hand-off (§7.4).
@@ -489,7 +489,9 @@ A failure in Render, Layout or Brand can be the idea rather than a mistake, like
 
 You can run either check yourself at any time, on any ad.
 
-### 7.4 Hand-off (`queue/<date>-<slug>/`), as in mathbooklm's `marketing/queue/`
+### 7.4 Hand-off (`queue/<date>-<brand>-<slug>/`), as in mathbooklm's `marketing/queue/`
+
+The folder is named for the brand, so ads can be found by brand later: `<date>-<brand>-<slug>`, with the kit's folder name from `brands/` (`2026-11-10-gomlin-madrich`). Work that is no brand's ad takes one plain word for what it is in its place (`2026-11-04-benchmark-bakeoff`). The scripts read the slug back with `folderSlug()` in `scripts/lib/queue.ts`, which matches the longest kit name first, and still find an older `<date>-<slug>` folder.
 
 - **The renders**, every ratio and take, each as `<id>.mp4` with sound and `<id>-silent.mp4` with none, plus the sound alone as `<slug>[-<take>].mp3`. An ad with no sound has no MP3. An ad with a thumbnail adds `<id>-thumbnail.png` and `.jpg` for each (§7.5).
 - `README.md`**:**
@@ -785,8 +787,8 @@ The page also shows whether the ElevenLabs key, Whisper, yt-dlp, OpenCV and ffmp
 
 Every ad is built with nykma, by `ad-agent`. From 2026-11-05 to 2026-11-08 a brief could also start a second agent that built variation B with HyperFrames (HeyGen's HTML and GSAP renderer). It was removed because the two tests found nothing it did better that a rule couldn't do:
 
-- **A frame-for-frame port** (`queue/2026-11-04-hyperframes-vs-nykma/`): the same picture (SSIM 0.99), sound and render time, with 1.4× the code, files 1.8× the size, less deterministic renders and a silent RTL bug. The hardest part, the app's UI, still ran on nykma's function-of-time code inside it.
-- **A blind bake-off** (`queue/2026-11-04-bakeoff/`): time, tokens, code and render time within about 20%. nykma's ad had the better idea and sound. HyperFrames' had the cleaner layout, because its skills gave it layout rules (safe areas, read times) and it checked them while it built.
+- **A frame-for-frame port** (`queue/2026-11-04-benchmark-hyperframes-vs-nykma/`): the same picture (SSIM 0.99), sound and render time, with 1.4× the code, files 1.8× the size, less deterministic renders and a silent RTL bug. The hardest part, the app's UI, still ran on nykma's function-of-time code inside it.
+- **A blind bake-off** (`queue/2026-11-04-benchmark-bakeoff/`): time, tokens, code and render time within about 20%. nykma's ad had the better idea and sound. HyperFrames' had the cleaner layout, because its skills gave it layout rules (safe areas, read times) and it checked them while it built.
 - **Outside the desk:** variation B had no board, story, scenes, `review` or `validate`, and it cost about twice the tokens per brief.
 
 So the combination is nykma's engine with HyperFrames' craft rules, which are now in `ad-agent.md` ("Craft"): frame 0 as the thumbnail, one real task from hook to payoff, time to read, nothing dead or piled up, phone-readable sizes and the same safe areas `validate` checks, and motion that lands and holds. The two experiments stay in `queue/` and `experiments/hyperframes/` as the record. The second thing worth taking, a transparent WebM from `render`, waits for an ad that needs it (§13).

@@ -4,6 +4,13 @@ Newest first. `spec.md` says how nykma works now. This file says what changed an
 
 ## 2026-11-22
 
+### Changed: queue folders carry the brand
+- **Why.** The user wanted each ad in `queue/` named with its brand, `<date>-<brand>-<slug>`, so it is easy to tell apart and find later, and work that is no brand's ad named with a label that says what it is.
+- **The rule** (spec.md §7.4, `ad-agent.md` step 3). A new folder is `queue/<date>-<brand>-<slug>/`, the brand as its folder in `brands/`; non-brand work takes one plain word (`benchmark`). `scripts/lib/queue.ts` has `folderParts()` and `folderSlug()`, which read the brand and slug back (longest kit name first, so a kit name with a dash works), and `queueFolder()` finds both the new names and older `<date>-<slug>` ones. The desk, `publish`, `eval` and `brandFor()` use them in place of `folder.slice(11)`; the desk falls back to the folder's brand when a pitch has no `brand:` line.
+- **Renamed.** All 44 existing folders, with the brand from each pitch or README. Two MathbookLM folders without a `brand:` line are mathbooklm, and the two HyperFrames comparisons are `benchmark`. Paths written inside the folders, the ads' code comments and spec.md point at the new names; older changelog entries and eval results keep the paths they had.
+- **Site.** The made-up demo on nobodyknowsmyapp.com shows `queue/2026-11-19-myapp-free-plan/` (and `-22-`), in the new form.
+- **Tested.** Typecheck; `folderParts` and `queueFolder` on madrich, bake-nykma, whos-sarah, pag-tokef, a kit name with a dash, an older `<date>-<slug>` name and a missing slug; `bun run history gomlin`.
+
 ### Changed: the desk wears nykma's brand, and the site shows the desk
 - **Why.** The user wanted the desk to take after nobodyknowsmyapp.com: red buttons instead of yellow, and the brand around it. And the site should sell the dashboard and Publishing, with ComfyUI-style demos of how nykma is used, while saying it's AI-first: everything can be done through the agent or the terminal. Then deploy it.
 - **The desk** (spec.md §10.7). The default theme is now **Ink**: the site's ink and deep greys for the panels, Paper `#F4EFE6` for text, the red Marker `#E8301F` for the accent (buttons, the playhead, the selection, the current stage), white on red. JetBrains Mono (the brand kit's font file) for timecode, code, page titles and the wordmark; Geist stays for the UI. The sidebar has nykma's icon and the site's `nykma_` wordmark with the red cursor, and the tab has the icon. Studio is unchanged.

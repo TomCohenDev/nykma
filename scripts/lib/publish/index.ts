@@ -13,7 +13,7 @@ import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, join, resolve, sep } from "node:path";
 import { home } from "../keys.ts";
-import { readIf } from "../queue.ts";
+import { folderSlug, readIf } from "../queue.ts";
 import { copyFor } from "./captions.ts";
 import { PLATFORM_INFO } from "./info.ts";
 import { begin, outcome, redirectUri } from "./oauth.ts";
@@ -95,7 +95,7 @@ export function draft(folder: string) {
   const covers = files.filter((file) => COVER.test(file));
   const postMd = readIf(join(dir, "post.md"));
   const readme = readIf(join(dir, "README.md")) ?? "";
-  const slug = folder.slice(11);
+  const slug = folderSlug(folder);
   // Generated media leaves gen.json (spec.md §6.6). The AI label starts on when there is any, and you can change it.
   const genFile = join(ROOT, "public", "ads", slug, "gen.json");
   const generated = existsSync(genFile) && /"(id|prompt)"\s*:/.test(readIf(genFile) ?? "");
@@ -285,7 +285,7 @@ export async function approve(folder: string, posts: Draft[], by = "on the desk 
     jobs.push({
       id: randomUUID(),
       folder,
-      slug: folder.slice(11),
+      slug: folderSlug(folder),
       accountId: account.id,
       provider: account.provider,
       platform: account.platform,

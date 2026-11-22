@@ -24,7 +24,7 @@ import { parseArgs } from "node:util";
 import { SECRET_ENV } from "./lib/keys.ts";
 import { INSTRUCTIONS } from "./lib/agents.ts";
 import { AGENT_ENV, ALLOWED, DENIED } from "./lib/permissions.ts";
-import { field, readIf, section } from "./lib/queue.ts";
+import { field, folderSlug, readIf, section } from "./lib/queue.ts";
 import { briefFor, readSettings, type Ratio } from "./lib/settings.ts";
 
 const ROOT = resolve(import.meta.dirname, "..");
@@ -358,7 +358,7 @@ async function evaluate(version: string) {
         if (build && folder && pitched.session && !pitched.stage.error) {
           process.stdout.write(`  ${brief.id} #${run} build … `);
           const built = await runClaude(work.tree, BUILD_NOTE, { deny: BUILD_DENIED, timeout: BUILD_TIMEOUT, resume: pitched.session });
-          const slug = folder.slice(11);
+          const slug = folderSlug(folder);
           const queued = join(work.tree, "queue", folder);
           const renders = existsSync(queued) ? readdirSync(queued).filter((name) => /\.(mp4|mp3|png)$/i.test(name)) : [];
           mkdirSync(join(out, "ads"), { recursive: true });
@@ -491,7 +491,7 @@ function traceFor(out: string, title: string) {
 }
 
 /** A run's own folders: the queue folders it made, and their ads' code. */
-const ownedBy = (made: string[]) => (path: string) => made.some((name) => path.startsWith(`queue/${name}`) || path.startsWith(`src/ads/${name.slice(11)}`));
+const ownedBy = (made: string[]) => (path: string) => made.some((name) => path.startsWith(`queue/${name}`) || path.startsWith(`src/ads/${folderSlug(name)}`));
 
 function retrace(label: string) {
   const dirs = filesUnder(join(RESULTS, label)).filter((file) => file.endsWith("meta.json")).map(dirname);
@@ -500,7 +500,7 @@ function retrace(label: string) {
     // Runs from before the shell reads were counted get them counted now.
     const log = readIf(join(dir, "events.jsonl"));
     const meta = JSON.parse(readFileSync(join(dir, "meta.json"), "utf8")) as Meta;
-    const slug = meta.folder?.slice(11) ?? readIf(join(dir, "pitch.md"))?.match(/^#\s*([^:\s]+)/)?.[1];
+    const slug = (meta.folder && folderSlug(meta.folder)) ?? readIf(join(dir, "pitch.md"))?.match(/^#\s*([^:\s]+)/)?.[1];
     if (log && slug) {
       const looked = lookedAt(log, (path) => path.includes(`-${slug}`) || path.startsWith(`src/ads/${slug}`));
       meta.oldAdsRead = looked.old;

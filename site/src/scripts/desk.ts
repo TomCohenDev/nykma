@@ -145,6 +145,11 @@ export function startDesk(root: HTMLElement) {
   const stepLists = [...root.querySelectorAll<HTMLElement>("[data-steps]")];
   const terms = [...root.querySelectorAll<HTMLElement>("[data-term]")];
   const pause = root.querySelector<HTMLButtonElement>("[data-pause]")!;
+  /** How long the change between chapters takes before the new one's clock starts, in ms. */
+  const LEAD = 800;
+  /** Where the cursor last was, and where a change between chapters started it from. */
+  let lastPos: [number, number] = [W / 2, 340];
+  let glideFrom: [number, number] | null = null;
   const termLines = terms.map((term) => [...term.querySelectorAll<HTMLElement>("[data-line]")]);
   const termPlan = termLines.map(termTimes);
 
@@ -185,7 +190,9 @@ export function startDesk(root: HTMLElement) {
     return [(box.left + box.width / 2 - frame.left) / scale + dx, (box.top + box.height / 2 - frame.top) / scale + dy];
   };
 
-  function render(ch: number, t: number) {
+  function render(ch: number, raw: number) {
+    // A change between chapters runs the clock from -LEAD: the chapter holds its first frame, only the cursor moves.
+    const t = Math.max(0, raw);
     const chapter = CHAPTERS[ch];
     const el = chapters[ch];
     for (const [from, cls, until] of chapter.sets ?? []) el.classList.toggle(cls, t >= from && (until === undefined || t < until));
@@ -239,6 +246,13 @@ export function startDesk(root: HTMLElement) {
     }
     const click = moves.filter((move) => move.click && t >= move.t && t - move.t < 500).pop();
     down ||= !!click && t - click.t < 170;
+    // While the chapters cross-fade (t < 0) the cursor glides from where it was to this chapter's first spot.
+    if (glideFrom && raw < 0) {
+      const p = inOut(clamp((raw + LEAD) / LEAD));
+      pos = [glideFrom[0] + (pos[0] - glideFrom[0]) * p, glideFrom[1] + (pos[1] - glideFrom[1]) * p];
+      down = false;
+    } else glideFrom = null;
+    lastPos = pos;
     cursor.style.transform = `translate(${pos[0].toFixed(1)}px, ${pos[1].toFixed(1)}px)`;
     if (zoomed) {
       const viewH = wrap.clientHeight / scale;
@@ -277,19 +291,39 @@ export function startDesk(root: HTMLElement) {
   let last = 0;
   let running = false;
 
-  const show = (ch: number) => {
+  // Restarts a CSS animation on an element: off, a reflow, on.
+  const replay = (el: HTMLElement, cls: string) => {
+    el.classList.remove(cls);
+    void el.offsetWidth;
+    el.classList.add(cls);
+  };
+  let leaving: ReturnType<typeof setTimeout> | undefined;
+  const show = (ch: number, animate = false) => {
+    const prev = current;
     current = ch;
+    clearTimeout(leaving);
+    chapters.forEach((el) => el.classList.remove("is-leaving"));
+    if (animate && prev !== ch) {
+      chapters[prev].classList.add("is-leaving");
+      leaving = setTimeout(() => chapters[prev].classList.remove("is-leaving"), 500);
+    }
     chapters.forEach((el, i) => el.classList.toggle("is-active", i === ch));
     stepLists.forEach((el, i) => (el.hidden = i !== ch));
     terms.forEach((el, i) => (el.hidden = i !== ch));
+    if (animate) {
+      glideFrom = lastPos;
+      replay(stepLists[ch], "is-in");
+      replay(terms[ch], "is-in");
+    }
     tabs.forEach((tab, i) => {
       tab.setAttribute("aria-selected", String(i === ch));
       tab.style.setProperty("--fill", i < ch ? "1" : "0");
     });
   };
-  const jump = (ch: number) => {
-    show(ch);
-    t = still ? CHAPTERS[ch].dur : 0;
+  const jump = (ch: number, animate = !still) => {
+    show(ch, animate);
+    // The new chapter waits on its first frame while the change plays, then its clock starts.
+    t = still ? CHAPTERS[ch].dur : animate ? -LEAD : 0;
     render(ch, t);
   };
 
@@ -304,7 +338,7 @@ export function startDesk(root: HTMLElement) {
   if (still) {
     root.classList.add("is-still");
     pause.hidden = true;
-    jump(0);
+    jump(0, false);
     return;
   }
 
@@ -313,9 +347,11 @@ export function startDesk(root: HTMLElement) {
     last = now;
     if (playing && seen && !document.hidden) {
       t += dt;
-      if (t > CHAPTERS[current].dur + 600) {
+      if (t > CHAPTERS[current].dur + 900) {
         jump((current + 1) % CHAPTERS.length);
-      } else render(current, Math.min(t, CHAPTERS[current].dur));
+      } else {
+        render(current, Math.min(t, CHAPTERS[current].dur));
+      }
     }
     if (seen) requestAnimationFrame(frame);
     else running = false;
@@ -332,5 +368,5 @@ export function startDesk(root: HTMLElement) {
     },
     { threshold: 0.2 },
   ).observe(wrap);
-  jump(0);
+  jump(0, false);
 }

@@ -1,6 +1,6 @@
 /** Reads the markdown the workflow scripts share: pitch.md, brand.md, sources.txt. Lenient on purpose: it's prose. */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { dirname, isAbsolute, join, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dirname, "../..");
 
@@ -60,12 +60,38 @@ const blank = (cell = "") => !cell.trim() || /^[-–—]+$/.test(cell.trim()) ||
 
 const column = (table: Table, name: RegExp) => table.header.findIndex((cell) => name.test(cell));
 
-/** Finds the latest queue/<date>-<slug>/. */
+const DATED = /^(\d{4}-\d{2}-\d{2})-(.+)$/;
+
+/** The kits in brands/, longest first, so with kits `myapp` and `myapp-pro`, `myapp-pro-launch` reads as myapp-pro. */
+const kitDirs = () => {
+  const root = join(ROOT, "brands");
+  return existsSync(root) ? readdirSync(root).filter((name) => !/^[_.]/.test(name)).sort((a, b) => b.length - a.length) : [];
+};
+
+/**
+ * A queue folder's name is `<date>-<brand>-<slug>`: the brand is a kit in brands/, or, for work that isn't any
+ * brand's ad, one word that says what it is (`benchmark`). Older folders without one read as `<date>-<slug>`.
+ */
+export function folderParts(name: string): { date: string; brand?: string; slug: string } | undefined {
+  const [, date, rest] = name.match(DATED) ?? [];
+  if (!date) return undefined;
+  const kit = kitDirs().find((brand) => rest.startsWith(`${brand}-`));
+  if (kit) return { date, brand: kit, slug: rest.slice(kit.length + 1) };
+  const cut = rest.indexOf("-");
+  return cut > 0 ? { date, brand: rest.slice(0, cut), slug: rest.slice(cut + 1) } : { date, slug: rest };
+}
+
+/** The ad's slug from its queue folder's name. */
+export const folderSlug = (name: string) => folderParts(name)?.slug ?? name;
+
+/** Finds the latest queue/<date>-<brand>-<slug>/ (or an older <date>-<slug>/). */
 export function queueFolder(slug: string) {
   const root = join(ROOT, "queue");
   if (!existsSync(root)) return undefined;
-  const dated = new RegExp(`^\\d{4}-\\d{2}-\\d{2}-${slug.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
-  const name = readdirSync(root).filter((entry) => dated.test(entry)).sort().at(-1);
+  const name = readdirSync(root)
+    .filter((entry) => DATED.test(entry) && (folderSlug(entry) === slug || entry.slice(11) === slug))
+    .sort((a, b) => a.slice(0, 10).localeCompare(b.slice(0, 10)) || a.localeCompare(b))
+    .at(-1);
   return name ? join(root, name) : undefined;
 }
 
@@ -190,7 +216,11 @@ export function readBrand(name: string): Brand | undefined {
 
 /** The brand named in the pitch or the README. With neither, the only brand there is. */
 export function brandFor(folder?: string, override?: string): { brand?: Brand; asked?: string } {
-  const asked = override ?? (folder && (field(readIf(join(folder, "pitch.md")) ?? "", "brand") ?? field(readIf(join(folder, "README.md")) ?? "", "brand")));
+  const named = folder && folderParts(basename(folder))?.brand;
+  const asked =
+    override ??
+    (folder && (field(readIf(join(folder, "pitch.md")) ?? "", "brand") ?? field(readIf(join(folder, "README.md")) ?? "", "brand"))) ??
+    (named && existsSync(join(ROOT, "brands", named, "brand.md")) ? named : undefined);
   if (asked) return { brand: readBrand(asked), asked };
   const names = brandNames();
   return { brand: names.length === 1 ? readBrand(names[0]) : undefined };

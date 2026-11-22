@@ -1,5 +1,5 @@
 // bun run claims <slug>   Checks the pitch's claims against its brand kit before anyone builds it. One cheap model call
-// (.claude/agents/claims-checker.md, or the brand's own version), text only. Writes queue/<date>-<slug>/claims.md and
+// (.claude/agents/claims-checker.md, or the brand's own version), text only. Writes queue/<date>-<brand>-<slug>/claims.md and
 // exits 1 when something is unsupported. Staging (an invented way of showing something real) is fine and is listed, so
 // the pitch can say it's invented. Spends a few cents of tokens.
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -41,7 +41,7 @@ const slug = process.argv[2];
 if (!slug || slug.startsWith("-")) throw new Error("Usage: bun run claims <slug>");
 const folder = queueFolder(slug);
 const pitch = folder ? readIf(join(folder, "pitch.md")) : undefined;
-if (!folder || !pitch) throw new Error(`No queue/<date>-${slug}/pitch.md to check.`);
+if (!folder || !pitch) throw new Error(`No queue/<date>-<brand>-${slug}/pitch.md to check.`);
 const brand = field(pitch, "brand");
 const kit = brand ? readIf(join(ROOT, "brands", brand, "brand.md")) : undefined;
 if (!brand || !kit) throw new Error(`The pitch names no brand with a brands/<brand>/brand.md${brand ? ` (it says "${brand}")` : ""}.`);

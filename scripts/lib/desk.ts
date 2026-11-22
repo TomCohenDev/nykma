@@ -85,7 +85,7 @@ import type { Story, Video } from "../../src/engine/index.ts";
 import { PYTHON, unpack, VIDEO } from "./footage.ts";
 import { AGENT_ENV, ALLOWED, DENIED } from "./permissions.ts";
 import { agentFor, editedCount, instructions, readInstruction, resetInstruction, saveInstruction } from "./agents.ts";
-import { brandFor, locate, readBrand, readIf, readPitch } from "./queue.ts";
+import { brandFor, folderSlug, locate, readBrand, readIf, readPitch } from "./queue.ts";
 import { briefFor, readSettings, saveSettings, VOICE_ID, type Ratio } from "./settings.ts";
 import { money, stateOf, totalToMake } from "./gen.ts";
 import { approve, budgets, jobOf, jobsOf, NeedsApproval, reviewsOf, reviewStill, spent, startShot, startVideos, stillsWaiting, WaitingOnStills } from "./gen-run.ts";
@@ -242,10 +242,10 @@ function readAd(folder: string): Ad {
   const hasPost = files.includes("post.md");
   return {
     folder,
-    slug: folder.slice(11),
+    slug: folderSlug(folder),
     date: folder.slice(0, 10),
     idea: pitch?.idea ?? "",
-    brand: pitch?.brand,
+    brand: pitch?.brand ?? brandFor(dir).asked,
     state: dropped(readme) ? "dropped" : !rendered ? "pitch" : hasPost ? "ready" : files.includes("validate.md") ? "checked" : "first-look",
     takes,
     stills,

@@ -10,7 +10,7 @@ import { Hand, SLUG, SelectionBar, Wordmark, boxOf, type Place } from "./world";
  * MathbookLM as one world of 1920×1000 app pixels: the canvas on the left and the chat panel (360 wide) on the right,
  * as the live app lays them out. The projection in the second half shows this world, and the full-screen shots film it
  * with a camera. The chat is this ad's exchange, in the app's layout: the selection asked about in Hebrew, the step by
- * step answer the live app gave on 2026-11-06 (queue/2026-11-05-spring-moves/live/1-steps-he.png), then the simulation.
+ * step answer the live app gave on 2026-11-06 (queue/2026-11-05-mathbooklm-spring-moves/live/1-steps-he.png), then the simulation.
  * Everything here is a function of the frame and of `t`, the app's own clock for this ad (frames since the desk scene
  * started), so the projection and the full-screen shots show the same moment.
  */

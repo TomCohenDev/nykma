@@ -1,5 +1,5 @@
 // bun run review <slug> [--frames 240,412 | --frames +240,412] [--ratio 9x16]
-// One fresh read-only `claude -p` per ratio on stills, merged to queue/<date>-<slug>/review.md. --frames limits the
+// One fresh read-only `claude -p` per ratio on stills, merged to queue/<date>-<brand>-<slug>/review.md. --frames limits the
 // frames to those; a leading + adds them to the automatic pick. Spends tokens; everything before the claude step is free.
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -163,7 +163,7 @@ const videos = await resolveVideos(slug, { ratio: ratio ?? "all" });
 const name = videos[0].slug;
 const folder = queueFolder(name);
 const pitch = folder ? readPitch(folder) : undefined;
-if (!pitch?.idea) console.log(`note: no idea in ${folder ? `${folder}/pitch.md` : `queue/<date>-${name}/pitch.md`}, so the reviewer sees only the stills.`);
+if (!pitch?.idea) console.log(`note: no idea in ${folder ? `${folder}/pitch.md` : `queue/<date>-<brand>-${name}/pitch.md`}, so the reviewer sees only the stills.`);
 
 // The brand's own version of the reviewer, if it edited one on the desk (spec.md §10.11).
 const text = reviewerText(pitch?.brand);
@@ -232,5 +232,5 @@ const path = join(folder ?? outDir(name), "review.md");
 const earlier = limited ? readIf(path) : undefined;
 writeFileSync(path, earlier ? `${earlier.trimEnd()}\n\n---\n\n${lines.join("\n").replace(/^# Review:/, "## Recheck:")}` : lines.join("\n"));
 console.log(`${path}  ${list.length ? `${list.length} adjustments` : "nothing to adjust"}, ${seconds} s${cost ? `, $${cost.toFixed(2)}` : ""}`);
-if (!folder) console.log(`note: no queue/<date>-${name}/ folder, so it went in out/ instead.`);
+if (!folder) console.log(`note: no queue/<date>-<brand>-${name}/ folder, so it went in out/ instead.`);
 if (failed.length) process.exit(1);

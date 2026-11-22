@@ -12,13 +12,13 @@ A bare-bones local ad maker. One agent (`.claude/agents/ad-agent.md`) has an ide
 bun run dev                                    # the desk: dashboard, viewer, timeline, inspector and chat (the scrubbing preview is at /)
 bun run history <brand>                        # the ideas a brand's ads have used, and the user's notes for it (free)
 bun run animatic <slug>                        # pitch slideshow from pitch.md (free)
-bun run claims <slug>                          # the pitch's claims against brand.md -> queue/<date>-<slug>/claims.md (a few cents)
+bun run claims <slug>                          # the pitch's claims against brand.md -> queue/<date>-<brand>-<slug>/claims.md (a few cents)
 bun run stills <id> --frames 0,90,240 [--ratio all] [--sheet]   # --sheet: one labelled image of those frames
 bun run stills <id> --ratio all --thumbnail    # the ad's cover image (`thumbnail` on its registry line)
 bun run sheet <id>
 bun run render <id> [--ratio all] [--pages 4] [--thumbnail]   # MP4s, plus <id>-thumbnail.png/.jpg; --thumbnail: only those
-bun run review <slug> [--frames 240,412 | --frames +240,412] [--dry-run]   # reviewer on stills -> queue/<date>-<slug>/review.md (spends tokens)
-bun run validate <id> [--brand <brand>]        # free checks -> queue/<date>-<slug>/validate.md
+bun run review <slug> [--frames 240,412 | --frames +240,412] [--dry-run]   # reviewer on stills -> queue/<date>-<brand>-<slug>/review.md (spends tokens)
+bun run validate <id> [--brand <brand>]        # free checks -> queue/<date>-<brand>-<slug>/validate.md
 bun run validate <id> --layout                 # layout and Hebrew only, from the code, no render -> out/<slug>/layout.md
 bun run stamp [<brand>] / bun run stamp --report   # which instructions make an ad, for its README; ads by instructions with their results
 bun run hand <slug> [--force] / bun run hand:check <slug>

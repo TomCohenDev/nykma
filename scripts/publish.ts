@@ -22,6 +22,7 @@ import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { PLATFORM_INFO } from "./lib/publish/info.ts";
 import type { AccountView, Job, Option, Platform } from "./lib/publish/types.ts";
+import { folderSlug } from "./lib/queue.ts";
 import { findDesk } from "./lib/stock.ts";
 
 const ROOT = resolve(import.meta.dirname, "..");
@@ -83,7 +84,7 @@ const line = (job: Job) =>
 /** The ad's queue folder from a slug (the latest one) or the folder's own name. */
 function folderOf(name: string): string {
   if (/^\d{4}-\d{2}-\d{2}-/.test(name) && existsSync(join(QUEUE, name))) return name;
-  const found = readdirSync(QUEUE).filter((folder) => folder.slice(11) === name).sort();
+  const found = readdirSync(QUEUE).filter((folder) => folderSlug(folder) === name).sort();
   return found.at(-1) ?? fail(`No folder for ${name} in queue/.`);
 }
 

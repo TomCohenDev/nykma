@@ -55,17 +55,17 @@ export const session: Line[] = [
   { k: "in", t: "use the ad-agent to make an ad about the free plan for myapp" },
   { k: "dim", t: "reading brands/myapp/brand.md and the ideas used before" },
   { k: "out", t: "explored three directions, picked one" },
-  { k: "ok", t: "pitch ready: queue/2026-11-19-free-plan/pitch.md, animatic.mp4" },
+  { k: "ok", t: "pitch ready: queue/2026-11-19-myapp-free-plan/pitch.md, animatic.mp4" },
   { k: "dim", t: "waiting for your go" },
   { k: "in", t: "go" },
   { k: "dim", t: "building src/ads/free-plan/, checking its own stills" },
   { k: "ok", t: "first look: free-plan-1x1.mp4, free-plan-9x16.mp4" },
   { k: "in", t: "looks good, finish it" },
-  { k: "ok", t: "handed off: queue/2026-11-19-free-plan/ (MP4s, README.md, post.md)" },
+  { k: "ok", t: "handed off: queue/2026-11-19-myapp-free-plan/ (MP4s, README.md, post.md)" },
 ];
 
 export const handoff = [
-  ["queue/2026-11-19-free-plan/", ""],
+  ["queue/2026-11-19-myapp-free-plan/", ""],
   ["  pitch.md", "the idea, the storyboard, the claims it makes"],
   ["  animatic.mp4", "the free slideshow of the pitch"],
   ["  free-plan-1x1.mp4", "the ad, one file per size"],

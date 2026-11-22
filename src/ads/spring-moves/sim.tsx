@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { clamp } from "../../parts/time";
 
 /**
- * The simulation MathbookLM built for "עכשיו תעשה סימולציה" on 2026-11-06 (queue/2026-11-05-spring-moves/live/), laid
+ * The simulation MathbookLM built for "עכשיו תעשה סימולציה" on 2026-11-06 (queue/2026-11-05-mathbooklm-spring-moves/live/), laid
  * out as the live card was: 560×350, the results column on the left because the page is right to left ("מאפייני
  * תנודה": ω = √(k/m), T = 2π/ω, f = 1/T), the stage on the right (a wall, a horizontal spring, the 2 kg block, the
  * F = −kx and v arrows, a live x(t) graph), then the app's own play bar, the Hebrew sliders, "Question values" and the
