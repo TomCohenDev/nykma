@@ -1,0 +1,286 @@
+<!doctype html>
+<html data-theme="graphite">
+<head>
+<meta charset="utf-8" />
+<title>nykma · editor</title>
+<link rel="stylesheet" href="base.css" />
+<style>
+  .app { display: grid; grid-template-columns: 248px 1fr 340px; grid-template-rows: 48px 1fr 262px; height: 900px; }
+  .top { grid-column: 1 / -1; }
+  .left { grid-row: 2; border-right: 1px solid var(--line-1); display: flex; flex-direction: column; min-height: 0; }
+  .center { grid-row: 2; display: flex; flex-direction: column; background: var(--bg-0); min-width: 0; }
+  .right { grid-row: 2 / 4; grid-column: 3; border-left: 1px solid var(--line-1); display: flex; flex-direction: column; min-height: 0; }
+  .tl { grid-row: 3; grid-column: 1 / 3; }
+
+  /* scenes list */
+  .scene { display: flex; gap: 10px; align-items: center; padding: 4px 8px; border-radius: var(--r-2); }
+  .scene.on { background: var(--bg-3); }
+  .scene .th { width: 22px; height: 39px; border-radius: 3px; background-size: cover; background-position: center; flex: none; box-shadow: 0 0 0 1px var(--line-2); }
+  .scene .nm { font-size: 12.5px; color: var(--text-1); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .scene .du { font-size: 11px; color: var(--text-3); }
+  .scene .n { font-family: var(--mono); font-size: 10.5px; color: var(--text-3); width: 12px; }
+  .layer { display: flex; align-items: center; gap: 7px; height: 26px; padding: 0 8px; border-radius: var(--r-1); font-size: 12px; color: var(--text-2); }
+  .layer.on { background: var(--accent-soft); color: var(--text-1); box-shadow: inset 2px 0 0 var(--accent); }
+  .layer .k { margin-left: auto; font-size: 10px; color: var(--text-4); }
+  .layer svg { color: var(--text-3); }
+
+  /* viewer */
+  .vbar { height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 12px; }
+  .stagearea { flex: 1; position: relative; display: grid; place-items: center; }
+  .transport { height: 46px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border-top: 1px solid var(--line-1); background: var(--bg-1); }
+  .transport .tc { font-size: 14px; color: var(--text-1); }
+  .tbtn { width: 30px; height: 30px; border-radius: var(--r-2); display: grid; place-items: center; color: var(--text-2); }
+  .tbtn.play { background: var(--text-1); color: var(--bg-0); border-radius: 50%; width: 34px; height: 34px; }
+
+  /* the ad: kav-echad end card, 1080x1920 at 0.25 */
+  .ad { width: 270px; height: 480px; background-color: #fff;
+    background-image: linear-gradient(#e9e9f3 1px, transparent 1px), linear-gradient(90deg, #e9e9f3 1px, transparent 1px);
+    background-size: 15px 15px; }
+  .ad .col { position: absolute; left: 30px; right: 30px; top: 50px; bottom: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 19px; padding-top: 22px; }
+  .ad .wm { width: 100%; justify-content: center; font-family: Nunito, sans-serif; font-weight: 700; font-size: 24px; color: #1c1b29; display: flex; align-items: center; line-height: 1; }
+  .ad .wm .m { font-family: "Times New Roman", serif; font-style: italic; color: #6a69d6; font-size: 30px; margin-right: 1px; }
+  .ad .wm .lm { font-family: "Times New Roman", serif; font-style: italic; font-weight: 400; }
+  .ad .line { font-family: Rubik, sans-serif; font-weight: 800; font-size: 21.5px; color: #1c1b29; direction: rtl; text-align: center; line-height: 1.15; }
+  .ad .url { font-family: Nunito, sans-serif; font-weight: 800; font-size: 19px; color: #6a69d6; }
+  .ad .free { font-family: Rubik, sans-serif; font-weight: 600; font-size: 13.5px; color: #464553; direction: rtl; margin-top: -10px; }
+
+  .ftool { position: absolute; display: flex; align-items: center; gap: 2px; padding: 4px; }
+  .ftool .b { height: 28px; padding: 0 8px; display: inline-flex; align-items: center; gap: 6px; border-radius: var(--r-2); font-size: 12px; color: var(--text-1); }
+  .ftool .b.ask { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .ftool .sep { width: 1px; height: 18px; background: var(--line-2); margin: 0 3px; }
+
+  /* inspector */
+  .ins-h { padding: 12px 14px 10px; border-bottom: 1px solid var(--line-1); }
+  .src { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+  .src b { color: var(--info); font-weight: 500; }
+  .how { display: inline-flex; align-items: center; gap: 4px; height: 18px; padding: 0 6px; border-radius: 4px; font-size: 10.5px; font-weight: 600; }
+  .how.direct { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
+  .how.knob { background: color-mix(in srgb, var(--info) 16%, transparent); color: var(--info); }
+  .how.ask { background: var(--accent-soft); color: var(--accent); }
+  .ta { min-height: 52px; border-radius: var(--r-1); background: var(--bg-2); box-shadow: inset 0 0 0 1.5px var(--accent); padding: 8px 10px; font-family: Rubik, var(--font); font-size: 15px; font-weight: 600; direction: rtl; color: var(--text-1); }
+  .lbl { font-size: 11px; color: var(--text-3); margin: 0 0 4px; display: flex; align-items: center; gap: 6px; }
+  .note { font-size: 11.5px; color: var(--text-3); line-height: 1.45; margin-top: 8px; }
+  .curve { height: 46px; border-radius: var(--r-1); background: var(--bg-2); position: relative; overflow: hidden; }
+  .ask-bar { margin-top: auto; padding: 10px 12px 12px; border-top: 1px solid var(--line-1); }
+  .ask-in { border-radius: var(--r-3); background: var(--bg-2); box-shadow: inset 0 0 0 1px var(--line-2); padding: 8px 10px; }
+  .ctx { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 6px; border-radius: 4px; background: var(--bg-4); font-size: 11px; color: var(--text-2); }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- top bar -->
+  <header class="top">
+    <div class="logo">n</div>
+    <div class="crumbs"><span>Projects</span><svg class="i s"><use href="#chevr"/></svg><span>mathbooklm</span><svg class="i s"><use href="#chevr"/></svg><b>kav-echad</b><svg class="i s" style="color:var(--text-3)"><use href="#chev"/></svg></div>
+    <div class="spacer"></div>
+    <nav class="stages">
+      <span class="stage done"><svg class="i s"><use href="#check"/></svg>Pitch</span>
+      <span class="stage done"><svg class="i s"><use href="#check"/></svg>Build</span>
+      <span class="stage now"><span class="dot"></span>First look</span>
+      <span class="stage">Checks</span>
+      <span class="stage">Post</span>
+    </nav>
+    <div class="spacer"></div>
+    <span class="chip" title="Spent on this ad"><svg class="i s"><use href="#coin"/></svg><span class="num">$0.31</span><span style="color:var(--text-4)">·</span><span class="num">1.2k</span> voice cr</span>
+    <button class="btn ghost sm"><svg class="i s"><use href="#undo"/></svg></button>
+    <button class="btn"><svg class="i s"><use href="#download"/></svg>Render</button>
+    <button class="btn primary">Check it<span class="kbd" style="color:inherit;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)">⌘↵</span></button>
+  </header>
+
+  <!-- left: scenes + layers -->
+  <aside class="left panel">
+    <div class="ptabs">
+      <span class="ptab on"><svg class="i s"><use href="#film"/></svg>Scenes</span>
+      <span class="ptab"><svg class="i s"><use href="#image"/></svg>Media</span>
+      <span class="ptab"><svg class="i s"><use href="#palette"/></svg>Brand</span>
+      <span class="ptab"><svg class="i s"><use href="#folder"/></svg>Files</span>
+    </div>
+    <div style="padding:8px 6px 6px">
+      <div class="scene"><span class="n">1</span><div class="th" style="background-image:url(img/kav1.jpg)"></div><div style="min-width:0"><div class="nm">The line writes the circuit</div><div class="du num">4.0 s</div></div></div>
+      <div class="scene"><span class="n">2</span><div class="th" style="background-image:url(img/kav2.jpg)"></div><div style="min-width:0"><div class="nm">The line becomes the sim</div><div class="du num">2.3 s</div></div></div>
+      <div class="scene"><span class="n">3</span><div class="th" style="background-image:url(img/kav3.jpg)"></div><div style="min-width:0"><div class="nm">The line is the current</div><div class="du num">4.7 s</div></div></div>
+      <div class="scene"><span class="n">4</span><div class="th" style="background-image:url(img/kav3.jpg);background-position:right"></div><div style="min-width:0"><div class="nm">The line becomes the M</div><div class="du num">1.0 s</div></div></div>
+      <div class="scene on"><span class="n">5</span><div class="th" style="background-image:url(img/kav4.jpg)"></div><div style="min-width:0"><div class="nm">End card</div><div class="du num">2.5 s</div></div></div>
+      <div class="t-micro" style="padding:10px 8px 4px;display:flex;justify-content:space-between"><span>Not in the video</span><span>1</span></div>
+      <div class="scene" style="opacity:.55"><span class="n"></span><div class="th" style="background:#fff"></div><div style="min-width:0"><div class="nm">Alt end: free forever</div><div class="du num">2.0 s</div></div></div>
+    </div>
+    <div style="border-top:1px solid var(--line-1);padding:10px 6px;flex:1">
+      <div class="sec-h" style="padding:0 8px;margin-bottom:6px"><span class="t">Layers · End card</span><svg class="i s muted"><use href="#search"/></svg></div>
+      <div class="layer"><svg class="i s"><use href="#layers"/></svg>Veil<span class="k num">opacity</span></div>
+      <div class="layer" style="padding-left:20px"><svg class="i s"><use href="#image"/></svg>Logo M<span class="k">brushed on</span></div>
+      <div class="layer" style="padding-left:20px"><svg class="i s"><use href="#type"/></svg>athbook LM</div>
+      <div class="layer on" style="padding-left:20px"><svg class="i s" style="color:var(--accent)"><use href="#type"/></svg>מכתב יד לסימולציה.<span class="k" style="color:var(--accent)">selected</span></div>
+      <div class="layer" style="padding-left:20px"><svg class="i s"><use href="#type"/></svg>mathbooklm.com</div>
+      <div class="layer" style="padding-left:20px"><svg class="i s"><use href="#type"/></svg>חינם לתמיד</div>
+    </div>
+  </aside>
+
+  <!-- center: viewer -->
+  <main class="center">
+    <div class="vbar">
+      <div class="seg"><span style="opacity:.45">16:9</span><span style="opacity:.45">1:1</span><span class="on">9:16</span></div>
+      <button class="btn ghost sm"><svg class="i s"><use href="#plus"/></svg>Add a ratio</button>
+      <div class="spacer"></div>
+      <div class="seg"><span class="on"><svg class="i s"><use href="#cursor"/></svg></span><span><svg class="i s"><use href="#hand"/></svg></span><span><svg class="i s"><use href="#comment"/></svg></span></div>
+      <div class="seg"><span class="on"><svg class="i s"><use href="#safe"/></svg>Safe areas</span><span><svg class="i s"><use href="#phone"/></svg>Feed overlay</span></div>
+      <button class="btn ghost sm">Fit<svg class="i s"><use href="#chev"/></svg></button>
+    </div>
+    <div class="stagearea">
+      <div class="adframe ad">
+        <div class="col">
+          <div class="wm"><span class="m">M</span>athbook<span class="lm">LM</span></div>
+          <div class="line" style="position:relative;transform:translateY(6px)">מכתב יד לסימולציה.<div class="sel" style="inset:-4px -8px"><i></i><i></i><i></i><i></i><span class="tag" style="direction:ltr"><svg class="i s"><use href="#type"/></svg>Headline</span></div></div>
+          <div class="url" style="position:relative">mathbooklm.com<div class="hover-box" style="inset:-3px -6px"></div></div>
+          <div class="free">חינם לתמיד</div>
+        </div>
+        <div class="safe" style="left:15px;right:15px;top:50px;bottom:80px"></div>
+      </div>
+      <div class="pop ftool" style="left:calc(50% + 150px);top:calc(50% - 40px);flex-direction:column;align-items:stretch">
+        <span class="b"><svg class="i s"><use href="#type"/></svg>Rubik 800</span>
+        <span class="b num">86</span>
+        <span class="b"><span class="sw" style="background:#1c1b29"></span></span>
+        <span class="b"><svg class="i s"><use href="#clock"/></svg>0.8 s</span>
+        <span class="b ask"><svg class="i s"><use href="#spark"/></svg>Ask</span>
+      </div>
+    </div>
+    <div class="transport">
+      <span class="tc">00:13:06</span><span class="tc" style="font-size:12px;color:var(--text-3)">/ 00:14:15</span>
+      <div class="spacer"></div>
+      <button class="tbtn"><svg class="i"><use href="#prev"/></svg></button>
+      <button class="tbtn"><svg class="i"><use href="#back"/></svg></button>
+      <button class="tbtn play"><svg class="i" style="fill:currentColor;stroke:none"><use href="#play"/></svg></button>
+      <button class="tbtn"><svg class="i"><use href="#chevr"/></svg></button>
+      <button class="tbtn"><svg class="i"><use href="#next"/></svg></button>
+      <div class="spacer"></div>
+      <span class="t-micro num">f 396 · 30 fps</span>
+      <button class="tbtn"><svg class="i"><use href="#vol"/></svg></button>
+      <button class="tbtn"><svg class="i"><use href="#max"/></svg></button>
+    </div>
+  </main>
+
+  <!-- right: inspector -->
+  <aside class="right panel">
+    <div class="ptabs">
+      <span class="ptab on"><svg class="i s"><use href="#sliders"/></svg>Inspect</span>
+      <span class="ptab"><svg class="i s"><use href="#spark"/></svg>Agent</span>
+      <span class="ptab"><svg class="i s"><use href="#comment"/></svg>Notes<span class="badge">3</span></span>
+    </div>
+    <div class="ins-h">
+      <div class="row" style="justify-content:space-between"><span class="t-title">Headline</span><span class="how direct"><svg class="i s"><use href="#check"/></svg>Edits the code</span></div>
+      <div class="src" style="margin-top:4px">End card › EndCard › <b>end.tsx:35</b></div>
+      <div class="src">text from <b>KavEchad.tsx:488</b> · 9:16</div>
+    </div>
+    <div class="sec">
+      <div class="lbl">Text</div>
+      <div class="ta">מכתב יד לסימולציה.</div>
+      <div class="note">Saved to the line prop in KavEchad.tsx. The scene redraws as you type.</div>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><span class="t">Type</span><span class="how direct">Direct</span></div>
+      <div class="grid2" style="grid-template-columns:1.6fr 1fr">
+        <div class="field">Rubik<span class="u">font</span></div>
+        <div class="field">800<span class="u">wt</span></div>
+      </div>
+      <div class="grid3" style="margin-top:6px">
+        <div class="field num">86<span class="u">px</span></div>
+        <div class="field num">1.15<span class="u">lh</span></div>
+        <div class="field num">−0.01<span class="u">em</span></div>
+      </div>
+      <div class="field" style="margin-top:6px"><span class="sw" style="background:#1c1b29"></span>TEXT<span class="u">#1C1B29 · used 9×</span></div>
+      <div class="row" style="margin-top:8px;gap:6px">
+        <span class="sw" style="background:#6a69d6"></span><span class="sw" style="background:#514fbb"></span><span class="sw" style="background:#8d8be6"></span><span class="sw" style="background:#1c1b29"></span><span class="sw" style="background:#464553"></span><span class="sw" style="background:#fff"></span>
+        <span class="t-micro" style="margin-left:4px">mathbooklm kit</span>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><span class="t">Position</span><span class="how knob">Offset</span></div>
+      <div class="grid2">
+        <div class="field num"><span class="muted">X</span> 0<span class="u">px</span></div>
+        <div class="field num"><span class="muted">Y</span> +24<span class="u">px</span></div>
+      </div>
+      <div class="note">The layout places it (a centred column), so a drag adds an offset on top. The code's own motion keeps playing.</div>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><span class="t">Motion</span><span class="how direct">Direct</span></div>
+      <div class="grid2">
+        <div class="field num"><span class="muted">In</span> 0.8<span class="u">s</span></div>
+        <div class="field num"><span class="muted">For</span> 0.4<span class="u">s</span></div>
+      </div>
+      <div class="curve" style="margin-top:6px">
+        <svg viewBox="0 0 300 46" width="100%" height="46" preserveAspectRatio="none"><path d="M0 40 C 60 40, 70 6, 300 6" stroke="var(--accent)" stroke-width="1.6" fill="none"/></svg>
+        <span class="t-micro" style="position:absolute;left:8px;top:5px">Rise 18 px · ease out cubic</span>
+      </div>
+      <div class="row" style="margin-top:8px;justify-content:space-between">
+        <span class="t-micro">Opacity, transform: from the frame</span>
+        <span class="how ask"><svg class="i s"><use href="#spark"/></svg>Ask to change</span>
+      </div>
+    </div>
+    <div class="ask-bar">
+      <div class="ask-in">
+        <div class="row" style="gap:5px;margin-bottom:6px"><span class="ctx"><svg class="i s"><use href="#type"/></svg>@headline</span><span class="ctx num">00:13:06</span></div>
+        <div style="color:var(--text-3);font-size:13px">Ask about this element…</div>
+        <div class="row" style="margin-top:8px;justify-content:space-between"><span class="t-micro">3 notes waiting · send together</span><button class="btn primary sm icon"><svg class="i s"><use href="#send"/></svg></button></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- timeline -->
+  <section class="tl">
+    <div class="tl-heads">
+      <div style="height:34px;border-bottom:1px solid var(--line-1);display:flex;align-items:center;gap:4px;padding:0 6px">
+        <button class="btn ghost sm icon"><svg class="i s"><use href="#cursor"/></svg></button>
+        <button class="btn ghost sm icon"><svg class="i s"><use href="#split"/></svg></button>
+        <button class="btn ghost sm icon"><svg class="i s"><use href="#plus"/></svg></button>
+      </div>
+      <div style="height:26px;border-bottom:1px solid var(--line-1)"></div>
+      <div class="tl-head" style="height:56px"><span class="sw2" style="background:var(--t-scene)"></span>Scenes</div>
+      <div class="tl-head"><span class="sw2" style="background:var(--t-text)"></span>Text</div>
+      <div class="tl-head"><span class="sw2" style="background:var(--t-music)"></span>Music<span class="ic"><svg class="i s"><use href="#vol"/></svg></span></div>
+      <div class="tl-head"><span class="sw2" style="background:var(--t-sfx)"></span>Sound fx<span class="ic"><svg class="i s"><use href="#vol"/></svg></span></div>
+      <div class="tl-head"><span class="sw2" style="background:var(--t-note)"></span>Notes</div>
+    </div>
+    <div style="position:relative;overflow:hidden">
+      <div style="height:34px;border-bottom:1px solid var(--line-1);display:flex;align-items:center;gap:10px;padding:0 10px">
+        <span class="t-micro">Drag scenes to reorder · drag an edge to trim · <span class="kbd">S</span> split · <span class="kbd">M</span> note</span>
+        <div class="spacer"></div>
+        <span class="chip"><svg class="i s"><use href="#bolt"/></svg>Snap</span>
+        <div style="width:110px;height:4px;border-radius:2px;background:var(--bg-3);position:relative"><div style="position:absolute;left:0;width:45%;height:100%;border-radius:2px;background:var(--text-3)"></div></div>
+        <button class="btn ghost sm">Fit</button>
+      </div>
+      <div class="ruler" id="ruler"></div>
+      <div class="lane" style="height:56px" id="lane-scenes"></div>
+      <div class="lane" id="lane-text"></div>
+      <div class="lane" id="lane-music"></div>
+      <div class="lane" id="lane-sfx"></div>
+      <div class="lane" id="lane-notes"></div>
+      <div class="playhead" id="ph"></div>
+    </div>
+  </section>
+</div>
+<script src="icons.js"></script>
+<script>
+  const PX = 64, X0 = 10; const x = s => X0 + s * PX;
+  const r = document.getElementById("ruler");
+  for (let s = 0; s <= 15; s++) r.insertAdjacentHTML("beforeend", `<span style="left:${x(s)}px">0:${String(s).padStart(2,"0")}</span>`);
+  const scenes = [["The line writes the circuit",4.0,"kav1"],["The line becomes the sim",2.3,"kav2"],["The line is the current",4.7,"kav3"],["Becomes the M",1.0,"kav3"],["End card",2.5,"kav4"]];
+  let t = 0; const L = document.getElementById("lane-scenes");
+  scenes.forEach(([n,d,img],i) => {
+    const w = d*PX - 2; const sel = i===4;
+    const tiles = Array.from({length: Math.ceil(w/27)}, () => `<div style="width:27px;height:100%;flex:none;background:url(img/${img}.jpg) center/cover;opacity:.85"></div>`).join("");
+    L.insertAdjacentHTML("beforeend", `<div class="clip" style="left:${x(t)+1}px;width:${w}px;top:4px;bottom:4px;padding:0;background:var(--t-scene);box-shadow:${sel?"0 0 0 2px var(--accent)":"none"}"><div style="display:flex;position:absolute;inset:16px 0 0 0;overflow:hidden">${tiles}</div><div style="position:absolute;left:0;right:0;top:0;height:16px;padding:0 6px;display:flex;align-items:center;gap:6px;background:var(--t-scene);font-size:10.5px">${i+1} ${n}<span style="margin-left:auto;font-family:var(--mono);opacity:.7">${d.toFixed(1)}s</span></div>${sel?'<div style="position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent)"></div><div style="position:absolute;right:0;top:0;bottom:0;width:6px;background:var(--accent)"></div>':""}</div>`);
+    t += d;
+  });
+  const bar = (lane, a, b, label, color, extra="") => document.getElementById(lane).insertAdjacentHTML("beforeend", `<div class="clip" style="left:${x(a)}px;width:${(b-a)*PX}px;background:${color};${extra}">${label}</div>`);
+  bar("lane-text", 0.6, 3.6, "10 mH · 100 µ (hand)", "color-mix(in srgb, var(--t-text) 70%, var(--bg-2))");
+  bar("lane-text", 6.75, 9.7, "כותבים ביד.", "color-mix(in srgb, var(--t-text) 70%, var(--bg-2))", "direction:rtl;justify-content:flex-end");
+  bar("lane-text", 12.4, 14.5, "athbookLM", "color-mix(in srgb, var(--t-text) 55%, var(--bg-2))", "top:4px;height:12px;bottom:auto;font-size:9px");
+  bar("lane-text", 12.8, 14.5, "מכתב יד לסימולציה.", "var(--t-text)", "top:17px;bottom:3px;font-size:9.5px;box-shadow:0 0 0 1.5px var(--accent);direction:rtl;justify-content:flex-end");
+  // music waveform
+  let path = ""; for (let i=0;i<=14.5*PX;i+=3){ const a = 4+ 9*Math.abs(Math.sin(i*0.07)*Math.sin(i*0.013+1)) * (i<40? i/40:1); path += `M${i} ${13-a/1.4}V${13+a/1.4}`; }
+  document.getElementById("lane-music").insertAdjacentHTML("beforeend", `<div class="clip" style="left:${x(0)}px;width:${14.5*PX}px;background:color-mix(in srgb, var(--t-music) 28%, var(--bg-2));padding:0"><svg width="${14.5*PX}" height="26" style="position:absolute;left:0;top:0"><path d="${path}" stroke="var(--t-music)" stroke-width="1.6"/></svg><span style="position:relative;margin-left:4px;padding:0 6px;border-radius:3px;background:var(--bg-1);color:var(--text-1);font-weight:600">kav-echad.mp3 · −14 LUFS</span></div>`);
+  [[0.4,"pen down"],[3.9,"whoosh"],[6.3,"click"],[11.2,"settle"],[12.3,"brush"]].forEach(([s,n]) => bar("lane-sfx", s, s+0.7, n, "color-mix(in srgb, var(--t-sfx) 80%, var(--bg-2))","font-size:10px"));
+  [[3.1,"R","var(--t-note)","Reviewer: L label tight to edge"],[8.2,"R","var(--t-note)",""],[11.0,"Y","var(--info)","You: hold the wave longer"]].forEach(([s,who,c,txt]) => document.getElementById("lane-notes").insertAdjacentHTML("beforeend", `<div style="position:absolute;left:${x(s)-9}px;top:6px;display:flex;align-items:center;gap:6px;white-space:nowrap"><div style="width:20px;height:20px;border-radius:50% 50% 50% 2px;background:${c};color:#111;font-size:10px;font-weight:700;display:grid;place-items:center">${who}</div><span style="font-size:11px;color:var(--text-2)">${txt}</span></div>`));
+  document.getElementById("ph").style.left = x(13.2) + "px";
+</script>
+</body>
+</html>

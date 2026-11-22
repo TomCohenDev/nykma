@@ -1,0 +1,325 @@
+---
+// The home page's hero: one window with two tabs. "claude" types out a session once it's on screen; when the session
+// ends, the window switches to the ad that session made and plays it, muted. Either tab can be clicked at any time.
+// With reduced motion nothing types or plays by itself: the whole session shows, and the ad tab waits for a click.
+// On a phone the ad tab shows the square 1:1 version, which fills a narrow window better than 16:9.
+import type { Line } from "./Terminal.astro";
+
+interface Props {
+  lines: Line[];
+  slug: string;
+  file: string;
+  label: string;
+}
+const { lines, slug, file, label } = Astro.props;
+---
+
+<figure class="hw" data-hw>
+  <div class="hw-bar">
+    <span class="hw-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <div class="hw-tabs" role="tablist" aria-label="Session and result">
+      <button type="button" role="tab" id="hw-tab-term" aria-controls="hw-term" aria-selected="true" data-tab="term">claude</button>
+      <button type="button" role="tab" id="hw-tab-ad" aria-controls="hw-ad" aria-selected="false" tabindex="-1" data-tab="ad">{file}</button>
+    </div>
+  </div>
+  <div class="hw-body">
+    <div class="hw-panel hw-term" id="hw-term" role="tabpanel" aria-labelledby="hw-tab-term">
+      {
+        lines.map((line) => (
+          <div class={"hw-l hw-" + line.k}>
+            {line.k === "in" ? <span class="hw-p">{"> "}</span> : null}
+            <span class="hw-t">{line.t}</span>
+          </div>
+        ))
+      }
+    </div>
+    <div class="hw-panel hw-ad" id="hw-ad" role="tabpanel" aria-labelledby="hw-tab-ad">
+      <video
+        src={`/examples/${slug}-16x9.mp4`}
+        poster={`/examples/${slug}-16x9.jpg`}
+        width="1280"
+        height="720"
+        muted
+        loop
+        playsinline
+        preload="none"
+        aria-label={label}
+        data-square={`/examples/${slug}.mp4`}
+        data-square-poster={`/examples/${slug}.jpg`}></video>
+    </div>
+  </div>
+  <figcaption class="hw-cap">
+    <button type="button" class="hw-sound" aria-pressed="false" data-hw-sound>sound on</button>
+  </figcaption>
+</figure>
+
+<style>
+  .hw {
+    margin: 0;
+    width: 100%;
+  }
+  .hw-bar,
+  .hw-body {
+    border: 1px solid var(--line);
+    background: var(--deep);
+  }
+  .hw-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 0 0 14px;
+    border-radius: 12px 12px 0 0;
+    border-bottom: 0;
+  }
+  .hw-dots {
+    display: flex;
+    gap: 7px;
+    flex: none;
+  }
+  .hw-dots i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3a3a3a;
+  }
+  .hw-dots i:first-child {
+    background: var(--red);
+  }
+  .hw-tabs {
+    display: flex;
+    min-width: 0;
+  }
+  .hw-tabs button {
+    font: 500 13px/1 var(--mono);
+    color: var(--dim);
+    background: transparent;
+    border: 0;
+    border-left: 1px solid var(--line);
+    padding: 13px 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .hw-tabs button[aria-selected="true"] {
+    color: var(--paper);
+    background: var(--ink);
+    box-shadow: inset 0 2px 0 var(--red);
+  }
+  .hw-body {
+    display: grid;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+    text-align: left;
+  }
+  .hw-panel {
+    grid-area: 1 / 1;
+    min-width: 0;
+  }
+  .hw-term {
+    padding: 20px 22px 24px;
+    font: 400 15px/1.85 var(--mono);
+    overflow-wrap: anywhere;
+  }
+  .hw-ad {
+    aspect-ratio: 16 / 9;
+    background: #000;
+    align-self: center;
+  }
+  @media (max-width: 640px) {
+    .hw-ad {
+      aspect-ratio: 1;
+    }
+  }
+  .hw-ad video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .hw .hw-ad,
+  .hw.on-ad .hw-term {
+    visibility: hidden;
+    opacity: 0;
+  }
+  .hw.on-ad .hw-ad {
+    visibility: visible;
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hw-panel {
+      transition:
+        opacity 0.45s ease,
+        visibility 0.45s;
+    }
+  }
+  .hw-l {
+    min-height: 1.85em;
+  }
+  .hw-p {
+    white-space: pre;
+    color: var(--red);
+    font-weight: 700;
+  }
+  .hw-in .hw-t {
+    font-weight: 700;
+  }
+  .hw-ok {
+    color: #ffb4a8;
+  }
+  .hw-dim {
+    color: var(--dim);
+  }
+  .hw.typing .hw-l {
+    visibility: hidden;
+  }
+  .hw.typing .hw-l.shown {
+    visibility: visible;
+  }
+  .hw-cap {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 14px;
+    color: var(--dim);
+    font-size: 14.5px;
+    text-align: left;
+  }
+  .hw-sound {
+    flex: none;
+    font: 600 13.5px/1 var(--mono);
+    color: var(--paper);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 12px;
+    cursor: pointer;
+  }
+  .hw-sound:hover {
+    border-color: var(--paper);
+  }
+  .hw-sound[aria-pressed="true"] {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+  @media (max-width: 560px) {
+    .hw-term {
+      padding: 16px;
+      font-size: 13px;
+    }
+    .hw-tabs button {
+      padding: 12px 10px;
+      font-size: 12px;
+    }
+  }
+</style>
+
+<script>
+  for (const box of document.querySelectorAll<HTMLElement>("[data-hw]")) {
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const video = box.querySelector<HTMLVideoElement>("video")!;
+    const tabs = [...box.querySelectorAll<HTMLButtonElement>("[data-tab]")];
+    const lines = [...box.querySelectorAll<HTMLElement>(".hw-l")];
+    const sound = box.querySelector<HTMLButtonElement>("[data-hw-sound]")!;
+    if (matchMedia("(max-width: 640px)").matches) {
+      video.src = video.dataset.square!;
+      video.poster = video.dataset.squarePoster!;
+      const adTab = tabs.find((tab) => tab.dataset.tab === "ad")!;
+      adTab.textContent = (adTab.textContent ?? "").replace("16x9", "1x1");
+    }
+    let typed = still;
+    let visible = false;
+
+    const show = (which: string) => {
+      box.classList.toggle("on-ad", which === "ad");
+      for (const tab of tabs) {
+        const on = tab.dataset.tab === which;
+        tab.setAttribute("aria-selected", String(on));
+        tab.tabIndex = on ? 0 : -1;
+      }
+      if (which === "ad") {
+        video.preload = "auto";
+        video.play().catch(() => {});
+      } else video.pause();
+    };
+    const finishTyping = () => {
+      typed = true;
+      box.classList.remove("typing");
+      lines.forEach((line) => {
+        line.classList.add("shown");
+        const text = line.querySelector<HTMLElement>(".hw-t")!;
+        if (text.dataset.full) text.textContent = text.dataset.full;
+      });
+    };
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => {
+        finishTyping();
+        show(tab.dataset.tab!);
+      });
+      tab.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+        const next = tabs[(i + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+        next.focus();
+        next.click();
+      });
+    });
+    sound.addEventListener("click", () => {
+      const on = video.muted;
+      video.muted = !on;
+      sound.setAttribute("aria-pressed", String(on));
+      sound.textContent = on ? "sound off" : "sound on";
+      if (on) show("ad");
+    });
+
+    const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+    const play = async () => {
+      for (const line of lines) {
+        if (typed) return;
+        const text = line.querySelector<HTMLElement>(".hw-t")!;
+        if (line.classList.contains("hw-in")) {
+          const full = text.textContent ?? "";
+          text.dataset.full = full;
+          text.textContent = "";
+          line.classList.add("shown");
+          await wait(260);
+          for (let i = 1; i <= full.length; i++) {
+            if (typed) return;
+            text.textContent = full.slice(0, i);
+            await wait(24);
+          }
+          await wait(360);
+        } else {
+          line.classList.add("shown");
+          await wait(line.classList.contains("hw-ok") ? 520 : 240);
+        }
+      }
+      if (typed) return;
+      finishTyping();
+      await wait(1100);
+      if (!box.classList.contains("on-ad")) show("ad");
+    };
+
+    if (!still && "IntersectionObserver" in window) {
+      box.classList.add("typing");
+      let started = false;
+      new IntersectionObserver(
+        (entries) => {
+          visible = entries.some((entry) => entry.isIntersecting);
+          if (visible && !started) {
+            started = true;
+            play();
+          }
+          if (box.classList.contains("on-ad")) {
+            if (visible) video.play().catch(() => {});
+            else video.pause();
+          }
+        },
+        { threshold: 0.35 },
+      ).observe(box);
+    }
+  }
+</script>

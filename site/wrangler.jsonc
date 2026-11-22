@@ -10,15 +10,15 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*"]
+    // The worker sees every request first, so www can redirect to the bare domain; it hands the rest to the assets.
+    "run_worker_first": true
   },
   "send_email": [{ "name": "SALES" }],
-  // On workers.dev until the domain is free: nobodyknowsmyapp.com still has other DNS records and a Cloudflare Access
-  // login in front of it (site/README.md). Then set workers_dev to false, uncomment the routes and deploy.
+  // nobodyknowsmyapp.com and www (which redirects), with the workers.dev preview kept on too.
   "workers_dev": true,
-  // "routes": [
-  //   { "pattern": "nobodyknowsmyapp.com", "custom_domain": true },
-  //   { "pattern": "www.nobodyknowsmyapp.com", "custom_domain": true }
-  // ],
+  "routes": [
+    { "pattern": "nobodyknowsmyapp.com", "custom_domain": true },
+    { "pattern": "www.nobodyknowsmyapp.com", "custom_domain": true }
+  ],
   "observability": { "enabled": true }
 }

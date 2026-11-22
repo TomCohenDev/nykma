@@ -1,0 +1,269 @@
+---
+// Variation 2, "two ways": the headline beside the two ways to use nykma, a terminal over the desk, then the six
+// steps, the examples and the two ways explained.
+import Term from "../../layouts/Term.astro";
+import Terminal from "../../components/Terminal.astro";
+import Examples from "../../components/Examples.astro";
+import Install from "../../components/Install.astro";
+import examples from "../../examples.json";
+import { headline, lede, steps, price } from "../../nykma";
+
+const states = ["ready", "first look", "pitch"];
+---
+
+<Term title="nykma: nobody knows my app" description={lede} preview>
+  <div class="t-wrap">
+    <section class="hero">
+      <div class="copy">
+        <h1 class="t-h1">{headline}<span class="cur"></span></h1>
+        <p class="t-lede">{lede}</p>
+        <div class="t-btns">
+          <a class="t-btn primary" href="#start">get started</a>
+          <a class="t-btn" href="#examples">see examples</a>
+        </div>
+      </div>
+      <div class="panes" aria-label="nykma in the terminal and on the desk">
+        <Terminal
+          title="terminal"
+          lines={[
+            { k: "in", t: "make an ad about the free plan" },
+            { k: "ok", t: "pitch ready, waiting for your go" },
+            { k: "in", t: "go" },
+            { k: "dim", t: "rendering 1:1 and 9:16" },
+          ]}
+        />
+        <figure class="desk">
+          <div class="desk-bar"><i></i><i></i><i></i><span>the desk, localhost</span></div>
+          <div class="desk-body">
+            <div class="rail"><b>projects</b><span>brand kits</span><span>settings</span></div>
+            <ul class="cards">
+              {
+                examples.map((ad, i) => (
+                  <li>
+                    <img src={`/examples/${ad.slug}.jpg`} alt="" width="720" height="720" loading="lazy" />
+                    <b>{ad.title}</b>
+                    <span>
+                      {ad.brand} <em class:list={[states[i] === "ready" && "on"]}>{states[i]}</em>
+                    </span>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <section class="t-section" id="how">
+      <h2 class="t-h2">how an ad gets made</h2>
+      <ol class="steps">
+        {
+          steps.map((step, i) => (
+            <li>
+              <span class="n">{String(i + 1).padStart(2, "0")}</span>
+              <b>{step.name}</b>
+              <p>{step.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="t-section" id="examples">
+      <h2 class="t-h2">made with nykma</h2>
+      <p class="t-note">Three ads for real apps, each pitched, approved and built in code.</p>
+      <div class="gap"><Examples /></div>
+    </section>
+
+    <section class="t-section">
+      <h2 class="t-h2">two ways to use it</h2>
+      <div class="ways">
+        <div>
+          <h3>in Claude Code</h3>
+          <p>Ask in plain words, in the terminal or your editor. Reply with go, notes or another idea.</p>
+          <p><code class="t-code">use the ad-agent to make an ad about X for &lt;brand&gt;</code></p>
+        </div>
+        <div>
+          <h3>on the desk</h3>
+          <p>A local web app: your projects, a board with every scene in every size, and the chat with the agent.</p>
+          <p><code class="t-code">bun run dev</code></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="t-section" id="start">
+      <h2 class="t-h2">start</h2>
+      <div class="gap"><Install /></div>
+      <p class="t-note gap">{price} <a href="/pricing">pricing</a></p>
+    </section>
+  </div>
+</Term>
+
+<style>
+  .hero {
+    padding-top: clamp(40px, 7vw, 90px);
+    display: grid;
+    gap: 48px;
+    align-items: center;
+  }
+  @media (min-width: 1000px) {
+    .hero {
+      grid-template-columns: 1.05fr 1fr;
+    }
+    .hero .t-h1 {
+      font-size: clamp(44px, 5.4vw, 72px);
+    }
+  }
+  .copy {
+    min-width: 0;
+  }
+  .panes {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+  }
+  .desk {
+    margin: 0;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .desk-bar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 14px;
+    background: #e9e3d7;
+    font-size: 12.5px;
+    color: #5d5850;
+  }
+  .desk-bar i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #c9c2b4;
+  }
+  .desk-bar i:first-child {
+    background: var(--red);
+  }
+  .desk-bar span {
+    margin-left: auto;
+  }
+  .desk-body {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    font-size: 12.5px;
+  }
+  .rail {
+    border-right: 1px solid #ddd6c8;
+    padding: 14px 12px;
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    color: #5d5850;
+  }
+  .rail b {
+    color: var(--ink);
+  }
+  .cards {
+    list-style: none;
+    margin: 0;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .cards li {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+  .cards img {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    border: 1px solid #ddd6c8;
+    margin-bottom: 4px;
+  }
+  .cards b {
+    font-size: 12.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cards span {
+    color: #5d5850;
+    font-size: 11.5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+  }
+  .cards em {
+    font-style: normal;
+    border: 1px solid #c9c2b4;
+    border-radius: 99px;
+    padding: 0 6px;
+  }
+  .cards em.on {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .steps {
+    list-style: none;
+    margin: 32px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 28px 32px;
+  }
+  @media (min-width: 700px) {
+    .steps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1040px) {
+    .steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .steps li {
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+  .steps .n {
+    color: var(--red);
+    font-weight: 800;
+    margin-right: 10px;
+  }
+  .steps b {
+    font-size: 18px;
+  }
+  .steps p {
+    margin: 8px 0 0;
+    color: var(--dim);
+    font-size: 15.5px;
+  }
+  .ways {
+    display: grid;
+    gap: 32px 48px;
+    margin-top: 28px;
+  }
+  @media (min-width: 760px) {
+    .ways {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .ways h3 {
+    margin: 0;
+    font-size: 19px;
+  }
+  .ways p {
+    margin: 10px 0 0;
+  }
+  .gap {
+    margin-top: 28px;
+  }
+</style>

@@ -1,8 +1,29 @@
 ---
-import Base from "../layouts/Base.astro";
+import Term from "../layouts/Term.astro";
 ---
 
-<Base title="Not found" description="There's no page at this address.">
-  <h1 class="headline"><span class="line">nothing here.</span></h1>
-  <p class="lede">There's no page at this address. Go to the <a href="/">home page</a> or <a href="/pricing">pricing</a>.</p>
-</Base>
+<Term title="Not found" description="There's no page at this address.">
+  <section class="t-wrap note">
+    <h1 class="t-h1">Nothing here<span class="cur"></span></h1>
+    <p class="t-lede">There's no page at this address.</p>
+    <div class="t-btns">
+      <a class="t-btn primary" href="/">home</a>
+      <a class="t-btn" href="/pricing">pricing</a>
+    </div>
+  </section>
+</Term>
+
+<style>
+  .note {
+    padding-top: clamp(80px, 14vw, 180px);
+    text-align: center;
+  }
+  .note .t-lede {
+    margin-left: auto;
+    margin-right: auto;
+    color: var(--dim);
+  }
+  .note .t-btns {
+    justify-content: center;
+  }
+</style>

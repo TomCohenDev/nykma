@@ -29,6 +29,7 @@ Files sit in `assets/`, relative to this folder. A system font has no file. An a
 |---|---|---|
 | assets/logo.svg | on light | Designed in code for this kit: a terminal `>` closed by one red pen stroke makes a play button |
 | assets/logo-on-dark.svg | on dark | The same, chevron in Paper |
+| assets/icon.svg | app and site icon, on any ground | Chosen by the user on 2026-11-19 for nobodyknowsmyapp.com: a white play button and a red cursor on a black tile (P1). The site's favicon and home-screen icons are made from it |
 
 ## Tone
 
@@ -43,7 +44,7 @@ Prices, limits and any other number an ad may state. Validators reject prices an
 | Output ratios | 16:9, 1:1, 9:16 | README.md |
 | Output format | MP4, with post copy in post.md | README.md |
 | Runs | Locally, in Claude Code | README.md |
-| Publishing | Never posts. The user approves and posts everything | .claude/agents/ad-agent.md |
+| Publishing | Posts only what the user approves, on the desk or with `bun run publish` when they ask an agent to | spec.md §10.12 |
 | Spending | No money is spent without the user's go-ahead | README.md |
 
 ## Banned claims

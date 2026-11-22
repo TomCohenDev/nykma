@@ -1,0 +1,166 @@
+---
+// Variation 5, "the spec sheet": the headline and explanation, a table of facts right under it, the examples, then
+// plain answers to the questions people ask before trying it.
+import Term from "../../layouts/Term.astro";
+import Examples from "../../components/Examples.astro";
+import Install from "../../components/Install.astro";
+import { headline, lede, facts, steps } from "../../nykma";
+
+const faq: [string, string][] = [
+  ["Does it post by itself?", "No. It hands you the files and the post copy. The desk's Publishing posts or schedules an ad on your accounts only once you approve it there, or when you ask an agent to post it (bun run publish)."],
+  [
+    "What does it cost to run?",
+    "Claude Code usage, on your own plan. Rendering is local and free. Paid voices (ElevenLabs) and generated stills or video are optional, priced first, and only spent within the budget you approve. Free stock from Pexels and Pixabay costs nothing.",
+  ],
+  ["Do I need to code?", "No. You ask in plain words, in Claude Code or on the desk. Each ad is code, so you or Claude can change any part of it later."],
+  [
+    "What does \"builds it in code\" mean?",
+    "Each ad is a set of React components, rendered frame by frame to MP4. Every value is a function of the frame, so the same ad comes out the same twice, and a change is a re-render, not a re-edit.",
+  ],
+  ["Will it look like my app?", "The first time, it reads what you point it at (your repo, site, screenshots, logo) and saves a brand kit: colours, fonts, logo and the facts an ad may state."],
+  ["Hebrew?", "Yes, right to left, with Hebrew fonts, Hebrew voice-overs and word timing."],
+  ["Which sizes?", "1:1 by default, and 16:9 and 9:16 when you ask, each laid out for its own shape rather than cropped."],
+  ["Is it open source?", "The code is public and free for personal and noncommercial use. Companies need a commercial licence."],
+];
+---
+
+<Term title="nykma: nobody knows my app" description={lede} preview>
+  <div class="t-wrap">
+    <section class="hero">
+      <h1 class="t-h1">{headline}<span class="cur"></span></h1>
+      <p class="t-lede">{lede}</p>
+    </section>
+
+    <section class="sheet" aria-label="At a glance">
+      <dl>
+        {
+          facts.map(([key, value]) => (
+            <div>
+              <dt>{key}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+      <div class="t-btns">
+        <a class="t-btn primary" href="#start">get started</a>
+        <a class="t-btn" href="/pricing">pricing for companies</a>
+      </div>
+    </section>
+
+    <section class="t-section" id="examples">
+      <h2 class="t-h2">made with nykma</h2>
+      <p class="t-note">Three ads for real apps, each pitched, approved and built in code.</p>
+      <div class="gap"><Examples /></div>
+    </section>
+
+    <section class="t-section" id="how">
+      <h2 class="t-h2">the steps</h2>
+      <p class="t-note">{steps.map((step) => step.name).join(", then ")}. It stops after the pitch and after the first look, for your go.</p>
+    </section>
+
+    <section class="t-section">
+      <h2 class="t-h2">questions</h2>
+      <div class="faq">
+        {
+          faq.map(([q, a]) => (
+            <details>
+              <summary>{q}</summary>
+              <p>{a}</p>
+            </details>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="t-section" id="start">
+      <h2 class="t-h2">start</h2>
+      <div class="gap"><Install /></div>
+    </section>
+  </div>
+</Term>
+
+<style>
+  .hero {
+    padding-top: clamp(48px, 8vw, 100px);
+  }
+  .sheet {
+    margin-top: 56px;
+  }
+  .sheet dl {
+    margin: 0;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    display: grid;
+  }
+  @media (min-width: 820px) {
+    .sheet dl {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .sheet dl > div {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 16px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--line);
+    background: var(--deep);
+  }
+  @media (min-width: 820px) {
+    .sheet dl > div:nth-child(odd) {
+      border-right: 1px solid var(--line);
+    }
+    .sheet dl > div:nth-last-child(-n + 2) {
+      border-bottom: 0;
+    }
+  }
+  @media (max-width: 819px) {
+    .sheet dl > div:last-child {
+      border-bottom: 0;
+    }
+  }
+  .sheet dt {
+    color: var(--red);
+    font-weight: 700;
+  }
+  .sheet dd {
+    margin: 0;
+  }
+  .faq {
+    margin-top: 24px;
+    border-top: 1px solid var(--line);
+    max-width: 900px;
+  }
+  .faq details {
+    border-bottom: 1px solid var(--line);
+  }
+  .faq summary {
+    cursor: pointer;
+    padding: 18px 0;
+    font-weight: 700;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq summary::after {
+    content: "+";
+    color: var(--red);
+    font-weight: 800;
+  }
+  .faq details[open] summary::after {
+    content: "-";
+  }
+  .faq p {
+    margin: 0 0 20px;
+    color: var(--dim);
+    max-width: 72ch;
+  }
+  .gap {
+    margin-top: 28px;
+  }
+</style>

@@ -1,0 +1,42 @@
+[
+  {
+    "slug": "under-pressure",
+    "title": "under pressure",
+    "brand": "mathbooklm",
+    "lang": "English",
+    "line": "An eraser wipes the chalkboard, and huge hand-drawn machines carry their motion from one shot into the next.",
+    "poster": 5,
+    "seconds": 30,
+    "ratios": [
+      "16:9",
+      "1:1",
+      "9:16"
+    ],
+    "wide": true
+  },
+  {
+    "slug": "madrich",
+    "title": "the full tutorial",
+    "brand": "gomlin",
+    "lang": "Hebrew",
+    "line": "A full tutorial on applying for a job that's over at second 1.5, with a progress bar that's barely moved.",
+    "seconds": 26,
+    "ratios": [
+      "1:1",
+      "9:16"
+    ]
+  },
+  {
+    "slug": "three-tries",
+    "title": "three tries",
+    "brand": "mathbooklm",
+    "lang": "Hebrew",
+    "line": "Three ink drawings of something that moves are struck out, then Simulate makes it move.",
+    "seconds": 33,
+    "ratios": [
+      "9:16",
+      "1:1",
+      "16:9"
+    ]
+  }
+]

@@ -1,0 +1,140 @@
+<!doctype html>
+<html data-theme="studio">
+<head>
+<meta charset="utf-8" />
+<title>nykma · pitch</title>
+<link rel="stylesheet" href="base.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" />
+<style>
+  .app { display: grid; grid-template-columns: 1fr 360px; grid-template-rows: 48px 1fr 250px; height: 900px; }
+  .top { grid-column: 1 / -1; }
+  .doc { grid-row: 2; display: grid; grid-template-columns: 1fr 300px; gap: 28px; padding: 26px 32px 20px; overflow: hidden; background: var(--bg-0); }
+  .right { grid-row: 2 / 4; grid-column: 2; border-left: 1px solid var(--line-1); display: flex; flex-direction: column; }
+  .tl { grid-row: 3; grid-column: 1; }
+  .kicker { font-size: 12px; color: var(--text-3); display: flex; gap: 8px; align-items: center; }
+  .idea { font-family: var(--font-display); font-size: 30px; line-height: 36px; font-weight: 600; letter-spacing: -0.02em; margin: 10px 0 14px; max-width: 640px; text-wrap: balance; }
+  .lede { font-size: 15px; line-height: 24px; color: var(--text-2); max-width: 640px; }
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 22px; border-radius: var(--r-3); overflow: hidden; background: var(--line-1); max-width: 680px; }
+  .facts > div { background: var(--bg-1); padding: 12px 14px; }
+  .facts .k { font-size: 11.5px; color: var(--text-3); }
+  .facts .v { font-size: 13.5px; margin-top: 3px; line-height: 1.4; }
+  .player { align-self: start; border-radius: var(--r-3); background: var(--viewer); padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: inset 0 0 0 1px var(--line-1); }
+  .risk { margin-top: 18px; max-width: 680px; padding: 12px 14px; border-radius: var(--r-3); background: color-mix(in srgb, var(--warn) 9%, var(--bg-1)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--warn) 25%, transparent); font-size: 13px; color: var(--text-2); line-height: 1.5; }
+  .shot { position: absolute; top: 4px; bottom: 4px; border-radius: var(--r-2); background: var(--bg-2); box-shadow: inset 0 0 0 1px var(--line-2); display: flex; gap: 8px; padding: 5px; overflow: hidden; }
+  .shot .tx { font-size: 11px; line-height: 1.35; color: var(--text-2); overflow: hidden; }
+  .shot .tx b { display: block; color: var(--text-1); font-size: 11.5px; margin-bottom: 2px; }
+  .msg { padding: 0 16px; margin-bottom: 14px; font-size: 13px; line-height: 1.55; color: var(--text-2); }
+  .msg .who { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--text-1); margin-bottom: 6px; }
+  .step { display: flex; align-items: center; gap: 8px; height: 26px; font-size: 12px; color: var(--text-3); }
+  .step svg { color: var(--ok); }
+  .gate { margin: 4px 14px 14px; border-radius: var(--r-3); background: var(--bg-2); box-shadow: inset 0 0 0 1px var(--accent), 0 0 0 4px var(--accent-soft); padding: 14px; }
+  .alt { display: flex; gap: 10px; padding: 10px; border-radius: var(--r-2); background: var(--bg-2); box-shadow: inset 0 0 0 1px var(--line-1); margin: 0 14px 8px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="logo">n</div>
+    <div class="crumbs"><span>Projects</span><svg class="i s"><use href="#chevr"/></svg><span>mathbooklm</span><svg class="i s"><use href="#chevr"/></svg><b>kav-echad</b></div>
+    <div class="spacer"></div>
+    <nav class="stages">
+      <span class="stage now"><span class="dot"></span>Pitch</span>
+      <span class="stage">Build</span>
+      <span class="stage">First look</span>
+      <span class="stage">Checks</span>
+      <span class="stage">Post</span>
+    </nav>
+    <div class="spacer"></div>
+    <span class="chip"><svg class="i s"><use href="#coin"/></svg>Pitch <span class="num">$0.18</span></span>
+    <button class="btn"><svg class="i s"><use href="#play"/></svg>Play animatic</button>
+  </header>
+
+  <section class="doc">
+    <div>
+      <div class="kicker"><span class="chip" style="height:20px"><span class="bdot" style="width:8px;height:8px;border-radius:2px;background:#6a69d6"></span>mathbooklm</span>9:16 · 14.5 s · Hebrew text, no voice · music by script</div>
+      <div class="idea">One ink line that never lifts: it writes the circuit, becomes the lasso, runs as the current, and ends as the purple M.</div>
+      <div class="lede">A camera chases a pen nib over the real grid. The line turns violet, lassoes the problem, taps Simulate, and swings on the live stage. When C goes up the wave slows, and its last two crests settle into the brush-written M. The line you drew ends as the brand.</div>
+      <div class="facts">
+        <div><div class="k">Who’s watching</div><div class="v">5-unit physics students and first-year engineers, sound off</div></div>
+        <div><div class="k">What they take away</div><div class="v">A problem you write by hand becomes a live simulation on the same page</div></div>
+        <div><div class="k">The proof</div><div class="v">f ≈ 159 Hz → 79.6 Hz as C goes 100 → 400 µF</div></div>
+      </div>
+      <div class="risk"><b style="color:var(--warn);font-weight:600">The risk.</b> The single line could be remembered as a pretty trick, not the product, so the bar, the tap on Simulate and the slider hold long enough to read.</div>
+    </div>
+    <div class="player">
+      <div id="big" style="border-radius:6px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.4)"></div>
+      <div class="row" style="width:100%;gap:8px"><button class="tbtn" style="width:28px;height:28px;border-radius:50%;background:var(--text-1);color:var(--bg-0);display:grid;place-items:center"><svg class="i s" style="fill:currentColor;stroke:none"><use href="#play"/></svg></button><div style="flex:1;height:3px;border-radius:2px;background:var(--bg-3);position:relative"><div style="position:absolute;left:0;width:56%;height:100%;background:var(--accent);border-radius:2px"></div></div><span class="num t-micro">0:08 / 0:14</span></div>
+      <div class="t-micro" style="align-self:flex-start">Animatic, shot 3 of 5 · free</div>
+    </div>
+  </section>
+
+  <aside class="right panel">
+    <div class="ptabs">
+      <span class="ptab on"><svg class="i s"><use href="#spark"/></svg>Agent</span>
+      <span class="ptab"><svg class="i s"><use href="#folder"/></svg>pitch.md</span>
+      <span class="ptab"><svg class="i s"><use href="#check"/></svg>Claims<span class="badge" style="background:var(--ok)">9</span></span>
+    </div>
+    <div style="flex:1;overflow:hidden;padding-top:14px">
+      <div class="msg"><div class="who"><span class="avatar" style="width:20px;height:20px;background:var(--bg-4);color:var(--text-2)">T</span>You</div>Three short ads for mathbooklm’s Simulate, each with its own physics example.</div>
+      <div style="padding:0 16px 8px">
+        <div class="step"><svg class="i s"><use href="#check"/></svg>Read the brand kit and its notes</div>
+        <div class="step"><svg class="i s"><use href="#check"/></svg>3 explorers came back with 6 ideas</div>
+        <div class="step"><svg class="i s"><use href="#check"/></svg>Wrote the pitch and a 14 s animatic</div>
+        <div class="step"><svg class="i s"><use href="#check"/></svg>Claims checked against brand.md: 9 backed, 0 open</div>
+      </div>
+      <div class="msg"><div class="who"><span class="avatar agent-av" style="width:20px;height:20px"><svg class="i s"><use href="#spark"/></svg></span>ad-agent</div>I picked the unbroken line because it shows the whole loop, from handwriting to simulation, without a word. Before hand-off I need one live Simulate on these values, so the redrawn sim matches the app.</div>
+      <div class="gate">
+        <div class="t-strong">Build this idea?</div>
+        <div class="row" style="gap:14px;margin:8px 0 12px;font-size:12px;color:var(--text-2)">
+          <span class="row" style="gap:5px"><svg class="i s"><use href="#clock"/></svg>~25 min</span>
+          <span class="row" style="gap:5px"><svg class="i s"><use href="#coin"/></svg>no voice, no generated media</span>
+        </div>
+        <div class="row" style="gap:6px"><button class="btn primary" style="flex:1;justify-content:center">Go</button><button class="btn">Another idea</button><button class="btn icon"><svg class="i s"><use href="#comment"/></svg></button></div>
+      </div>
+      <div class="t-micro" style="padding:4px 16px 8px">Also on the table</div>
+      <div class="alt">
+        <div style="width:36px;height:64px;border-radius:4px;flex:none;background:linear-gradient(160deg,#4a3420,#1d140b);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)"></div>
+        <div><div class="t-strong" style="font-size:12.5px">Music box · the wild one</div><div style="font-size:12px;color:var(--text-3);line-height:1.4">Handwritten physics runs through a brass comb; the play button sits where the cylinder was. One Blender scene.</div></div>
+      </div>
+      <div class="alt">
+        <div style="width:36px;height:64px;border-radius:4px;flex:none;background:#fbfbfd;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)"></div>
+        <div><div class="t-strong" style="font-size:12.5px">The circuit sets the tempo</div><div style="font-size:12px;color:var(--text-3);line-height:1.4">Dragging C slows the whole ad to half speed.</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <section class="tl">
+    <div class="tl-heads">
+      <div style="height:26px;border-bottom:1px solid var(--line-1)"></div>
+      <div class="tl-head" style="height:120px"><span class="sw2" style="background:var(--t-scene)"></span>Storyboard</div>
+      <div class="tl-head"><span class="sw2" style="background:var(--t-text)"></span>On-screen text</div>
+      <div class="tl-head"><span class="sw2" style="background:var(--t-music)"></span>Sound</div>
+      <div class="tl-head"><span class="sw2" style="background:var(--text-4)"></span>Made with</div>
+    </div>
+    <div style="position:relative;overflow:hidden">
+      <div class="ruler" id="ruler"></div>
+      <div class="lane" style="height:120px" id="lane-sb"></div>
+      <div class="lane" id="lane-text"></div>
+      <div class="lane" id="lane-snd"></div>
+      <div class="lane" id="lane-how"></div>
+      <div class="playhead" style="left:calc(10px + 8 * 64px)"></div>
+    </div>
+  </section>
+</div>
+<script src="icons.js"></script>
+<script src="sketches.js"></script>
+<script>
+  const PX = 64, X0 = 10, x = s => X0 + s * PX;
+  const r = document.getElementById("ruler");
+  for (let s = 0; s <= 14; s++) r.insertAdjacentHTML("beforeend", `<span style="left:${x(s)}px">0:${String(s).padStart(2,"0")}</span>`);
+  document.getElementById("big").innerHTML = SKETCH(2, 216, 384);
+  const shots = [[0,4,"0:00 The nib writes the circuit","Extreme close-up; the line writes L, C, 9 V without lifting."],[4,6.5,"0:04 The lasso","Line turns violet, selects the problem, taps Simulate."],[6.5,9.5,"0:06 The current","The sim builds beside it; the line swings on the stage."],[9.5,12,"0:09 C goes up","The wave slows; f ≈ 79.6 Hz."],[12,14.5,"0:12 End card","The M, athbookLM, mathbooklm.com."]];
+  shots.forEach(([a,b,t,d],i) => document.getElementById("lane-sb").insertAdjacentHTML("beforeend", `<div class="shot" style="left:${x(a)+1}px;width:${(b-a)*PX-3}px;${i===2?"box-shadow:inset 0 0 0 1.5px var(--accent)":""}"><div style="border-radius:3px;overflow:hidden;flex:none">${SKETCH(i,59,105)}</div><div class="tx"><b>${t}</b>${d}</div></div>`));
+  const bar = (lane,a,b,label,color,extra="") => document.getElementById(lane).insertAdjacentHTML("beforeend", `<div class="clip" style="left:${x(a)}px;width:${(b-a)*PX}px;background:${color};${extra}">${label}</div>`);
+  bar("lane-text",6.75,9.7,"כותבים ביד. מקבלים סימולציה על אותו דף.","var(--t-text)","direction:rtl;justify-content:flex-end");
+  bar("lane-text",12.2,14.5,"mathbooklm.com · חינם לתמיד","var(--t-text)");
+  bar("lane-snd",0,14.5,"Script-made pulse that follows the current · pen scratch · one note when the M lands","color-mix(in srgb, var(--t-music) 55%, var(--bg-2))","color:var(--text-1)");
+  bar("lane-how",0,14.5,"Code only: one SVG path drawn by dash offset, sim chrome in React · no Blender, no stock, no generated media","var(--bg-3)","color:var(--text-2);font-weight:500");
+</script>
+</body>
+</html>

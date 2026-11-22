@@ -23,11 +23,11 @@
 ## 2. Non-goals or future goals
 
 - A hosted web app, job queue or database. The desk (§10) runs locally on the dev server, and its state is the files: queue folders, `src/ads/<slug>/` and `brands/`.
-- Editing tools on the board (text, shapes, properties) for now. The agent makes the scenes, and the board shows and arranges them (§10.3).
+- Drawing tools (new shapes, new text boxes, keyframes by hand). The agent makes the scenes; the desk changes the values they already have (§10.13) and arranges them on the timeline (§10.4).
 - A multi-agent pipeline (brand analyst → copywriter → scene composer → QA). One agent makes the whole ad, and the reviewer only suggests adjustments.
 - Schemas or contracts for ads, storyboards or brands. Markdown and code are enough.
 - AI-generated images or footage *instead of* code. Every ad is still built in code (React, SVG, Blender). Generated stills and clips are an addition for what code can't make well, such as a real-looking person reacting or the world an idea lives in (§6.6), never the product's UI, the brand or a claim.
-- Auto-posting. Ads land in `queue/` for you. 
+- Posting unasked. Ads land in `queue/` for you. They go out when you publish them from the desk's Publishing (§10.12) or by hand, or when you ask an agent to, which posts through the same desk with `bun run publish`.
 
 ---
 
@@ -77,8 +77,8 @@ nykma/
 ├─ desk.html, board.html     # the desk, and one scene for its board (§10.3), dev server only
 ├─ src/
 │  ├─ engine/                # useFrame, Sequence, Stage, Plate, the page API for capture (§5)
-│  ├─ desk/                  # the desk (bun run dev): dashboard, board, chat (§10)
-│  ├─ board/                 # one scene alone, for the board's iframes (§10.3)
+│  ├─ desk/                  # the desk (bun run dev): dashboard, viewer, timeline, inspector, chat (§10)
+│  ├─ board/                 # an ad in an iframe for the desk: the viewer, a scene alone, filmstrips (§10.3)
 │  ├─ preview/               # scrub/play page (/ on the dev server)
 │  ├─ parts/                 # the parts bin (§6): reuse, copy, change or ignore
 │  ├─ ads/<slug>/            # one folder per ad, structured however the ad needs, plus story.json (§10.4)
@@ -101,6 +101,21 @@ Small enough to read in one sitting:
 - **In the page:** `useFrame()`, `useVideo()` (fps, length, size), and `<Sequence from duration>` to shift time for a scene. `<Stage>` mounts an ad at its exact output size. `window.nykma.seek(frame)` resolves once React has committed, fonts are ready and images have decoded. `window.nykma.inspect()` returns the visible text on the current frame, with each element's box, font, size and colour, for the validators.
 - **Desk:** `bun run dev` opens the desk, the UI for the whole flow (§10).
 - **Scenes:** an ad can list its scenes instead of one component, and `story.json` sets their order (§10.4). An ad with one `component` is one scene.
+- **Trims:** `story.json` can trim a scene (`trim`, §10.4). The scene then starts later or stops sooner, and its code is untouched: `useFrame()` inside it counts from the trim's `in`, and its cues move with it. Renders go through the same engine, so a trim is in the MP4 too.
+- **Knobs:** `src/engine/tune.ts`. An ad reads a value by name, with the value in its code as the fallback, so the desk can change it without touching the code:
+  - `const { k, nudge, at } = useTune()` inside a component, or `tuneFor({ slug, take, ratio })` outside one, such as in a cue function
+  - `k("title.size", 120)` is a number, string or boolean; `at("drop", 90)` is a named time in frames
+  - `nudge("logo")` returns CSS `translate`, `scale` and `rotate`, which add to the element's own `transform`, so its motion keeps playing. Don't set those three yourself on a nudged element
+  - the values are in `src/ads/<slug>/tune.json` (`tune-<take>.json` for a take with its own): `{ "all": { "title.size": 132 }, "9x16": { "logo": { "dx": 0, "dy": -40, "scale": 1.2 } } }`. A ratio's entry wins over `all`. With no file or no key, a knob is its fallback
+  - the desk writes the file through `POST /api/tune`, and a mounted page takes the change without a reload (a new file reloads it once). While you drag, the desk sets `setLiveTune()` values in memory only; renders never see them
+  - `knobsSeen()` lists the knobs the ads have read, for the desk's panel. `validate` warns about a tune.json key no code in the ad mentions
+- **Transitions:** `story.json`'s `transitions` puts a transition into a scene (`src/engine/transitions.ts`, §10.4). The scenes keep their starts and the video its length; the outgoing scene holds its last frame under the incoming one. `Video.transitions` lists the ones that play, each with `start` and `frames`. Scenes sit in `display: contents` wrappers (`data-nykma-scene`) that become full-frame layers only while a transition plays.
+- **Effects:** `src/engine/fx.ts`. Any element can carry `data-fx`, a list of steps `slot:effect[@start][+frames][*amount][~ease]`:
+  - `in:fade-up@12+15 loop:float out:fade@80+10`: an entrance, a loop and an exit. `@start` is the scene's own frame, as `useFrame()` counts it, trims included (`in` and `loop` default to 0, `out` to ending with the scene); `+frames` is how long (a loop's cycle), `*amount` how far or strong, `~ease` one of linear, in, out, in-out, expo, back or spring
+  - entrances and exits: fade, fade-up/down/left/right, slide-up/down/left/right, pop, zoom-in, zoom-out, blur, drop, spin, wipe (which follows the ad's direction), wipe-up, wipe-down; loops: pulse, float, bounce, sway, shake, wiggle, glow, blink, spin. `EFFECTS` lists them with labels; `parseFx`, `formatFx` and `checkFx` read, write and check the string
+  - before its entrance the element waits in its first pose (hidden, for the fades) and after its exit it stays gone
+  - `<Stage>` applies them after every commit (a layout effect, and a MutationObserver for commits inside the ad), so the desk and a render draw the same frame. They write only `translate`, `scale`, `rotate`, `filter` and `mask-image`, composed with the ad's own (translate added, scale multiplied, filters appended; an ad's own mask wins). Each scene's frame is on a `display: contents` marker (`data-nykma-frame`, `data-nykma-length`)
+  - `validate` warns about transitions that can't play and `data-fx` values that don't parse
 - **Preview:** `/` on the dev server has a picker for ad and ratio, a scrubber, play, frame stepping, and the frame in the URL.
 - **Render:** `bun run render <id>`:
   1. build with Vite, with `index.html` and `capture.html` as its two entries. Builds don't copy `public/`: `sirv` serves it in place, so a heavy `gen/blender/` doesn't slow any build
@@ -171,7 +186,7 @@ This is ported from the hero words in `tomcohendev-portfolio` (`scripts/hero-str
 - **Timing helpers** have the same names in TS (`src/parts/timeline.ts`) and Python (`py/blender/tl.py`): `said`, `marker`, `beatPhase`, `pulse`, `energy`, `section`. TS passes the timeline first, as in `said(tl, track, word)`, and Python calls them on it, as in `tl.said(track, word)`. They let you cue picture to words and beats instead of hard-coded seconds.
 - **Blender:** a scene script uses `kit.py` (scene setup, world/fog, bloom, chalk and text materials, camera) and bakes motion one key per frame with `tl.bake`.
   - `mv.py blender <slug> --scene … --preview --frames 1,300` renders quick stills.
-  - `--layer` renders PNG plates for a composition to show with `<Plate>`. The dev server doesn't watch `gen/`, because plates can run to gigabytes, so it reads `/ads/<slug>/gen/` from disk on each request. That way plates rendered while it runs show on the board and in the preview without a restart. They're straight-alpha RGBA: `kit.compositor` puts the alpha back after bloom (the render's own, or the glow's brightness past an object's edge), so the page shows through and the glow still lands on it.
+  - `--layer` renders PNG plates for a composition to show with `<Plate>`. The dev server doesn't watch `gen/`, because plates can run to gigabytes, so it reads `/ads/<slug>/gen/` from disk on each request. That way plates rendered while it runs show in the desk and in the preview without a restart. They're straight-alpha RGBA: `kit.compositor` puts the alpha back after bloom (the render's own, or the glow's brightness past an object's edge), so the page shows through and the glow still lands on it.
   - `--video` renders a standalone 3D cut.
   - `--ratio 1x1` or `9x16` renders that shape instead of 16x9.
 - **Whisper** (`py/whisper.py`): `faster-whisper` on the CPU, `large-v3-turbo` or ivrit.ai's Hebrew fine-tune of it. Each model downloads once (about 1.6 GB). Given the script, the words that come back are the script's, laid on what Whisper heard, so `word:` cues and lines behave as they do with forced alignment. Its times lean early, so starts move 50 ms later: against ElevenLabs' own timing on 109 Hebrew words, 78-86% then started within 2 frames and 83-90% within 3. That's close enough for captions, but `"align": "eleven"` is closer for a cut that has to land on a word. A 30 s voice takes about 4 minutes on an Intel Mac. `mv.py words <audio>` writes `words.json` beside any recording, such as a clip's `audio.wav`. Transcripts with no script need reading before they become captions: Whisper writes numbers as digits and mishears the odd word.
@@ -213,7 +228,7 @@ Video you shot goes into an ad as itself, cut and timed by the ad like everythin
   - Its sound is a cue like any other.
 - **The brand's own videos:** `bun run footage <slug> <url> --own` downloads one with yt-dlp (up to 4K, video and sound merged to MP4), then unpacks it like any clip. It refuses without `--own`, because someone else's video can't go in an ad. Its URL, title, channel and date go in `public/ads/<slug>/sources.json`, which is committed while `footage/` isn't, so it records whose video it was, and `bun run footage <slug>` downloads it again after a clone.
 - **Speech in a clip:** `mv.py words <clip's audio.wav> [--lang he] [--text "..."]` gives its word times (§6.3). In an ad timed by audio, list the clip's sound as a voice with no `text` and `"mix": false`, and its words land in the timeline.
-- **Dropped on the board:** a clip dropped on a project's board is uploaded, unpacked and placed as a scene (§10.3).
+- **Dropped on the timeline:** a clip dropped on a project's timeline is uploaded, unpacked and placed as a scene (§10.4).
 - **Not generated:** this is footage someone shot. Generated clips (§6.6) use the same unpacking and `<Footage>`, but they're a separate source with their own rules.
 
 ### 6.6 Generated media (`scripts/gen.ts`, `scripts/lib/gen.ts`, `gen-run.ts`)
@@ -345,7 +360,7 @@ Three ways to depth, and `.claude/guides/3d.md` says which when: CSS 3D for the 
 
 - `<Three setup draw>` is a three.js scene that's a function of the frame. `setup` builds it once and returns the objects. `draw(frame, objects, kit)` sets everything that moves, and then the part renders, in the same layout effect that commits the frame, so the seek's paint shows it. There's no clock, animation loop or time-stepped physics, and scattering uses `random(seed)`.
 - `texture(src)` and `model(src)` (glTF/GLB) load from `public/` and hold the capture until they're in. That's `holdFrame` in `src/engine/ready.ts`: `seek` waits for fonts, the stage's images, everything held, and then a paint.
-- The renderer has a pixel ratio of 1, antialiasing, sRGB output and `preserveDrawingBuffer`. The canvas is the video's size by default, so each ratio moves its camera rather than shrinking the scene. Text a viewer reads stays DOM on top, because words drawn in WebGL are invisible to Layout, Truth and the Hebrew checks.
+- The renderer has a pixel ratio of 1, antialiasing (`antialias={false}` turns it off, for hard pixels when a small canvas is scaled up with `imageRendering: "pixelated"`, as `one-tile` does at 640×360), sRGB output and `preserveDrawingBuffer`. The canvas is the video's size by default, so each ratio moves its camera rather than shrinking the scene. Text a viewer reads stays DOM on top, because words drawn in WebGL are invisible to Layout, Truth and the Hebrew checks.
 - It's imported on its own (`../../parts/Three`), so ads without 3D don't load three.js.
 - **Tested** with `three-demo` (64 seeded cubes settling into a cube under a DOM headline, 1:1 and 9:16): headless Chromium renders WebGL here, and `validate` passes, including the re-render of random frames on fresh pages. Post-processing through `EffectComposer` isn't wired in yet.
 
@@ -458,6 +473,8 @@ Notes you give after the checks have run are fixed the same way, and the reviewe
 | Copy | every link in `post.md` has UTMs. Hebrew text renders right to left, and no letter falls back to a font outside the brand kit |
 | Handwriting | stroke order and coverage flags from `hand:check` |
 
+Render also warns about a `tune.json` key that no code in `src/ads/<slug>/` names, since that knob does nothing (§5).
+
 Where the lines fall:
 
 - **Layout:** a problem held for 0.75 s or more fails, and a shorter one warns, because it's a moment in a move. In 9x16, text under 32 px fails and under 40 px warns. Safe areas in 9x16 keep clear 200 px at the top, 120 px on the right, 320 px at the bottom and 60 px on the left, for the app's own UI.
@@ -506,7 +523,7 @@ A short core that's relevant to every run, and guides the agent reads only when 
 **The core, in order:**
 
 - **The job:** an ad worth watching that says one true thing about the product and works on a phone. The user approves and posts everything.
-- **Hard rules**, first because they hold over everything: publishing is the user's, spend only what's approved, claims are true, rights, keys stay closed, say only what happened. Each says where code backs it: the desk denies `gh`, `git push`, `curl`, `.env` and the key store (§10.10), holds the generated-media budget (§6.6), and `validate` checks the truth, numbers and UTMs (§7.3). A prompt can't make a model obey perfectly, so the limits that matter most are enforced outside it.
+- **Hard rules**, first because they hold over everything: post only when asked, spend only what's approved, claims are true, rights, keys stay closed, say only what happened. Each says where code backs it: the desk denies `gh`, `git push`, `curl`, `.env` and the key store (§10.10), so a post goes only through `bun run publish` and the desk (§10.12), holds the generated-media budget (§6.6), and `validate` checks the truth, numbers and UTMs (§7.3). A prompt can't make a model obey perfectly, so the limits that matter most are enforced outside it.
 - **Who decides what:** the hard rules, then the brand kit, then the brief, then the stages, then craft. A brand's style or note beats a general principle. A brand's own instructions come before the defaults, except the hard rules.
 - **The stages**, each ending in a file you can look at: read the brief (with `brand-check` and `history`), explore, pitch and stop, build, first look and stop, checks when asked, hand-off. The pitch is the contract: the build decides what it leaves open, and a change to the idea, a claim or the cost goes back to you.
 - **Finding the idea**: the explorers and the choice (§7.1).
@@ -531,7 +548,7 @@ No emphasis in capitals and no "MUST": current Claude models over-apply emphatic
 | `hand-off.md` | the ad is done: the files, README, post.md, notes for next time, the reply (§7.4) |
 | `brand-kit.md` | a new brand kit or a refresh (§9) |
 
-**`CLAUDE.md`** holds what every session needs, agent or not: the commands, the code rules (every value a function of the frame, no `import` from `gen/`, the board's `story.json`), the limits, and how to change nykma. Making an ad points to `ad-agent.md`, which owns that workflow, so each rule has one owner.
+**`CLAUDE.md`** holds what every session needs, agent or not: the commands, the code rules (every value a function of the frame, no `import` from `gen/`, the desk's `story.json`), the limits, and how to change nykma. Making an ad points to `ad-agent.md`, which owns that workflow, so each rule has one owner.
 
 **Brand notes** (`brands/<brand>/notes.md`) are the user's standing feedback for a brand's ads ("music only", "no self-writing words"), printed by `history`. The agent adds one at hand-off when a note should hold for the brand's next ads. Agent runs get no Claude Code memory (`CLAUDE_CODE_DISABLE_AUTO_MEMORY`, and the memory folder denied), because a person's own sessions' memory reached the agent outside the instructions in the first eval, so the notes are the one place this feedback lives.
 
@@ -582,16 +599,17 @@ brands/<brand>/
 
 ## 10. The desk (the UI)
 
-`bun run dev` opens the desk, a Figma-style app over the same files and the same agent. Everything in §7 and §9 can be done from it without a terminal. It adds no flow of its own: a button sends the agent the words you'd type.
+`bun run dev` opens the desk, a video editor over the same files and the same agent. Everything in §7 and §9 can be done from it without a terminal. It adds no flow of its own: a button sends the agent the words you'd type.
 
-It has two places: the **dashboard**, with projects and brand kits, and a **project**, with the board in the middle and the chat on the right.
+It has two places: the **dashboard**, with projects and brand kits, and a **project**, laid out like a video editor: the viewer in the middle, the timeline under it, scenes and files on the left, the inspector and the agent on the right. Until 2026-11-21 the project was a Figma-style board where you drew arrows between scenes; the timeline replaced it, because a video is a line, not a graph.
 
 ### 10.1 Dashboard
 
-A left rail with **Projects** and **Brand kits**, and a grid of cards on the right, like Figma's file browser.
+A left rail with **Projects**, **Brand kits**, **Publishing**, **Settings** and the brands.
 
-- **Projects.** A project is one video or one asset (§10.5). Each card shows the render, which plays on hover, or else the stills, the animatic, a storyboard image or the live middle scene. Then the name, brand, state and date. The state is read from the files, as before: **Pitch**, **First look**, **Checked** (`validate.md` exists), **Ready** (`post.md` exists) or **Dropped** (`Dropped` at the top of the README). An ad in the registry with no queue folder, like the demos, is **In code**. You can filter by brand and state.
-- **New project** is AI-first: one prompt box ("what's the ad about?"), a brand picker, Video / Asset, the layouts (1:1 unless you pick more) and **Pitch first**. The last two start from the settings (§10.8) and change only this ad. Sending it opens the project with the chat already running. The agent picks the slug and makes the queue folder as usual.
+- **The brief comes first.** The top of Projects is a prompt box ("What should the next ad be about?") with the brand, Video / Asset, the layouts, **Pitch first** and **Cover image**. The last three start from the settings (§10.8) and change only this ad. Ctrl+Enter sends it and opens the project with the agent already running. The agent picks the slug and makes the queue folder as usual. **New project** in the header jumps to the box.
+- **Your move.** Under it, up to four cards for what's waiting: a pitch to answer (with **Go** and **Another idea**, which send those words without opening the project), a first look to watch, and what the agent is working on. Newest first.
+- **The library.** A project is one video or one asset (§10.5). Each card is the ad's own shape, so a 9:16 ad is a tall card: the first layout that has a render, which plays on hover, or else its cover, a still, the animatic, a storyboard image or the live middle scene. On it are the state, the layouts and the length; under it the name, brand and date. The state is read from the files, as before: **Pitch**, **First look**, **Checked** (`validate.md` exists), **Ready** (`post.md` exists) or **Dropped** (`Dropped` at the top of the README). An ad in the registry with no queue folder, like the demos, is **In code**. You can filter by brand and state.
 - **Brand kits.** Each card shows the logo on the kit's first colour, the palette as swatches and the font names.
 - **New brand kit** has three ways in, and each one opens a chat with the agent to make the kit (§9):
   - **From a local repo:** paste a path.
@@ -602,69 +620,66 @@ A left rail with **Projects** and **Brand kits**, and a grid of cards on the rig
 ### 10.2 A project
 
 ```
-┌──────────────────────────────────────────────────────────────────────────┐
-│ ‹ Projects  achuzim · First look   16:9 1:1 9:16 All   ▶ Play  Render  62% │
-├────────────┬──────────────────────────────────────────┬──────────────────┤
-│ Scenes     │                                          │ Chat             │
-│ 1 hook     │   ┌──────┐     ┌──────┐     ┌──────┐     │                  │
-│ 2 demo     │   │ hook │ ──▶ │ demo │ ──▶ │ end  │     │  agent messages  │
-│ 3 end      │   └──────┘     └──────┘     └──────┘     │  tool steps      │
-│ ── off ──  │                                          │                  │
-│ alt-hook   │        ┌──────────┐                      │ [Check it] [Skip │
-│            │        │ alt-hook │  (dimmed)            │  the checks] ... │
-│ Files      │        └──────────┘                      │ ┌──────────────┐ │
-│ pitch.md   │                                          │ │ @demo  note… │ │
-│ README.md  │        [ V  H  ↗  ⤢ ]                    │ └──────────────┘ │
-└────────────┴──────────────────────────────────────────┴──────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────┐
+│ ‹ Projects / mathbooklm / kav-echad   ✓Pitch ✓Build ●First look Checks Post  Render [Check it] │
+├────────────┬───────────────────────────────────────────────┬───────────────────┤
+│ Scenes Media Files │ 16:9 1:1 9:16 All          Select  Safe areas │ Inspect Effects History Agent │
+│ 1 The line…  4.0 s │              ┌────────┐                       │ Headline          │
+│ 2 The lasso  2.3 s │              │  the   │                       │ KavEchad.tsx:393  │
+│ 3 …                │              │  video │                       │ Text  [כותבים…]   │
+│ Not in the video   │              └────────┘                       │ X 0  Y -12  100%  │
+│ alt-end   +        │  ━━━━━━━━━━━━━━━━━━━━━━━━●━━━━━━━━━━━━━━━━━━━ │ Size 80  ● #111   │
+│                    │  00:13:06 / 00:14:15   ⏮ ‹ ▶ › ⏭             │ Effects  Fade up  │
+├────────────┴───────────────────────────────────────────────┤                   │
+│ Video  [1 the line ▒▒▒▒][2 lasso ▒▒]◆[3 the current ▒▒▒▒▒][4][5 end ▒▒]       │                   │
+│ Sound  [music.wav ||||||||||||||||||||||||||||||||||||||||||||||||||||||||]   │                   │
+└────────────────────────────────────────────────────────────┴───────────────────┘
 ```
 
-- **Top bar:** back to the dashboard, the project name, brand and state, the ratio switch (16:9, 1:1, 9:16, or All), **Play** (the whole story in an overlay player with the scrubber, the sound and the frame in the URL), **Render** (every ratio, the same as the first look), and the zoom level.
-- **Left panel:** the scenes in story order with their numbers, then the ones off the story. Below them are the project's files (`pitch.md`, `README.md`, `post.md`, `review.md`, `validate.md` and the renders), each opening in a reader. Clicking a scene centres it on the board.
-- **Board (middle):** §10.3.
-- **Chat (right):** §10.6.
+- **Top bar:** back to the dashboard, the brand and the project name, the take, the **stages** (Pitch, Build, First look, Checks, Post: done ones ticked, the current one lit, from the same state as the dashboard), **Undo** and **Redo** (§10.13, with what they'd undo in their tooltip), **Render** (every ratio, no agent, no tokens), **Publish**, and the stage's next step as the one filled button: **Go** for a pitch, **Check it** at the first look, **Publish** when it's ready.
+- **Left panel:** **Scenes** lists the story in order with lengths, then **Not in the video** (the plus puts one back at the end), and **Add an image or a clip**. **Media** is the generated stills and videos (§6.6). **Files** has the idea and the project's files (`pitch.md`, `README.md`, `post.md`, `review.md`, `validate.md`, the renders, stills, covers and the animatic), each opening in a reader.
+- **Viewer (middle):** §10.3. **Timeline (bottom):** §10.4.
+- **Right panel:** **Inspect**, **Effects** and **History** (§10.13), and **Agent**, the chat (§10.6). Picking something in the viewer opens Inspect (or keeps Effects open); a run starting opens Agent.
+- **Keys:** Space plays, ←/→ step a frame (Shift: ten), ↑/↓ go to the previous or next scene, Home/End, V turns Select on and off, Esc clears the selection, Ctrl+Z undoes the desk's last change and Ctrl+Shift+Z (or Ctrl+Y) puts it back.
 
-### 10.3 The board
+### 10.3 The viewer
 
-An infinite canvas, like a Figma page, where each scene of the ad is a frame. They're called **scenes** here because "frame" already means one video frame.
+The whole video in story order, played by the engine, not a render: `board.html?id=…&viewer` in an iframe at the video's exact size, scaled to fit. A broken ad shows its error there and the rest of the desk carries on.
 
-- **Pan and zoom:** scroll or drag with space held, the middle button or the Hand tool (H). Zoom with Ctrl+wheel, a pinch, + and −, from 2% to 400% (a row of 1920 px scenes needs far below 10% to fit). Shift+1 fits everything, Shift+2 fits the selection, and Shift+0 is 100%.
-- **A scene** is drawn at its real pixel size for the chosen ratio, with its name and length above it (`hook · 3.0 s`) and its story number in a badge. It's the real component through the engine, not a picture: each is `board.html?id=…&scene=…` in an iframe, so a broken scene shows its error on its own frame and the rest of the desk carries on. Each scene opens on its middle frame. The selected one has a scrubber under it and plays in place (K). Scenes well off screen, or too small to read, unload, so a big board stays fast.
-- **All ratios:** each scene shows as three frames side by side, 16:9, 1:1 and 9:16, so each layout is seen in its own shape (Goal 8).
-- **Live:** when the agent edits a scene, Vite's hot reload redraws it on the board. When it adds one, the new scene lands to the right of the last, or in the row below if it's off the story. Writing `story.json` doesn't reload the scenes: the module that reads it accepts its own updates.
-- **Right-click** a scene for **Start here**, **Ask about this scene**, **Zoom to scene** and **Remove its arrows**.
-- **Your own video clips:** drop a clip (MOV, MP4, M4V, WebM, MKV or AVI, up to 4 GB) on the board, or add it with the image button (I). It goes to `public/ads/<slug>/footage/` and is unpacked to frames (§6.5) while the board says so, which takes a while for a long or 4K clip. Then it's a scene like an image: off the story until an arrow takes it in. On the board it shows the frame under its scrubber, cropped for each shape, and it plays in place (K). In the video it plays from the start to its end with its own sound. Right-click it for **Shown for** (shorter than the clip, or **All**), **Picture** (Fill or Fit) and **Sound** (On or Off). Trims inside a clip, slow motion and framing per shape are for the agent, through `<Footage>`.
-- **Your own images:** drop image files on the board, paste one (Ctrl+V), or press the image button (I). Each is uploaded to `public/ads/<slug>/board/`, because the video reads only `public/`, and lands where it was dropped, or in the first free spot below the middle of the view. It starts off the story, so nothing changes until you draw an arrow to or from it. Then it's a scene like the others: it plays as a still, the same picture in every ratio. Right-click it to set **Shown for** (1, 2, 3, 5 or 8 s, 2 by default) and **Picture**: **Fill** crops the picture to the frame, and **Fit** shows all of it on black. **Take off the board** (or Delete) removes it and closes the gap in the story, so A → image → B becomes A → B. The file stays in `public/`. It works on any ad in the registry, including one with a single component. The pitch board doesn't take images, because there's no ad yet.
-- **Selecting** scenes (click, Shift+click, or drag a box) attaches them to your next chat message (§10.6).
-- **Bottom toolbar:** Move (V), Hand (H), Arrow (A), Add image (I), Auto layout (L) and Fit. There are no tools for making or editing anything yet. The agent makes the scenes, and the board shows and arranges them, along with the images you add.
-- **Layout:** you can drag scenes anywhere. Their places on the board are saved in `story.json` and have no effect on the video.
-- **Auto layout (L):** puts the story in one row in the order it plays, each chain off the story in a row below it, and scenes with no arrows in a last row, then fits the view. Only the places change, so the video doesn't.
+- **Ratios:** 16:9, 1:1, 9:16 or **All**, which shows every layout side by side at one height, playing together, so each is seen in its own shape (Goal 8). The first carries the sound and the clock.
+- **Play** plays with the ad's sound (the cue list, as in the preview), from the playhead. Under the picture, a **scrub bar** spans the whole video with a tick where each scene starts: press and drag it to scrub. The transport shows timecode and frame, steps frames and jumps scenes.
+- **Live:** when the agent or the desk changes an ad's code, the viewer draws the new code in place, on the same frame with the same selection. The registry accepts the hot update itself (`import.meta.hot.accept` in `src/registry.ts`) and hands the new one to each `board.html` frame, so the desk page never reloads; a page that doesn't listen, like the scrubbing preview at `/`, reloads only itself. When the story, a trim or a transition changes on disk, the viewer loads the video again.
+- **Select (V)** outlines the element under the pointer and selects it on click (§10.13). **Safe areas** shows the margins `validate` checks.
+- **Moving an element:** drag the selected element to move it (Shift keeps it on one axis), or drag a corner to scale it. The frames show it live, a readout gives the offset or the scale, and on release it's saved as the element's `translate` or `scale` (or its nudge knob, when the code has one), one entry in the history. A click inside the selection without a drag picks what's under the pointer, and a double click edits its text in the inspector.
+- **Before there's code** the viewer plays the animatic, or shows the storyboard row under the playhead.
 
-### 10.4 The story: arrows between scenes
+### 10.4 The timeline, and the story
 
-Arrows between scenes are the story. The video plays the scenes in the order the arrows go.
+The story is the timeline: one track of scenes with no gaps, as in Final Cut's storyline. The video plays them left to right.
 
-- **Drawing one:** drag from the handle on a scene's edge, or use the Arrow tool (A) and drag from anywhere on a scene, onto another scene. The arrow turns green over a scene it can go to and red over one that would make a loop.
-- **How they're drawn:** side to side when nothing is in the way. An arrow that would cross another scene arcs over the top, and one that runs backwards loops under the bottom, so the order reads at a glance. Arrows between scenes off the story are grey and dashed.
-- **Example:** with scenes 1, 2 and 3, an arrow from 1 to 3 and another from 3 to 2 make a video that plays 1, then 3, then 2.
-- **The start** is the scene with an outgoing arrow and none coming in. Right-click a scene → **Start here** to choose when there's more than one chain. A board with no arrows plays only the start scene.
-- **One way through:** each scene has at most one arrow out and one in. Dragging a second arrow out of a scene replaces the first. An arrow that would close a loop isn't allowed, and the cursor shows it.
-- **Off the story:** scenes that the chain doesn't reach stay on the board, dimmed, and aren't in the video. That's where an alternative opening or a cut scene waits.
-- **Removing one:** click it and press Delete, or right-click a scene → **Remove its arrows**. Cutting the arrow out of the start makes the scene it pointed at the start, so the rest of the story still plays.
-- **One story for every ratio.** The arrows are drawn once and apply to 16:9, 1:1 and 9:16.
+- **Moving a scene:** drag it. A line shows where it will land, and the scenes after it close up.
+- **Trimming a scene:** drag its start or end. A scene's code still runs from its own frame 0, so trimming only chooses which of its frames play (`trim` below). Dragging an end back out shows the frames again, up to the scene's full length. An image's end sets how long it shows.
+- **Taking one out:** **Take it out of the video** in the inspector. It waits under **Not in the video** in the left panel, which is where an alternative opening or a cut scene lives. It comes back at the end with the plus, or with **Put it in the video**.
+- **Your own images and clips:** drop them on the timeline where you want them, or **Add an image or a clip** (to the list, not the video). Images go to `public/ads/<slug>/board/`, because the video reads only `public/`. Clips (MOV, MP4, M4V, WebM, MKV or AVI, up to 4 GB) go to `public/ads/<slug>/footage/` and are unpacked to frames (§6.5) while the viewer says so, which takes a while for a long or 4K clip. In the inspector: **Shown for**, **Picture** (Fill crops to the frame, Fit shows all of it on black) and, for a clip, **Sound** on or off. **Remove from the project** takes one away; the file stays in `public/`. Trims inside a clip, slow motion and framing per shape are for the agent, through `<Footage>`.
+- **Filmstrips:** each scene shows a few of its own frames, drawn by the engine (`board.html?…&scene=…&strip=n&h=px`, one iframe per scene).
+- **Sound:** a second track shows the ad's cues where they start, from the registry.
+- **The playhead:** press anywhere on the ruler, on the playhead's handle or on an empty part of a track and drag to scrub; a double-click on a scene jumps to its start. Zoom with the slider; **Fit** goes back. Drag the timeline's top edge to make it taller (the filmstrips grow with it); the desk keeps the height.
+- **Transitions:** a diamond on a cut marks a transition into the scene after it, with a band over the frames it covers. Clicking it opens the scene's transition in the Effects tab (§10.13).
+- **One story for every ratio.** The order and trims apply to 16:9, 1:1 and 9:16.
 
-**The file:** `src/ads/<slug>/story.json` holds the order and the board places:
+**The file:** `src/ads/<slug>/story.json` holds the order:
 
 ```json
-{ "order": ["hook", "demo", "end"], "board": { "hook": [0, 0], "demo": [2200, 0], "end": [4400, 0], "alt-hook": [0, 1400] } }
+{ "order": ["hook", "demo", "end"] }
 ```
 
-Images added on the board are listed under `images`, by id, and their ids go in `order`, `arrows` and `board` like any scene's:
+Images added on the timeline are listed under `images`, by id, and their ids go in `order` like any scene's:
 
 ```json
 "images": { "image-team-photo": { "src": "ads/launch/board/team-photo.png", "name": "team photo", "seconds": 3, "fit": "contain" } }
 ```
 
-A video clip on the board is listed there too, with `src` pointing at its frames and `clip` saying how to play them:
+A video clip is listed there too, with `src` pointing at its frames and `clip` saying how to play them:
 
 ```json
 "clip-trail-run": { "src": "ads/launch/gen/footage/trail-run/#####.jpg", "name": "trail run",
@@ -673,7 +688,23 @@ A video clip on the board is listed there too, with `src` pointing at its frames
 
 `from` (seconds into the clip) and `volume` (0 is muted) are optional. Without `seconds` a clip plays to its end.
 
-The agent writes it with the order it intends, and the board rewrites it when you change an arrow. A take can have its own story as `story-<take>.json`, so take B can be the same scenes in another order. The registry reads it with `import.meta.glob`, so a missing file never breaks an ad. Without one, the order is the registry's.
+A scene can be trimmed, by id, in the scene's own frames:
+
+```json
+"trim": { "demo": { "in": 20, "out": 150 } }
+```
+
+`in` is the first frame shown (default 0) and `out` the frame it stops before (default the scene's length). The scene plays `out - in` frames, at least one. Its code still runs from its own frame 0, so frame `in` is what shows first. Its cues move with it: one that starts before `in` starts at once, further into its file, and one that starts at or after `out` is dropped. One that runs past `out` plays on, as a cue running past a scene's end always has. Board images and clips aren't trimmed this way (they have `seconds` and `from`), and an asset ignores trims. Trimming an ad with one `component` makes it a scene like any other, with its cues moving with it.
+
+A scene can have a transition into it from the scene before, by id (`src/engine/transitions.ts`):
+
+```json
+"transitions": { "demo": { "type": "push-left", "frames": 15 } }
+```
+
+The types are cut, fade (a crossfade), fade-black and fade-white (dips), slide-left/right/up/down (the new scene slides over the old, which drifts back and dims), push-left/right/up/down (both move), whip-left/right (a fast push with motion blur), zoom-in, zoom-out, blur, wipe-left/right/up/down (a soft edge) and iris. A type the engine doesn't know, or one on the first scene, plays as a cut. Nothing moves in time: the video's length and every scene's start stay as they are, so cues stay put. For the incoming scene's first `frames` (at most its length), the outgoing scene is held on its last frame and the incoming one plays from its frame 0 with the transition laid over both.
+
+The agent writes it with the order it intends, and the desk rewrites it when you move or trim a scene or set a transition, keeping the fields it doesn't own. `arrows`, `start` and `board` were the old board's: the engine never read them, and the desk drops them when it writes. A take can have its own story as `story-<take>.json`, so take B can be the same scenes in another order. The registry reads it with `import.meta.glob`, so a missing file never breaks an ad. Without one, the order is the registry's.
 
 **Scenes in the registry:**
 
@@ -687,21 +718,21 @@ defineAd({ slug: "launch", lang: "he", cues, scenes: [
 
 - **Time:** the engine plays the scenes in story order, each in its own `<Sequence>`, so `useFrame()` inside a scene starts at 0. The ad's length is the sum of the scenes on the story. Every value is still a function of the frame.
 - **Sound:** a scene's own `cues` move with it. The ad's `cues`, like a music bed, play from the start of the story whatever the order.
-- **An ad timed by audio** takes each scene's length from its timeline. Reordering it puts the voice out of order, so the board shows a warning, and the agent asks before it spends credits on a new mix.
-- **An ad with one `component`** is one scene with no arrows. The ads made before the desk work as they are. Once you add an image to its board, the component is a scene named after the ad, and its `cues` move with it: an image before it pushes its sound later too.
-- **Board images** are scenes the engine makes from `story.json`: `seconds` long (one image for an asset), with no sound. In an ad with scenes that's timed by audio, an image on the story moves the scenes after it away from the mix, so the board shows the same warning as a reorder.
+- **An ad timed by audio** takes each scene's length from its timeline. Reordering or trimming it puts the voice out of time, so the viewer shows a warning, and the agent asks before it spends credits on a new mix.
+- **An ad with one `component`** is one scene. The ads made before the desk work as they are. Once you add an image to its timeline, the component is a scene named after the ad, and its `cues` move with it: an image before it pushes its sound later too.
+- **Board images** are scenes the engine makes from `story.json`: `seconds` long (one image for an asset), with no sound. In an ad with scenes that's timed by audio, an image on the story moves the scenes after it away from the mix, so the viewer shows the same warning as a reorder.
 - **Scenes are where the agent chose to cut**, not a schema for shots. A continuous move can span one long scene, and a single long take is one scene.
 
 ### 10.5 Projects: videos and assets
 
 - **A video** is what nykma makes today: scenes in story order, rendered to MP4 in every ratio.
-- **An asset** is a still, or a set of them, such as a post image or a carousel. It's `kind: "asset"` in the registry, and each scene is one image. Render writes `<id>-<n>.png` for every ratio in story order, so the arrows set the order of a carousel, and a single image needs none. `validate` doesn't know assets yet: until it does, an asset's checks are the reviewer and your eyes.
+- **An asset** is a still, or a set of them, such as a post image or a carousel. It's `kind: "asset"` in the registry, and each scene is one image. Render writes `<id>-<n>.png` for every ratio in story order, so the timeline sets the order of a carousel, and a single image needs none. `validate` doesn't know assets yet: until it does, an asset's checks are the reviewer and your eyes.
 
 ### 10.6 The chat
 
-The right panel is the conversation with `ad-agent` for this project, or with the agent making a brand kit. Opening a project is AI-first: a new project starts with the chat running, and the board fills as the agent works.
+The **Agent** tab on the right is the conversation with `ad-agent` for this project, or with the agent making a brand kit. Opening a project is AI-first: a new project starts with the chat running, and the timeline fills as the agent works.
 
-- **Width:** drag the panel's left edge, from 280 px up to whatever leaves the board room. Double-click it to reset. The width is kept for next time.
+- **Width:** drag the panel's left edge, from 280 px up to whatever leaves the viewer room. Double-click it to reset. The width is kept for next time.
 - **Messages stream:** the desk runs `claude -p --agent ad-agent --output-format stream-json` and shows the text as it comes. Tool steps fold into one line each ("rendered 9x16", "wrote pitch.md") and open to show the details.
 - **Same conversation:** each project's session id is kept in `queue/<folder>/.session` (gitignored), so every note continues it.
 - **Quick replies** follow the state and send the words you'd type:
@@ -709,21 +740,30 @@ The right panel is the conversation with `ad-agent` for this project, or with th
   - First look: **Check it**, **Skip the checks**, **Drop it**
 
   "Drop it" marks the ad without calling the agent, so it spends nothing.
-- **Context chips:** selected scenes and the current frame are attached to the message as `@demo frame 40`, so "make this bigger" means something. A change to the story since the last message is added too ("story is now hook → end → demo"), so the agent knows before it renders.
+- **Context chips:** what's selected comes with the message: an element (`@div "מכתב יד…" · f396`, with its source location, box, font and colour), a scene or image on the timeline, or else the frame you're on. **Ask the agent about this element** in the inspector keeps it as a chip. A change to the order since the last message is added too ("it now plays hook → end → demo"), so the agent knows before it renders.
 - **Files:** images, recordings or fonts dropped on the chat are saved in `queue/<folder>/inbox/` (or the brand's `uploads/`), and their paths go in the message.
 - **Stop** ends the run, and agents stop when the dev server does. A finished run is saved in `.chat.json` next to `.session` (gitignored), so the chat survives a restart.
 - **Render** in the top bar runs `bun run render <slug> --ratio all` with no agent and no tokens, shows its progress in the chat, and copies what it wrote to the queue folder.
-- **Pitch on the board:** while there's only a pitch, each storyboard row is a card on the board with its image, text and time, and the arrows follow the table. The animatic plays with **Play**.
+- **The pitch on the timeline:** while there's only a pitch, each storyboard row is a clip at its times, with its image, and the animatic plays in the viewer.
 
 ### 10.7 Look and build
 
-- **Look:** Figma's: dark panels, a neutral grey board so an ad's colours read true, small 11–13 px UI type in Inter (OFL), one accent colour, thin borders and a lot of space around the scenes. Hebrew projects keep the desk in English and the scenes in RTL. The tools are reached by keyboard as in Figma.
-- **No new services:** it's still a React page on the Vite dev server, with the file reads, writes and agent runs as dev-server endpoints (`scripts/lib/desk.ts`) that only accept POSTs from the desk's own page. The scene list comes from the registry through the dev server's own module loader. Pan, zoom and arrows are hand-written (CSS transforms and SVG), with no canvas library. The only new package is the Inter font.
+- **Look:** a video editor's: neutral grey around the viewer so an ad's colours read true, 13 px UI type, timecode in a mono face with fixed-width digits, one accent for what's live or selected (the playhead, the selection, the current stage, the one filled button), thin borders, and colour kept for the timeline's tracks. Two themes share the same tokens (`src/desk/desk.css`, `theme.ts`), picked in **Settings → Look** and kept in this browser: **Ink** (the default, `graphite` in code: nykma's own colours from `brands/nykma/brand.md` and nobodyknowsmyapp.com, Ink and the site's deep greys for the panels, Paper for the text and the red Marker `#E8301F` as the accent, with Geist for the UI and JetBrains Mono for timecode, code, page titles and the wordmark) and **Studio** (warm charcoal, brass, IBM Plex, which has a Hebrew cut). Both are OFL. Hebrew projects keep the desk in English and the ads in RTL. The sidebar carries nykma's icon (a play button and the red cursor on a black tile) and the site's wordmark, `nykma_` with the cursor in red; the desk tab's icon is the same drawing.
+- **No new services:** it's still a React page on the Vite dev server, with the file reads, writes and agent runs as dev-server endpoints (`scripts/lib/desk.ts`) that only accept POSTs from the desk's own page. The scene list comes from the registry through the dev server's own module loader. The viewer, timeline and pick boxes are hand-written (iframes, CSS and pointer events), with no editor library.
 - **Unattended agent:** allowed file tools and the build commands, and denied `.env` files, `gh` and `git push`, as before.
 
 ### 10.8 Settings
 
 **Settings** in the left rail sets the defaults for new ads. They're saved in `settings.json` at the repo's root (gitignored) as you change them, and `scripts/lib/settings.ts` falls back to the defaults for anything missing or wrong.
+
+The page (`src/desk/Settings.tsx`, `settings.css`) lists its categories on the left and shows one at a time, each value a row with what it does on the left and its control on the right. A dot on a category means something there needs a look (Claude Code not connected, the chosen generator not ready, a key missing, a tool the desk needs not found). The desk remembers the last category; opened from a brand kit, it goes to Agent with that brand's instructions. A "Saved" mark shows after each change.
+
+- **General:** Layouts (a card per ratio, in its shape), Pitch first and Thumbnail (switches), and the desk's theme (a card with a picture of the desk in each).
+- **Agent:** Claude Code's connection, its model and effort, its path under Advanced, and the agent instructions (§10.11).
+- **Voice:** Automatic or Always this voice, the voice and its preview, and the saved voices with Add voice.
+- **Generated media:** stills, video and word timing as option cards marked Free, Paid or Credits, with the chosen one's readiness under it; Codex's path under Advanced; Start and Stop for ComfyUI.
+- **Connections:** each service's key (Connect or Replace opens the field, with Test and Remove), and the logins that need no key (Codex, Claude Code).
+- **System:** every tool the desk checks, with Check again.
 
 | Setting | Default | What it does |
 |---|---|---|
@@ -737,7 +777,7 @@ The right panel is the conversation with `ad-agent` for this project, or with th
 | Generated video | OpenRouter | OpenRouter (paid per clip) or this PC (LTX-2.5 in ComfyUI, no money, about 3½ minutes a clip, §6.9). With this PC, the brief tells the agent to write `"via": "local"` and `"model": "ltx-2.5-q4"` on each video. The page shows whether ComfyUI and the model files are there and whether ComfyUI is running, with Start and Stop. |
 | Claude Code | `claude`, its own model and effort | The path to the binary, and `--model` and `--effort` for every agent run. The page shows whether it's installed and logged in, from `claude --version` and `claude auth status`. Logging in happens in a terminal, with `claude auth login`. |
 
-The page also shows whether the ElevenLabs key, Whisper and yt-dlp are there. Its **Agent instructions** section edits what the agent is told, for every brand or for one (§10.11). These checks spend nothing, and the key is never read out: a one-line Python call says only whether there is one.
+The page also shows whether the ElevenLabs key, Whisper, yt-dlp, OpenCV and ffmpeg are there. Its **Agent instructions** edits what the agent is told, for every brand or for one (§10.11). These checks spend nothing, and the key is never read out: a one-line Python call says only whether there is one.
 
 **Settings go into the ad, not under it.** The desk puts them at the end of a new ad's brief, and the agent writes them into the ad: `ratios` on the registry line, `voice_id` and `align` in spec.json. `mv.py` never reads `settings.json`, and its own defaults (George, Whisper) don't move. So changing a setting never changes a built ad or spends credits on it again. An agent run outside the desk reads `settings.json` for the layouts when its brief names none.
 
@@ -802,6 +842,66 @@ The desk reads and writes only these files (`scripts/lib/agents.ts`).
 
 ---
 
+### 10.12 Publishing (`scripts/lib/publish/`, `src/desk/Publish.tsx`)
+
+**Publishing** in the left rail connects your social accounts, and **Publish** on an ad posts or schedules its MP4s on them. An agent you ask posts the same way, with `bun run publish` (below). Either way the desk posts, and nothing goes out until it's approved, on the page or by that command. Approving is a commitment to exact files: the dialog's approval records each MP4's and cover's SHA-256, and a file that changed since isn't posted ("File changed"). Approvals, logins and app secrets live in the key store, `~/.config/nykma/publish/` (`apps/`, `accounts/`, `jobs/`, 0600 files outside the repo, denied to agents like the rest of it), so an agent never holds a login: it asks the desk to post. What happened to each post is appended to `queue/<folder>/posts.jsonl` (no tokens) as the ad's record.
+
+**The page.** A summary across the top (Needs you, Coming up, Posted, Accounts; each opens its list), the marks of the platforms you've connected, then three tabs. **Posts** lists every post with its platform's mark, account, ad, file, state and time, filtered to all, coming up, needing you or done; a post opens to its link and log, with Post now, Cancel and Clear where they apply. **Accounts** is a card per connected account, with its mark, handle, state and Disconnect. **Connect** is a tile per provider, with the marks of the platforms it reaches and whether it's set up; a tile opens its setup steps, numbered, beside its redirect URI and fields. The Publish dialog shows each account with its platform's mark too. The marks (`src/desk/social.tsx`) are Simple Icons' paths (CC0), copied in so the desk doesn't load the whole set; LinkedIn's, no longer in it, is drawn there, and Google Business Profile uses Google's "G".
+
+**Your own apps.** Each platform posts through a developer app you register once, so your posts depend on no one else's approval and no client secret ships with nykma. The Publishing page shows each provider's setup steps, the redirect URI to register and its fields. For accounts you own, none of these needs a platform review:
+
+| Provider | Gives | How it connects | Notes |
+|---|---|---|---|
+| YouTube | channels: videos and Shorts | your Google Cloud project's Desktop OAuth client | Resumable upload, `publishAt` scheduling, the cover, and `containsSyntheticMedia` and paid placement set on every upload. 100 uploads a day. Since 2026-11-02 an unverified project's uploads can be public. In Testing, Google ends the login every 7 days, so publish the app to In production |
+| Meta | Facebook Pages, Instagram professional accounts | your Meta app in Development mode, with you holding a role on it | Instagram Reels and Stories by resumable upload (no public URL), Facebook Reels (9:16, up to 90 s) and videos, with Facebook's own scheduling. Instagram has none, so the desk posts at the time. Personal profiles can't be posted to. An Instagram account comes through the one Page it's linked to (Meta allows one), and any Page will do; a login that gives no Instagram account says whether the permissions or the link is missing |
+| TikTok | your TikTok account | your TikTok developer app (Login Kit for Desktop, Content Posting API) | **Send to inbox** by default: the video lands in the TikTok app to finish there. **Direct Post** follows TikTok's composer rules (creator info, privacy with no default, interactions off by default, the commercial-content toggles, `is_aigc`), but until TikTok audits the app its posts are private, and a personal tool is unlikely to pass the audit |
+| LinkedIn | your personal profile | your LinkedIn app with Sign In with LinkedIn using OpenID Connect and Share on LinkedIn | Videos API in 4 MB parts. No refresh: connect again every 60 days. Company Pages need LinkedIn's vetted Community Management API |
+| X | your account | your X app, OAuth 2.0 with PKCE | Pay per use: $0.015 a post, $0.20 with a link. The dialog shows the price, and approving the post approves it |
+| Tumblr | your blogs | your Tumblr app, OAuth 2 | Native scheduling (`queue` with `publish_on`). 20 videos and 60 minutes of video a day |
+| Bluesky | your account | handle and an app password | Video through video.bsky.app, with link and hashtag facets |
+| Mastodon | your account | instance and an access token from its Development settings | Native `scheduled_at`, and the instance's own limits |
+| Telegram | a channel | a BotFather bot made an admin of it | Up to 50 MB through the hosted Bot API |
+| Discord | a channel | its webhook URL | The server's upload cap |
+| Upload-Post | whatever its profile has connected | its API key and profile name | Paid. Posts through its own audited apps, so TikTok posts can be public from the start, and Threads, Pinterest and Google Business work, which an app of your own can't do without reviews. It schedules too |
+
+Logins come back to a callback server of the desk's own on a fixed port, `http://127.0.0.1:8723/callback` (`localhost` for Meta, LinkedIn and Tumblr; `NYKMA_CALLBACK_PORT` moves it). It runs only while a login waits, takes only a state it handed out in the last 15 minutes, and exchanges the code itself, so the token never reaches the page. It's separate from the desk because the desk's port can change, and a redirect URI has to match what you registered exactly. Tokens are refreshed before they run out, and every six hours for any that end within a week; a login that's gone marks the account **Connect again**.
+
+**The dialog.** Pick accounts. Each gets a card with the MP4 (the ratio that suits the platform first), the cover, the title where there is one and the caption, from `post.md`'s section for that platform or its fallbacks (Threads takes Instagram's, Bluesky X's), with the platform's limit counted. A section that says the ad isn't for that platform shows as a warning. Then come the platform's own choices, and **Label it as AI-generated** where the API has one, on when the ad's `gen.json` has shots or its files say it's AI-generated. Every check that can fail before posting fails at approval: the caption's and title's length, the file's size and length, the account, the required choices and the provider's own rules (TikTok's). **Post by hand elsewhere** covers every platform with no account: copy the caption, show the file, open the upload page.
+
+**When it posts.** Now, or at a time. Where the platform holds a scheduled post itself (YouTube, Facebook, Mastodon, Tumblr, Upload-Post) and the time is far enough ahead, the desk uploads at once and the platform posts it then, so the PC can be off. Everywhere else the desk checks for due posts every 15 seconds while it runs. A time that passed while it wasn't running waits as **Overdue** for you to post or cancel, so nothing posts hours late. A post the desk was in the middle of when it stopped is marked failed and not retried, since the platform may already have it. A 429 or a 5xx is retried after 1, 5 and 15 minutes; a refusal isn't. There's one clock per machine: a second desk leaves posting to the first, and a Vite config reload swaps the clock instead of starting another.
+
+**`bun run publish`.** The same approval from a terminal or an agent's run, which is how an agent posts when you ask it to (ad-agent's hard rules, CLAUDE.md). Alone, it lists the connected accounts and the latest posts. `bun run publish <slug> --to facebook:mathbooklm,instagram --at "2026-11-23 18:00"` builds each post as the dialog would (the file whose ratio suits the platform, its cover, post.md's caption and title, each option's default, the AI label from the ad's files), prints them, and approves them; `--dry-run` only prints. `--to` takes an account's id, its platform when only one is connected, or its name; `--caption`, `--title`, `--file`, `--cover` and `--set key=value` override, and a required choice with no default (TikTok's privacy) must be set. A post made now is followed until it's out, with its link. `--status`, `--cancel`, `--now` and `--remove` do what the page's buttons do. The desk takes `approve` and `job` from it with the desk's token, which only a script on this machine has (`out/.desk.json`, or the run's environment), and each post's log says "Approved by bun run publish". Setting up a provider and connecting an account stay on the page, since a login is a browser window. `bun run eval` runs get no desk token, so an eval can't post.
+
+**Not done.** Threads and Pinterest directly (Threads takes video only from a public URL, and Pinterest needs a Standard-access review), Snapchat (allowlist only), Reddit (approval, and no documented video upload), and WhatsApp Channels and Lemon8 (no API): those go through Upload-Post or the hand-off. Posting while the desk is off, for a platform with no scheduling of its own. What this doesn't stop: an agent can post wherever an account is connected, so ad-agent's rules and CLAUDE.md say it posts only when you ask, only where and when you said; the code doesn't know what you asked. Disconnect an account to keep agents off it.
+
+### 10.13 Editing an ad's values from its preview (`scripts/lib/source-tag.ts`, `scripts/lib/source.ts`)
+
+On the dev server, every host JSX element in `src/ads/` and `src/parts/` (a lowercase tag: `div`, `span`, `svg`, `path`) gets `data-nk="<file>:<line>:<col>"`, the repo path and the 1-based line and column of its `<` in the source, such as `data-nk="src/ads/kav-echad/end.tsx:30:13"`. An element whose attributes read knobs (`k("id")`, `nudge("id")`, `at("id")`, bare or as `t.k(`) also gets `data-nk-knobs="<id>,<id>"`. Components, fragments and member tags like `motion.div` get none. The tags come from a Vite plugin that runs only on the dev server (`apply: "serve"`), so `vite build`, and so every render and MP4, has none. A file that doesn't parse is passed on untouched.
+
+The desk sends a tag back to read and change that element:
+
+- `GET /api/source/element?loc=[&text=…][&slug=]` gives the element's tag, its component (the nearest named function), the file's hash, and its lists. **Text** is editable when the element holds one piece of text or one string literal. **Style** has a field per property of a `style={{ ... }}` literal, and `styleMode` says whether properties can be added (`object`, `none` for no style yet, or `other` for `style={s}` or spread props). **Props** has the other attributes, leaving out `data-*`, `key`, `ref`, `children` and event handlers; **attrs** has the `data-*` ones but `data-nk`. A field is editable when its value is a plain literal: a number (or minus one), a string or a template with no `${}`. Anything else is shown as its code.
+- **Where the text is written.** The desk sends what the element shows, and its parents' text, as repeated `text=` (up to 6). The desk searches the string literals of the ad's folder (strings, plain templates, JSX text and attribute strings, leaving out imports, object keys, types, class names, style values and the like), comparing without bidi marks, zero-width characters or extra spaces, and answers `texts`: up to 6 literals, best first, each with its `loc`, file, line, value, file hash and whether it matched `exact`ly or `contains` the text. That finds a `{title}`, a `LINES[i]`, a prop the parent passes, or a line split into word spans. `slug=` lets an element the parts bin draws find its text in the ad.
+- `POST /api/source/edit { loc, hash, edit, label? }` replaces that one literal and nothing else, so the file's line endings, Hebrew and comments stay as they were. `edit` is `{ kind: "text", value }`, `{ kind: "literal", value }` (the request's `loc` and `hash` are one of `texts`; the value is escaped for that literal's quotes, or becomes `{"…"}` in JSX when it needs to), `{ kind: "style", name, value }` (adds the property when it's missing, as the object's last or as a new `style={{ … }}`; `null` takes it out), `{ kind: "prop", name, value }` or `{ kind: "attr", name, value }` (a `data-*` attribute set, replaced or taken out with `null`). Numbers are rounded to 4 decimals. A file that changed since it was read answers 409 with its new hash, and an edit that would break the file isn't written. Only `src/ads/` is editable: `src/parts/` is shared by every ad, so the desk sends you to the agent for it.
+- **History** (`scripts/lib/history.ts`). Every write the desk makes to an ad, through `/api/source/edit`, `/api/tune` or `/api/story` (all take an optional `label`), is one entry: what each file was before and after (only the changed stretch, with hashes of the whole). Two writes to the same thing within 2 seconds merge into one ("Size 80 → 96" then "96 → 100" reads "80 → 100"). `GET /api/history?slug=` gives `{ entries, position }` (oldest first, `position` the number applied); `POST /api/history/undo`, `/redo` and `/goto { slug, position }` move through it, 0 being before every entry. A move checks every file first and refuses with 409, naming the file, when the agent or an editor changed it since: nothing is overwritten. Undoing a write that made a file (a new `tune.json`) deletes it. A new change after an undo drops what was undone. It's kept in `out/<slug>/desk-history.json` (gitignored, the last 200), so it survives a restart. `POST /api/source/undo { slug }` is the same as undo.
+
+Both POSTs answer only the desk page itself (`sameOrigin` in desk.ts), like its other actions. Vite's hot reload shows the change.
+
+**The Inspect tab** (`src/desk/Inspector.tsx`) is what you see of this. With **Select** on, the viewer outlines the tagged element under the pointer, and a click selects it: the viewer asks the iframe for the element (`board.html` answers with its tag, text, box, font, colour, a few computed values, its parents' scale and the tagged elements around it with their text, which become a breadcrumb), and the inspector reads its code. Its sections fold:
+
+- **Text:** the words, in a box. When the element holds them itself they're edited there; when they come from a constant, a list or a prop the parent passes, the desk finds where the ad writes them (the `texts` above) and edits that literal, saying which file and line, with **Not this one?** when there are several. A word that's part of a longer line shows the whole line. Text the code puts together goes to the agent.
+- **Layout:** X, Y, Scale and Rotate, written as the element's own `translate`, `scale` and `rotate` style (added when the code has none), or its nudge knob when it has one. **Reset position** takes them out. Dragging in the viewer writes the same values (§10.3).
+- **Type** (for text) and **Appearance:** size, weight, colour, spacing, line height, alignment, opacity, background and corners. A value the code writes plainly is edited in place; one it doesn't set yet shows the browser's value greyed and is added on save; one the code works out shows as `ƒ` and its code, and a click asks the agent.
+- **Effects:** a line about the element's effects and a button to the Effects tab.
+- **More from the code:** every other style literal, the computed ones as their code, and the attributes.
+- **Knobs:** values the element reads with `useTune()` (§5), written to `tune.json` by `/api/tune`, for every ratio or this one only, while the code's own motion keeps playing.
+
+A number field's label can be dragged sideways (Shift: ten times, Alt: a tenth) and its arrow keys step it; the frames show the value live (a `preview` message to `board.html`, which sets it on the element and puts the old value back if you press Escape), and it's saved once, on release or Enter. A colour swatch opens the picker, live while it's open. Every save is one entry in the history. An element drawn by the parts bin is shown but not edited. With nothing picked, the inspector shows the video; with a scene picked on the timeline, its length, trim, transition, picture and sound.
+
+**The Effects tab** (`src/desk/Effects.tsx`). For a picked element: an **Entrance**, a **Loop** and an **Exit**, each a grid of tiles that play the effect with the engine's own maths when you hover them, then its start (**Here** takes the playhead's frame in that scene), length, strength and easing. It's written to the element's `data-fx` attribute in the ad's code (§5), so the render draws exactly what the viewer does. For a scene (picked on the timeline, or the one under the playhead): the **transition into it** from the scene before, a tile per type previewed the same way, and its length, written to `story.json`'s `transitions` (§10.4).
+
+**The History tab** (`src/desk/History.tsx`) lists every change the desk made to the ad, newest first, labelled in words ("Size 80 → 96", "Moved "the lasso"", "Fade up in on h1"), with what kind it was (code, knob, timeline) and when. Click one to go back to just after it; the ones above it stay, crossed out, until you make a new change, so you can come forward again. **Reset all** goes back to before the first change listed. Undo and Redo in the top bar and Ctrl+Z / Ctrl+Shift+Z step through the same list.
+
 ## 11. Commands
 
 ```bash
@@ -828,6 +928,7 @@ bun run history <brand>                        # a brand's past ideas and the us
 bun run eval <version|current> [--briefs a,b] [--runs 2] [--label name] [--build]   # a prompt version on the briefs, to the pitch or the MP4 (spends tokens, §8.1)
 bun run eval compare <a> <b> / trace <label>                                    # how two versions worked side by side; traces rebuilt (free)
 bun run eval snapshot <name> / blind <a> <b> / score <a> <b>              # freeze a version, a blind sheet, its tally (free)
+bun run publish [<slug> --to <account>,... [--at <time>] [--dry-run]]   # posts through the desk; alone, accounts and posts (§10.12)
 bun run export-public [--to <dir>] [--dry-run]  # the public part of the repo → ../nykma-public, from publish.json (free, §12)
 bun run typecheck
 .venv/Scripts/python py/mv.py voices [--json] [--id <voice id>]  # the account's ElevenLabs voices, or one (free)
@@ -859,15 +960,17 @@ nykma is source-available: free for personal and noncommercial use under PolyFor
 
 - **This repo stays private** (`TomCohenDev/nykma-private`). It holds client brands, `queue/` and research. The public repo, `TomCohenDev/nykma`, is a separate one with its own history, filled by `bun run export-public`, never by pushing this one. To publish: export, then commit and push in `../nykma-public`, whose commits use the GitHub no-reply address. Its `main` can't be force-pushed or deleted, and it has secret scanning with push protection and private vulnerability reporting.
 - **`publish.json` is an allowlist.** It names the brands and ads that go public and the folders that never do. A new brand or ad stays private until it's added there. Public brands lose `notes.md` and `sources.txt` (the user's feedback and local paths). The registry is rewritten to the listed ads.
+- **The examples on the home page** are listed in `site/src/examples.json` (title, brand, language, one line, and a poster time when frame 0 isn't a good still). `node site/scripts/examples.mjs` makes them from the ads' 1:1 hand-offs in `queue/`: 720 px MP4s with sound (1 to 7 MB each, under Workers' 25 MB file limit) and JPEG posters in `site/public/examples/`. Only ads from public brands belong there. Spec ads for well-known products (made without the company, labelled as such on the card and the end card) are listed in `site/src/spec-ads.json` and shown in a sideways-scrolling row at their own shapes. Each plays muted while it's on screen, "sound on" plays one with sound, and with reduced motion none plays by itself.
 - **The export stops** when an exported text file matches `blocked` (a client's name, a local path), when code still uses an unlisted ad, or when a file is over 50 MB. Docs that only name an unlisted ad are a warning. It writes `../nykma-public` (or `--to`), drops everything there but `.git`, and never commits or pushes.
 - **nobodyknowsmyapp.com** is the site: tutorials, a showcase of public brands' ads, the docs, the changelog and pricing. It's English, and says that ads can be in Hebrew. The domain, nobodyknowsmyapp.com (nykma for short), is on Cloudflare, with Email Routing forwarding sales@ to the user's inbox.
-- **The site lives in `site/`** (`site/README.md`): a static Astro build served by a Cloudflare Worker. So far it has a home page and `/pricing`, whose sales form posts to `/api/contact`. The Worker checks the fields, ignores bots that fill a hidden field, and mails the request from form@nobodyknowsmyapp.com to the sales inbox through Email Routing, with the sender as Reply-To. The inbox's address is a Worker secret (`SALES_TO`), so it's not in the public repo. Without JavaScript the form still posts, and lands on `/pricing/sent/` or `/pricing/not-sent/`. For now the Worker runs on its workers.dev preview: the domain itself still has other DNS records and a Cloudflare Access login in front of it, which have to go before `site/wrangler.jsonc` can attach it.
+- **The site lives in `site/`** (`site/README.md`): a static Astro build served by a Cloudflare Worker. So far it has a home page, with three example ads, and `/pricing`, whose sales form posts to `/api/contact`. The Worker checks the fields, ignores bots that fill a hidden field, and mails the request from form@nobodyknowsmyapp.com to the sales inbox through Email Routing, with the sender as Reply-To. The inbox's address is a Worker secret (`SALES_TO`), so it's not in the public repo. Without JavaScript the form still posts, and lands on `/pricing/sent/` or `/pricing/not-sent/`. For now the Worker runs on its workers.dev preview: the domain itself still has other DNS records and a Cloudflare Access login in front of it, which have to go before `site/wrangler.jsonc` can attach it.
 
 ## 13. Later, only if it's needed
 
-- Making and editing on the board: text, shapes, moving an element, and an Inspect tab next to the chat with an element's size, font and colour, as in Figma.
-- Comments pinned on a scene and frame, sent to the agent as notes.
-- Transitions set on an arrow, and branching stories for A/B cuts.
+- Dragging an element in the viewer to move it, writing a `nudge` knob.
+- Comments pinned on a frame and a spot, spoken or typed, collected and sent to the agent as one note (the screening room in `design/redesign/`).
+- A text track on the timeline, from `inspect()`, and transitions between scenes.
+- Takes side by side in the viewer, swapped in place on the timeline.
 - An in-browser pad for recording real handwriting, with its timing.
 - Blender curves that write on from `hand.gen.json` (chalk on a 3D board).
 - Post-processing (bloom and the like) in `<Three>` (§6.10).
@@ -878,4 +981,4 @@ nykma is source-available: free for personal and noncommercial use under PolyFor
 
 - Should the pitch be the default, or only for ads above a certain size?
 - Should the ads made before the desk be split into scenes, or stay one scene each?
-- When an arrow change makes a story longer or shorter than the platform's limit, should the board warn?
+- When a new order or a trim makes a story longer or shorter than the platform's limit, should the timeline warn?

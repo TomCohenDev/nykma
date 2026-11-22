@@ -1,0 +1,207 @@
+---
+// Variation 3, "the manual": the whole page as a Unix man page. Section names in the margin, everything else plain
+// and complete: synopsis, description, examples, workflow, output, requirements, licence.
+import Term from "../../layouts/Term.astro";
+import Examples from "../../components/Examples.astro";
+import Install from "../../components/Install.astro";
+import { headline, lede, steps, handoff, repo } from "../../nykma";
+---
+
+<Term title="nykma(1): nobody knows my app" description={lede} preview>
+  <div class="t-wrap">
+    <div class="mhead" aria-hidden="true"><span>NYKMA(1)</span><span>nobody knows my app</span><span>NYKMA(1)</span></div>
+
+    <h1 class="t-h1 title">{headline}<span class="cur"></span></h1>
+
+    <section class="m">
+      <h2>NAME</h2>
+      <div><b>nykma</b> - an ad maker that runs in Claude Code</div>
+    </section>
+
+    <section class="m">
+      <h2>SYNOPSIS</h2>
+      <div class="syn">
+        <code><b>claude</b> "use the ad-agent to make an ad about <u>X</u> for <u>brand</u>"</code>
+        <code><b>bun run dev</b></code>
+        <code><b>bun run render</b> <u>id</u> [--ratio all]</code>
+      </div>
+    </section>
+
+    <section class="m">
+      <h2>DESCRIPTION</h2>
+      <div><p class="first">{lede}</p></div>
+    </section>
+
+    <section class="m" id="examples">
+      <h2>EXAMPLES</h2>
+      <div><Examples detail /></div>
+    </section>
+
+    <section class="m" id="how">
+      <h2>WORKFLOW</h2>
+      <dl class="flow">
+        {
+          steps.map((step) => (
+            <>
+              <dt>{step.name}</dt>
+              <dd>{step.text}</dd>
+            </>
+          ))
+        }
+      </dl>
+    </section>
+
+    <section class="m">
+      <h2>FILES</h2>
+      <div class="files">{handoff.map(([path, what]) => <div><b>{path}</b>{what && <span class="what">  {what}</span>}</div>)}</div>
+    </section>
+
+    <section class="m" id="start">
+      <h2>INSTALL</h2>
+      <div><Install /></div>
+    </section>
+
+    <section class="m">
+      <h2>NOTES</h2>
+      <div>
+        <p class="first">
+          It posts only what you approve, on the desk or when you ask an agent to. Paid voices (ElevenLabs) and generated video are priced first and used only within the
+          budget you approve. Ads are React components rendered frame by frame, so the same ad renders the same way twice.
+        </p>
+      </div>
+    </section>
+
+    <section class="m">
+      <h2>LICENSE</h2>
+      <div>
+        <p class="first">
+          Free for personal and noncommercial use, under PolyForm Noncommercial 1.0.0. Companies need a commercial
+          licence: see <a href="/pricing">pricing</a>.
+        </p>
+      </div>
+    </section>
+
+    <section class="m">
+      <h2>SEE ALSO</h2>
+      <div class="also">
+        <a href={repo}>github.com/TomCohenDev/nykma</a>
+        <a href={`${repo}/blob/main/spec.md`}>spec.md</a>
+        <a href={`${repo}/blob/main/CHANGELOG.md`}>CHANGELOG.md</a>
+        <a href="/pricing">pricing</a>
+      </div>
+    </section>
+
+    <div class="mhead foot" aria-hidden="true"><span>nykma</span><span>2026-11-19</span><span>NYKMA(1)</span></div>
+  </div>
+</Term>
+
+<style>
+  .mhead {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--dim);
+    font-size: 14px;
+    padding: 28px 0 12px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .mhead.foot {
+    border-bottom: 0;
+    border-top: 1px dashed var(--line);
+    margin-top: 72px;
+  }
+  @media (max-width: 520px) {
+    .mhead span:nth-child(2) {
+      display: none;
+    }
+  }
+  .title {
+    margin: clamp(40px, 7vw, 80px) 0 clamp(40px, 6vw, 72px);
+  }
+  .m {
+    display: grid;
+    gap: 10px 32px;
+    margin-top: 44px;
+  }
+  @media (min-width: 820px) {
+    .m {
+      grid-template-columns: 170px minmax(0, 1fr);
+    }
+  }
+  .m > * {
+    min-width: 0;
+  }
+  .m h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--red);
+  }
+  .m .first {
+    margin: 0;
+    max-width: 70ch;
+  }
+  .syn {
+    display: grid;
+    gap: 8px;
+  }
+  .syn code {
+    font: inherit;
+  }
+  .syn u {
+    text-decoration-color: var(--red);
+    text-underline-offset: 4px;
+  }
+  .flow {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 12px 24px;
+    margin: 0;
+    max-width: 82ch;
+  }
+  .flow dt {
+    font-weight: 800;
+  }
+  .flow dd {
+    margin: 0;
+  }
+  @media (max-width: 560px) {
+    .flow {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+    .flow dd {
+      margin-bottom: 12px;
+    }
+  }
+  .files {
+    white-space: pre;
+    margin: 0;
+    font: inherit;
+    font-size: 15px;
+    line-height: 1.9;
+    overflow-x: auto;
+  }
+  .files .what {
+    color: var(--dim);
+  }
+  @media (max-width: 640px) {
+    .files {
+      white-space: normal;
+      min-width: 0;
+    }
+    .files > div {
+      margin-bottom: 6px;
+    }
+    .files .what {
+      display: block;
+      padding-left: 2ch;
+    }
+  }
+  .also {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+  }
+</style>

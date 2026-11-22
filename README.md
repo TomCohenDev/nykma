@@ -2,7 +2,7 @@
 
 *nobody knows my app*
 
-A bare-bones ad maker. You ask Claude Code for an ad, and it comes up with an idea, builds it in code, and hands you MP4s with post copy, 1:1 unless you ask for 16:9 or 9:16 too. Everything runs locally. Nothing is published, and no money is spent without your go-ahead. Ads can be in English or Hebrew, right to left included.
+A bare-bones ad maker. You ask Claude Code for an ad, and it comes up with an idea, builds it in code, and hands you MP4s with post copy, 1:1 unless you ask for 16:9 or 9:16 too. Everything runs locally. Nothing is published unless you post it from the desk or ask Claude to, and no money is spent without your go-ahead. Ads can be in English or Hebrew, right to left included.
 
 ## Setup
 

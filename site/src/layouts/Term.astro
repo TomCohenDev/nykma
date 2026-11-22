@@ -1,0 +1,283 @@
+---
+// The dark terminal look (S3): ink, paper text, the red pen, all JetBrains Mono. The landing page variations use it.
+import Icon from "../components/Icon.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  preview?: boolean;
+  /** Where "examples" and "how it works" live: the home page. */
+  home?: string;
+}
+const { title, description, preview = false, home = "/" } = Astro.props;
+const repo = "https://github.com/TomCohenDev/nykma";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {preview && <meta name="robots" content="noindex" />}
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preload" href="/fonts/JetBrainsMono-wght.ttf" as="font" type="font/ttf" crossorigin />
+    <meta name="theme-color" content="#141414" />
+  </head>
+  <body class="term">
+    <header class="t-wrap t-top">
+      <a class="t-brand" href="/"><Icon size={26} /><span>nykma<b>_</b></span></a>
+      <nav aria-label="Site">
+        <a href={`${home}#examples`}>examples</a>
+        <a href={`${home}#how`}>how it works</a>
+        <a href={`${home}#desk`}>the desk</a>
+        <a href="/pricing">pricing</a>
+        <a href={repo}>github</a>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="t-wrap t-bottom">
+      <span>nykma: nobody knows my app</span>
+      <nav aria-label="Footer">
+        <a href={`${repo}/blob/main/LICENSE`}>licence</a>
+        <a href="/pricing">pricing</a>
+        <a href="mailto:sales@nobodyknowsmyapp.com">sales@nobodyknowsmyapp.com</a>
+      </nav>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  @font-face {
+    font-family: "JetBrains Mono";
+    src: url("/fonts/JetBrainsMono-wght.ttf") format("truetype");
+    font-weight: 100 800;
+    font-display: swap;
+  }
+  .term {
+    --ink: #141414;
+    --deep: #0d0d0d;
+    --raise: #1b1b1b;
+    --line: #2e2e2e;
+    --paper: #f4efe6;
+    --dim: #a8a297;
+    --red: #e8301f;
+    --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+    color-scheme: dark;
+    margin: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font: 400 18px/1.7 var(--mono);
+    font-variant-ligatures: none;
+    -webkit-text-size-adjust: 100%;
+  }
+  .term *,
+  .term *::before,
+  .term *::after {
+    box-sizing: border-box;
+  }
+  .term a {
+    color: inherit;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .term a:hover {
+    text-decoration-color: var(--red);
+  }
+  .term :focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 3px;
+  }
+  .term ::selection {
+    background: var(--red);
+    color: #fff;
+  }
+
+  /* docker.com's side margins: 16 px on a phone, 32 from 768 px wide, 40 from 1024 and 48 from 1440, with the
+     content no wider than 1344 px. */
+  .t-wrap {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  @media (min-width: 768px) {
+    .t-wrap {
+      padding: 0 32px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .t-wrap {
+      padding: 0 40px;
+    }
+  }
+  @media (min-width: 1440px) {
+    .t-wrap {
+      padding: 0 48px;
+    }
+  }
+  .t-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-block: 18px;
+  }
+  .t-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 18px;
+    text-decoration: none;
+  }
+  .t-brand b,
+  .red {
+    color: var(--red);
+  }
+  .t-top nav {
+    display: flex;
+    gap: clamp(12px, 2.4vw, 26px);
+    font-size: 14px;
+  }
+  .t-top nav a {
+    text-decoration: none;
+    color: var(--dim);
+  }
+  .t-top nav a:hover {
+    color: var(--paper);
+  }
+  @media (max-width: 640px) {
+    .t-top nav a[href$="#how"],
+    .t-top nav a[href$="#desk"],
+    .t-top nav a[href$="#examples"] {
+      display: none;
+    }
+  }
+  .t-bottom {
+    margin-top: 120px;
+    padding-block: 28px 44px;
+    border-top: 1px solid var(--line);
+    color: var(--dim);
+    font-size: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px 24px;
+  }
+  .t-bottom nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+  }
+
+  /* Shared pieces */
+  .t-h1 {
+    font-weight: 800;
+    font-size: clamp(38px, 7.4vw, 84px);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+  .t-h1 .cur {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.12em;
+    background: var(--red);
+    margin-left: 0.08em;
+    vertical-align: baseline;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .t-h1 .cur {
+      animation: t-blink 1.1s steps(1) infinite;
+    }
+  }
+  @keyframes t-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  .t-lede {
+    font-size: clamp(17px, 1.6vw, 19px);
+    line-height: 1.7;
+    max-width: 62ch;
+    margin: 28px 0 0;
+  }
+  .t-h2 {
+    font-weight: 800;
+    font-size: clamp(24px, 3vw, 32px);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .t-note {
+    color: var(--dim);
+    font-size: 15px;
+    max-width: 64ch;
+  }
+  .t-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+  }
+  .t-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    border: 1px solid var(--line);
+  }
+  .t-btn.primary {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+  .t-btn.primary:hover {
+    background: #ff3d2b;
+  }
+  .t-btn:not(.primary):hover {
+    border-color: var(--paper);
+  }
+  .t-section {
+    margin-top: clamp(80px, 11vw, 140px);
+  }
+  .t-dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 10px 28px;
+    margin: 0;
+  }
+  .t-dl dt {
+    color: var(--dim);
+  }
+  .t-dl dd {
+    margin: 0;
+  }
+  @media (max-width: 560px) {
+    .t-dl {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+    .t-dl dd {
+      margin-bottom: 12px;
+    }
+  }
+  .t-code {
+    background: var(--deep);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1px 6px;
+    font-size: 0.92em;
+  }
+</style>

@@ -1,0 +1,160 @@
+<!doctype html>
+<html data-theme="graphite">
+<head>
+<meta charset="utf-8" />
+<title>nykma · build</title>
+<link rel="stylesheet" href="base.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" />
+<style>
+  .app { display: grid; grid-template-columns: 1fr 360px; grid-template-rows: 48px 1fr 270px; height: 900px; }
+  .top { grid-column: 1 / -1; }
+  .center { grid-row: 2; display: flex; flex-direction: column; background: var(--bg-0); }
+  .right { grid-row: 2 / 4; grid-column: 2; border-left: 1px solid var(--line-1); display: flex; flex-direction: column; min-height: 0; }
+  .tl { grid-row: 3; grid-column: 1; }
+  .stagearea { flex: 1; display: flex; align-items: center; justify-content: center; gap: 36px; }
+  .mon { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .mon .cap { font-size: 12px; color: var(--text-3); display: flex; gap: 6px; align-items: center; }
+  .transport { height: 46px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border-top: 1px solid var(--line-1); background: var(--bg-1); }
+  .tbtn { width: 30px; height: 30px; border-radius: var(--r-2); display: grid; place-items: center; color: var(--text-2); }
+  .tbtn.play { background: var(--text-1); color: var(--bg-0); border-radius: 50%; width: 34px; height: 34px; }
+  .dev { position: absolute; top: 4px; bottom: 4px; border-radius: var(--r-1); overflow: hidden; }
+  .dev .hd { position: absolute; left: 0; right: 0; top: 0; height: 16px; padding: 0 6px; display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 600; color: #0d0d0d; }
+  .shimmer { position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.18) 50%, transparent 70%); }
+  .feed { flex: 1; overflow: hidden; padding: 14px 16px 0; }
+  .step { display: flex; align-items: flex-start; gap: 9px; padding: 6px 0; font-size: 12.5px; color: var(--text-2); }
+  .step .ic { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; flex: none; margin-top: 1px; }
+  .step .sub { font-size: 11.5px; color: var(--text-3); font-family: var(--mono); margin-top: 2px; }
+  .cp { display: flex; gap: 6px; margin: 8px 0 14px; }
+  .cp > div { width: 38px; height: 54px; border-radius: 4px; background-size: cover; background-position: center; box-shadow: 0 0 0 1px var(--line-2); position: relative; }
+  .cp > div span { position: absolute; bottom: -15px; left: 0; right: 0; text-align: center; font-family: var(--mono); font-size: 9.5px; color: var(--text-3); }
+  .queue { margin: 0 12px 8px; padding: 10px 12px; border-radius: var(--r-3); background: var(--bg-2); box-shadow: inset 0 0 0 1px var(--line-1); }
+  .qn { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--text-2); padding: 4px 0; }
+  .fuel { height: 6px; border-radius: 3px; background: var(--bg-3); display: flex; overflow: hidden; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="logo">n</div>
+    <div class="crumbs"><span>Projects</span><svg class="i s"><use href="#chevr"/></svg><span>mathbooklm</span><svg class="i s"><use href="#chevr"/></svg><b>kav-echad</b></div>
+    <div class="spacer"></div>
+    <nav class="stages">
+      <span class="stage done"><svg class="i s"><use href="#check"/></svg>Pitch</span>
+      <span class="stage now"><span class="dot"></span>Build · 3 of 5</span>
+      <span class="stage">First look</span>
+      <span class="stage">Checks</span>
+      <span class="stage">Post</span>
+    </nav>
+    <div class="spacer"></div>
+    <span class="chip"><svg class="i s"><use href="#coin"/></svg><span class="num">$0.18</span> of <span class="num">$0.18</span> approved</span>
+    <button class="btn"><svg class="i s"><use href="#x"/></svg>Stop</button>
+  </header>
+
+  <main class="center">
+    <div class="stagearea">
+      <div class="mon">
+        <div class="adframe" style="width:240px;height:427px;background:url(img/kav2.jpg) center/cover"></div>
+        <div class="cap"><span class="dot" style="color:var(--ok)"></span>Scene 2 · built · plays live</div>
+      </div>
+      <div class="mon">
+        <div class="adframe" style="width:240px;height:427px;background:#fbfbfd;position:relative">
+          <div id="sk" style="position:absolute;inset:0;opacity:.9"></div>
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 0 40%,rgba(255,255,255,.0) 40%),url(img/kav3.jpg) center/cover;clip-path:inset(0 0 58% 0)"></div>
+          <div style="position:absolute;left:0;right:0;top:42%;height:2px;background:var(--accent);box-shadow:0 0 14px var(--accent)"></div>
+        </div>
+        <div class="cap"><span class="spark" style="display:inline-flex;color:var(--accent)"><svg class="i s"><use href="#spark"/></svg></span>Scene 3 · developing · the sketch turns into the real frame</div>
+      </div>
+    </div>
+    <div class="transport">
+      <span class="tc" style="font-size:14px">00:05:12</span><span class="tc" style="font-size:12px;color:var(--text-3)">/ 00:14:15</span>
+      <div class="spacer"></div>
+      <button class="tbtn"><svg class="i"><use href="#prev"/></svg></button>
+      <button class="tbtn play"><svg class="i" style="fill:currentColor;stroke:none"><use href="#play"/></svg></button>
+      <button class="tbtn"><svg class="i"><use href="#next"/></svg></button>
+      <div class="spacer"></div>
+      <span class="t-micro">Built scenes play; the rest play as the animatic</span>
+    </div>
+  </main>
+
+  <aside class="right panel">
+    <div class="ptabs">
+      <span class="ptab"><svg class="i s"><use href="#sliders"/></svg>Inspect</span>
+      <span class="ptab on"><svg class="i s"><use href="#spark"/></svg>Agent<span class="spark" style="width:6px;height:6px;border-radius:50%;background:var(--accent)"></span></span>
+      <span class="ptab"><svg class="i s"><use href="#comment"/></svg>Notes</span>
+    </div>
+    <div class="feed">
+      <div class="t-micro">Checkpoints · click one to see the ad then</div>
+      <div class="cp">
+        <div style="background-image:url(img/anim-2.jpg);background-color:#fff"><span>pitch</span></div>
+        <div style="background-image:url(img/kav1.jpg)"><span>sc 1</span></div>
+        <div style="background-image:url(img/kav2.jpg)"><span>sc 2</span></div>
+        <div style="background-image:url(img/kav3.jpg);box-shadow:0 0 0 1.5px var(--accent)"><span style="color:var(--accent)">now</span></div>
+      </div>
+      <div style="height:10px"></div>
+      <div class="step"><span class="ic" style="background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)"><svg class="i s"><use href="#check"/></svg></span><div>Scene 1: the nib writes the circuit<div class="sub">KavEchad.tsx · hand.ts · 2 stills checked</div></div></div>
+      <div class="step"><span class="ic" style="background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)"><svg class="i s"><use href="#check"/></svg></span><div>Scene 2: the lasso and the bar<div class="sub">ui.tsx · SelectionActionBar redrawn</div></div></div>
+      <div class="step"><span class="ic" style="background:var(--accent-soft);color:var(--accent)"><svg class="i s"><use href="#spark"/></svg></span><div style="color:var(--text-1)">Scene 3: building the sim beside the selection<div class="sub">writing world.tsx · stills at f 196, 240</div></div></div>
+      <div class="step" style="opacity:.55"><span class="ic" style="box-shadow:inset 0 0 0 1px var(--line-2)"></span><div>Scene 4: C goes up, the wave slows into the M</div></div>
+      <div class="step" style="opacity:.55"><span class="ic" style="box-shadow:inset 0 0 0 1px var(--line-2)"></span><div>Scene 5: end card · then render 9:16</div></div>
+      <div style="margin-top:14px">
+        <div class="row" style="justify-content:space-between"><span class="t-micro">Spend</span><span class="t-micro num">$0.18 pitch · $0 build · forecast $0</span></div>
+        <div class="fuel"><i style="width:22%;background:var(--accent)"></i><i style="width:0"></i></div>
+      </div>
+    </div>
+    <div class="queue">
+      <div class="row" style="justify-content:space-between;margin-bottom:4px"><span class="t-label">Runs after this step</span><span class="t-micro">2 notes</span></div>
+      <div class="qn"><svg class="i s muted"><use href="#comment"/></svg>@scene 2 · hold the bar 10 frames longer</div>
+      <div class="qn"><svg class="i s muted"><use href="#comment"/></svg>Make the lasso a touch thicker</div>
+    </div>
+    <div class="ask-bar" style="padding:10px 12px 12px;border-top:1px solid var(--line-1)">
+      <div style="border-radius:var(--r-3);background:var(--bg-2);box-shadow:inset 0 0 0 1px var(--line-2);padding:10px 12px;color:var(--text-3);font-size:13px;display:flex;align-items:center">Add a note for the agent…<span style="margin-left:auto" class="kbd">Hold Space to talk</span></div>
+    </div>
+  </aside>
+
+  <section class="tl">
+    <div class="tl-heads">
+      <div style="height:26px;border-bottom:1px solid var(--line-1)"></div>
+      <div class="tl-head" style="height:120px"><span class="sw2" style="background:var(--t-scene)"></span>Scenes</div>
+      <div class="tl-head"><span class="sw2" style="background:var(--t-text)"></span>Text</div>
+      <div class="tl-head"><span class="sw2" style="background:var(--t-music)"></span>Sound</div>
+      <div class="tl-head"><span class="sw2" style="background:var(--t-note)"></span>Notes</div>
+    </div>
+    <div style="position:relative;overflow:hidden">
+      <div class="ruler" id="ruler"></div>
+      <div class="lane" style="height:120px" id="lane-sc"></div>
+      <div class="lane" id="lane-text"></div>
+      <div class="lane" id="lane-snd"></div>
+      <div class="lane" id="lane-notes"></div>
+      <div class="playhead" style="left:calc(10px + 5.4 * 64px)"></div>
+    </div>
+  </section>
+</div>
+<script src="icons.js"></script>
+<script src="sketches.js"></script>
+<script>
+  document.getElementById("sk").innerHTML = SKETCH(2, 240, 427);
+  const PX = 64, X0 = 10, x = s => X0 + s * PX;
+  const r = document.getElementById("ruler");
+  for (let s = 0; s <= 14; s++) r.insertAdjacentHTML("beforeend", `<span style="left:${x(s)}px">0:${String(s).padStart(2,"0")}</span>`);
+  const L = document.getElementById("lane-sc");
+  const shots = [[0,4,"1 The nib writes the circuit","kav1","built"],[4,6.5,"2 The lasso","kav2","built"],[6.5,9.5,"3 The current","kav3","dev"],[9.5,12,"4 C goes up",null,"sketch"],[12,14.5,"5 End card",null,"sketch"]];
+  shots.forEach(([a,b,n,img,st],i) => {
+    const w = (b-a)*PX - 3, left = x(a)+1;
+    if (st === "built") {
+      const tiles = Array.from({length: Math.ceil(w/58)}, () => `<div style="width:58px;height:100%;flex:none;background:url(img/${img}.jpg) center/cover"></div>`).join("");
+      L.insertAdjacentHTML("beforeend", `<div class="dev" style="left:${left}px;width:${w}px;background:var(--t-scene)"><div style="display:flex;position:absolute;inset:16px 0 0 0;overflow:hidden">${tiles}</div><div class="hd" style="background:var(--t-scene)">${n}<span style="margin-left:auto;font-family:var(--mono);opacity:.7">${(b-a).toFixed(1)}s</span></div></div>`);
+    } else if (st === "dev") {
+      L.insertAdjacentHTML("beforeend", `<div class="dev" style="left:${left}px;width:${w}px;background:var(--bg-2);box-shadow:inset 0 0 0 1.5px var(--accent)"><div style="position:absolute;inset:16px 0 0 0;display:flex;overflow:hidden"><div style="width:58%;display:flex;overflow:hidden">${Array.from({length:3},()=>`<div style="width:58px;height:104px;flex:none;background:url(img/kav3.jpg) center/cover"></div>`).join("")}</div><div style="flex:1;display:flex;gap:4px;padding:4px;opacity:.75">${SKETCH(2,52,92)}</div></div><div class="shimmer"></div><div class="hd" style="background:var(--accent)">${n}<span style="margin-left:auto;font-family:var(--mono)">developing 58%</span></div></div>`);
+    } else {
+      L.insertAdjacentHTML("beforeend", `<div class="dev" style="left:${left}px;width:${w}px;background:var(--bg-2);box-shadow:inset 0 0 0 1px var(--line-2)"><div style="position:absolute;inset:18px 4px 4px 4px;display:flex;gap:8px">${SKETCH(i,54,96)}<div style="font-size:11px;color:var(--text-3);line-height:1.35">Storyboard<br>sketch</div></div><div class="hd" style="color:var(--text-2)">${n}<span style="margin-left:auto;font-family:var(--mono);opacity:.7">${(b-a).toFixed(1)}s</span></div></div>`);
+    }
+  });
+  const bar = (lane,a,b,label,color,extra="") => document.getElementById(lane).insertAdjacentHTML("beforeend", `<div class="clip" style="left:${x(a)}px;width:${(b-a)*PX}px;background:${color};${extra}">${label}</div>`);
+  bar("lane-text",0.6,3.6,"10 mH · 100 µ (hand)","var(--t-text)");
+  bar("lane-text",6.75,9.7,"כותבים ביד.","color-mix(in srgb, var(--t-text) 40%, var(--bg-2))","direction:rtl;justify-content:flex-end;color:var(--text-2);border:1px dashed var(--t-text)");
+  bar("lane-snd",0,6.5,"pulse · pen scratch","var(--t-music)");
+  bar("lane-snd",6.5,14.5,"planned: pulse halves when C goes up","color-mix(in srgb, var(--t-music) 25%, var(--bg-2))","color:var(--text-2);border:1px dashed var(--t-music)");
+  document.getElementById("lane-notes").insertAdjacentHTML("beforeend", `<div style="position:absolute;left:${x(5.1)-9}px;top:6px;display:flex;align-items:center;gap:6px;white-space:nowrap"><div style="width:20px;height:20px;border-radius:50% 50% 50% 2px;background:var(--info);color:#111;font-size:10px;font-weight:700;display:grid;place-items:center">T</div><span style="font-size:11px;color:var(--text-2)">hold the bar 10 frames longer · queued</span></div>`);
+</script>
+</body>
+</html>

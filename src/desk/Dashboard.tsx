@@ -1,17 +1,20 @@
 /** The dashboard: projects and brand kits, like a file browser (spec.md §10.1). */
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { BrandIcon, CloseIcon, FolderIcon, GearIcon, GlobeIcon, PlusIcon, ProjectsIcon, SparkIcon, UploadIcon } from "./icons";
-import { RATIOS, STATE_LABEL, ago, brandFile, post, posterOf, ratioLabel, upload, useEscape, type BrandKit, type Project, type Ratio, type Run, type Settings, type State } from "./api";
+import { BrandIcon, CloseIcon, FolderIcon, GearIcon, GlobeIcon, NykmaIcon, PlusIcon, ProjectsIcon, SendIcon, SparkIcon, UploadIcon } from "./icons";
+import { RATIOS, SIZES, STATE_LABEL, ago, brandFile, media, post, posterOf, ratioLabel, upload, useEscape, type BrandKit, type Project, type Ratio, type Run, type Settings, type State } from "./api";
 
 type Go = (hash: string) => void;
 
-export function Shell({ page, state, go, children }: { page: "projects" | "brands" | "settings"; state: State; go: Go; children: ReactNode }) {
+export function Shell({ page, state, go, children }: { page: "projects" | "brands" | "publish" | "settings"; state: State; go: Go; children: ReactNode }) {
   const kits = state.brands.filter((kit) => kit.made || kit.uploads.length);
   return (
     <div className="shell">
       <nav className="sidebar" aria-label="Desk">
         <div className="wordmark">
-          <span className="wordmark-mark">n</span> nykma
+          <NykmaIcon size={24} />
+          <span>
+            nykma<b>_</b>
+          </span>
         </div>
         <ul className="nav">
           <li>
@@ -22,6 +25,11 @@ export function Shell({ page, state, go, children }: { page: "projects" | "brand
           <li>
             <button className={page === "brands" ? "on" : ""} onClick={() => go("#/brands")}>
               <BrandIcon /> Brand kits
+            </button>
+          </li>
+          <li>
+            <button className={page === "publish" ? "on" : ""} onClick={() => go("#/publish")}>
+              <SendIcon /> Publishing
             </button>
           </li>
           <li>
@@ -69,7 +77,8 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   );
 }
 
-function NewProject({ brands, onClose, go }: { brands: BrandKit[]; onClose: () => void; go: Go }) {
+/** The brief, on the page rather than in a dialog: what the ad is about, the brand, and how it's made. */
+function Composer({ brands, go, focusKey }: { brands: BrandKit[]; go: Go; focusKey: number }) {
   const [text, setText] = useState("");
   const [brand, setBrand] = useState(brands[0]?.name ?? "");
   const [kind, setKind] = useState<"video" | "asset">("video");
@@ -79,6 +88,7 @@ function NewProject({ brands, onClose, go }: { brands: BrandKit[]; onClose: () =
   const [ratios, setRatios] = useState<Ratio[]>(["1x1"]);
   const [pitch, setPitch] = useState(true);
   const [thumbnail, setThumbnail] = useState(true);
+  const box = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     fetch("/api/settings")
       .then((res) => res.json())
@@ -89,9 +99,13 @@ function NewProject({ brands, onClose, go }: { brands: BrandKit[]; onClose: () =
       })
       .catch(() => {});
   }, []);
+  useEffect(() => {
+    if (focusKey) box.current?.focus();
+  }, [focusKey]);
   const toggle = (ratio: Ratio) => setRatios((now) => (now.includes(ratio) ? (now.length > 1 ? now.filter((item) => item !== ratio) : now) : RATIOS.filter((item) => item === ratio || now.includes(item))));
-  const submit = (event: FormEvent) => {
-    event.preventDefault();
+  const submit = (event?: FormEvent) => {
+    event?.preventDefault();
+    if (!text.trim() || sending) return;
     setSending(true);
     setError("");
     post("/api/ask", { text, brand: brand || undefined, kind, ratios, pitch, thumbnail: kind === "asset" ? undefined : thumbnail })
@@ -101,84 +115,62 @@ function NewProject({ brands, onClose, go }: { brands: BrandKit[]; onClose: () =
         setSending(false);
       });
   };
+  const kit = brands.find((item) => item.name === brand);
   return (
-    <Modal title="New project" onClose={onClose}>
-      <form className="new-form" onSubmit={submit}>
-        <label className="big-ask">
-          <span>
-            <SparkIcon /> What's it about?
-          </span>
-          <textarea
-            dir="auto"
-            rows={4}
-            autoFocus
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && text.trim()) submit(event);
-            }}
-            placeholder="A 20 second ad about how fast the app solves a page of homework"
-          />
+    <form className="composer" onSubmit={submit}>
+      <textarea
+        ref={box}
+        dir="auto"
+        rows={2}
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) submit();
+        }}
+        placeholder="What should the next ad be about? A 15-second ad that shows the free plan solving one real homework problem…"
+      />
+      <div className="composer-opts">
+        <label className="opt">
+          <span className="swatch-dot" style={{ background: kit?.colours[3] ?? kit?.colours[0] ?? "#555" }} />
+          <select value={brand} onChange={(event) => setBrand(event.target.value)} aria-label="Brand">
+            {brands.map((item) => (
+              <option key={item.name}>{item.name}</option>
+            ))}
+            <option value="">Another brand: say it above</option>
+          </select>
         </label>
-        <div className="form-row">
-          <label>
-            Brand
-            <select value={brand} onChange={(event) => setBrand(event.target.value)}>
-              {brands.map((kit) => (
-                <option key={kit.name}>{kit.name}</option>
-              ))}
-              <option value="">Another brand: say it above</option>
-            </select>
-          </label>
-          <div className="field">
-            Kind
-            <div className="segmented" role="group" aria-label="Kind">
-              <button type="button" aria-pressed={kind === "video"} onClick={() => setKind("video")}>
-                Video
-              </button>
-              <button type="button" aria-pressed={kind === "asset"} onClick={() => setKind("asset")}>
-                Asset
-              </button>
-            </div>
-          </div>
+        <div className="seg" role="group" aria-label="Kind">
+          <button type="button" aria-pressed={kind === "video"} onClick={() => setKind("video")}>
+            Video
+          </button>
+          <button type="button" aria-pressed={kind === "asset"} onClick={() => setKind("asset")}>
+            Asset
+          </button>
         </div>
-        <div className="form-row">
-          <div className="field">
-            Layouts
-            <div className="segmented" role="group" aria-label="Layouts">
-              {RATIOS.map((ratio) => (
-                <button key={ratio} type="button" aria-pressed={ratios.includes(ratio)} onClick={() => toggle(ratio)}>
-                  {ratioLabel(ratio)}
-                </button>
-              ))}
-            </div>
-          </div>
+        <div className="seg" role="group" aria-label="Layouts">
+          {RATIOS.map((ratio) => (
+            <button key={ratio} type="button" aria-pressed={ratios.includes(ratio)} onClick={() => toggle(ratio)}>
+              {ratioLabel(ratio)}
+            </button>
+          ))}
         </div>
-        <label className="check">
+        <label className="opt check">
           <input type="checkbox" checked={pitch} onChange={(event) => setPitch(event.target.checked)} />
           Pitch first
         </label>
         {kind !== "asset" && (
-          <label className="check">
+          <label className="opt check">
             <input type="checkbox" checked={thumbnail} onChange={(event) => setThumbnail(event.target.checked)} />
-            Thumbnail
+            Cover image
           </label>
         )}
-        <p className="hint">
-          {pitch ? "The agent writes a pitch and an animatic first, then stops for you." : "No pitch: the agent builds straight away and stops at the first look."}{" "}
-          {kind === "asset" ? "An asset is stills: a post image or a carousel." : ""}
-        </p>
-        {error && <p className="form-error">{error}</p>}
-        <footer>
-          <button type="button" className="ghost" onClick={onClose}>
-            Cancel
-          </button>
-          <button className="primary" disabled={!text.trim() || sending}>
-            {sending ? "Starting" : "Start"} <kbd>Ctrl ↵</kbd>
-          </button>
-        </footer>
-      </form>
-    </Modal>
+        <span className="composer-hint">{pitch ? "A pitch costs a few cents. Nothing is built until you say go." : "No pitch: the agent builds straight away and stops at the first look."}</span>
+        <button className="primary" disabled={!text.trim() || sending}>
+          {sending ? "Starting…" : pitch ? "Pitch it" : "Build it"} <kbd>Ctrl ↵</kbd>
+        </button>
+      </div>
+      {error && <p className="form-error">{error}</p>}
+    </form>
   );
 }
 
@@ -282,15 +274,30 @@ function NewKit({ onClose, go }: { onClose: () => void; go: Go }) {
   );
 }
 
-function Poster({ project }: { project: Project }) {
-  const { video, image } = posterOf(project);
+/** The ratio an ad is shown in on its card: its first layout, so a 9:16 ad gets a tall card. */
+function ratioOf(project: Project): Ratio {
+  const listed = project.info?.takes[0]?.ratios.map((item) => item.ratio as Ratio) ?? [];
+  const take = project.ad ? Object.values(project.ad.takes)[0] : undefined;
+  // The first layout that has a render, so the card plays what was made; then the registry's first layout.
+  return (listed.find((ratio) => take?.[ratio]) ?? RATIOS.find((ratio) => take?.[ratio]) ?? listed[0] ?? "16x9") as Ratio;
+}
+
+const CARD_H = 228;
+
+function Poster({ project, ratio, height = CARD_H }: { project: Project; ratio: Ratio; height?: number }) {
+  const ad = project.ad;
   const ref = useRef<HTMLVideoElement>(null);
-  if (video)
+  const cover = ad?.thumbnails?.find((file) => file.includes(ratio) && file.endsWith(".jpg")) ?? ad?.thumbnails?.find((file) => file.includes(ratio));
+  const take = ad ? Object.values(ad.takes)[0] : undefined;
+  const file = take?.[ratio];
+  const fallback = posterOf(project);
+  if (file || fallback.video)
     return (
       <video
         ref={ref}
         className="card-media"
-        src={`${video}#t=2`}
+        src={`${file ? media(ad!.folder, file) : fallback.video}#t=2`}
+        poster={cover ? media(ad!.folder, cover) : undefined}
         muted
         loop
         playsInline
@@ -299,14 +306,22 @@ function Poster({ project }: { project: Project }) {
         onMouseLeave={() => ref.current?.pause()}
       />
     );
-  if (image) return <img className="card-media contain" src={image} alt="" loading="lazy" />;
-  const take = project.info?.takes[0];
-  const id = take?.ratios.find((item) => item.ratio === "16x9")?.id;
-  const scene = take?.scenes[Math.floor((take.scenes.length - 1) / 2)];
-  if (id && scene && take.frames)
+  if (cover || fallback.image) return <img className="card-media" src={cover ? media(ad!.folder, cover) : fallback.image} alt="" loading="lazy" />;
+  const info = project.info?.takes[0];
+  const id = info?.ratios.find((item) => item.ratio === ratio)?.id;
+  const scene = info?.scenes[Math.floor((info.scenes.length - 1) / 2)];
+  if (id && scene && info.frames)
     return (
       <div className="card-live">
-        <iframe title={project.slug} src={`/board.html?id=${encodeURIComponent(id)}&scene=${encodeURIComponent(scene.id)}&f=${Math.floor(scene.frames / 2)}`} width={1920} height={1080} tabIndex={-1} loading="lazy" />
+        <iframe
+          title={project.slug}
+          src={`/board.html?id=${encodeURIComponent(id)}&scene=${encodeURIComponent(scene.id)}&f=${Math.floor(scene.frames / 2)}`}
+          width={SIZES[ratio].width}
+          height={SIZES[ratio].height}
+          tabIndex={-1}
+          loading="lazy"
+          style={{ transform: `scale(${height / SIZES[ratio].height})` }}
+        />
       </div>
     );
   return <div className="card-media blank">{project.slug}</div>;
@@ -314,10 +329,81 @@ function Poster({ project }: { project: Project }) {
 
 const FILTERS = ["all", "pitch", "first-look", "checked", "ready", "dropped", "code"] as const;
 
+/** What's waiting for you: pitches to answer, first looks to watch, ads to post, and what the agent is doing. */
+function Moves({ projects, go }: { projects: Project[]; go: Go }) {
+  const [sent, setSent] = useState<Record<string, string>>({});
+  const say = (project: Project, text: string) => {
+    setSent((now) => ({ ...now, [project.key]: text }));
+    post("/api/ask", { folder: project.folder, text }).then(() => go(`#/p/${encodeURIComponent(project.key)}`));
+  };
+  const live = projects.filter((project) => project.state !== "dropped" && project.state !== "code");
+  const moves = [
+    ...live.filter((project) => project.running).map((project) => ({ project, kind: "working" as const })),
+    ...live.filter((project) => !project.running && project.state === "pitch" && project.ad?.idea).map((project) => ({ project, kind: "pitch" as const })),
+    ...live.filter((project) => !project.running && project.state === "first-look").map((project) => ({ project, kind: "look" as const })),
+  ]
+    .sort((a, b) => b.project.updated - a.project.updated)
+    .slice(0, 4);
+  if (!moves.length) return null;
+  const label = { working: "Agent working", pitch: "Pitch waiting for you", look: "First look ready" };
+  return (
+    <section className="moves" aria-label="Your move">
+      {moves.map(({ project, kind }) => {
+        const ratio = ratioOf(project);
+        const open = () => go(`#/p/${encodeURIComponent(project.key)}`);
+        return (
+          <div key={project.key} className={`move ${kind}`}>
+            <button className="move-thumb" style={{ width: Math.round(96 * (SIZES[ratio].width / SIZES[ratio].height)) }} onClick={open} tabIndex={-1}>
+              <Poster project={project} ratio={ratio} height={96} />
+            </button>
+            <div className="move-body">
+              <span className="move-kind">
+                <span className={kind === "working" ? "working-dot" : "dot"} />
+                {label[kind]}
+              </span>
+              <button className="move-name" onClick={open}>
+                {project.slug}
+              </button>
+              <p className="move-text" dir="auto">
+                {kind === "pitch" ? project.ad?.idea.split("\n")[0] : [project.brand, ago(project.updated)].filter(Boolean).join(" · ")}
+              </p>
+              <div className="move-acts">
+                {kind === "pitch" &&
+                  (sent[project.key] ? (
+                    <span className="move-sent">Sent: {sent[project.key]}</span>
+                  ) : (
+                    <>
+                      <button className="primary small" onClick={() => say(project, "go")}>
+                        Go
+                      </button>
+                      <button className="ghost small boxed" onClick={() => say(project, "another idea")}>
+                        Another idea
+                      </button>
+                    </>
+                  ))}
+                {kind === "look" && (
+                  <button className="ghost small boxed" onClick={open}>
+                    Watch it
+                  </button>
+                )}
+                {kind === "working" && (
+                  <button className="ghost small boxed" onClick={open}>
+                    Follow along
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </section>
+  );
+}
+
 export function ProjectsPage({ state, projects, go }: { state: State; projects: Project[]; go: Go }) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("all");
   const [brand, setBrand] = useState("");
-  const [creating, setCreating] = useState(false);
+  const [focusKey, setFocusKey] = useState(0);
   const starting = state.runs.filter((run) => run.running && run.kind === "agent" && !run.folder && !run.brand && !run.slug && !run.thread);
   const shown = useMemo(
     () =>
@@ -329,15 +415,18 @@ export function ProjectsPage({ state, projects, go }: { state: State; projects: 
   );
   const counts = Object.fromEntries(FILTERS.map((key) => [key, key === "all" ? projects.filter((p) => p.state !== "code").length : projects.filter((p) => p.state === key).length]));
   const brands = [...new Set(projects.map((project) => project.brand).filter(Boolean))] as string[];
+  const colourOf = (name?: string) => state.brands.find((kit) => kit.name === name)?.colours[3] ?? "#555";
 
   return (
     <Shell page="projects" state={state} go={go}>
       <header className="page-head">
         <h1>Projects</h1>
-        <button className="primary" onClick={() => setCreating(true)}>
+        <button className="ghost boxed" onClick={() => setFocusKey((key) => key + 1)}>
           <PlusIcon size={14} /> New project
         </button>
       </header>
+      <Composer brands={state.brands.filter((kit) => kit.made)} go={go} focusKey={focusKey} />
+      <Moves projects={projects} go={go} />
       <div className="filters">
         {FILTERS.filter((key) => key === "all" || counts[key]).map((key) => (
           <button key={key} aria-pressed={filter === key} onClick={() => setFilter(key)}>
@@ -353,48 +442,54 @@ export function ProjectsPage({ state, projects, go }: { state: State; projects: 
           </select>
         )}
       </div>
-      <ul className="grid">
+      <ul className="library">
         {starting.map((run: Run) => (
-          <li key={run.id}>
-            <button className="card" onClick={() => go(`#/run/${run.id}`)}>
-              <div className="card-thumb">
+          <li key={run.id} style={{ width: Math.round(CARD_H * (16 / 9)) }}>
+            <button className="tile" onClick={() => go(`#/run/${run.id}`)}>
+              <div className="tile-thumb" style={{ height: CARD_H }}>
                 <div className="card-media blank">
                   <span className="spinner big" />
                 </div>
               </div>
-              <div className="card-info">
-                <span className="card-name" dir="auto">{run.title}</span>
-                <span className="card-meta">The agent is starting</span>
-              </div>
+              <span className="tile-name" dir="auto">
+                {run.title}
+              </span>
+              <span className="tile-meta">The agent is starting</span>
             </button>
           </li>
         ))}
-        {shown.map((project) => (
-          <li key={project.key}>
-            <button className={`card${project.state === "dropped" ? " dropped" : ""}`} onClick={() => go(`#/p/${encodeURIComponent(project.key)}`)}>
-              <div className="card-thumb">
-                <Poster project={project} />
-                <span className={`state ${project.state}`}>{STATE_LABEL[project.state]}</span>
-                {project.running && <span className="working-dot on-card" title="The agent is working" />}
-                {project.kind === "asset" && <span className="kind-tag">Asset</span>}
-              </div>
-              <div className="card-info">
-                <span className="card-name">{project.slug}</span>
-                <span className="card-meta">{[project.brand, ago(project.updated)].filter(Boolean).join(" · ") || "No queue folder yet"}</span>
-              </div>
-            </button>
-          </li>
-        ))}
-        {!shown.length && !starting.length && (
-          <li className="grid-empty">
-            <p>No projects here yet.</p>
-            <button className="primary" onClick={() => setCreating(true)}>
-              <PlusIcon size={14} /> New project
-            </button>
-          </li>
-        )}
+        {shown.map((project) => {
+          const ratio = ratioOf(project);
+          const take = project.info?.takes[0];
+          const ratios = take?.ratios.map((item) => item.ratio as Ratio) ?? [];
+          return (
+            <li key={project.key} style={{ width: Math.round(CARD_H * (SIZES[ratio].width / SIZES[ratio].height)) }}>
+              <button className={`tile${project.state === "dropped" ? " dropped" : ""}`} onClick={() => go(`#/p/${encodeURIComponent(project.key)}`)}>
+                <div className="tile-thumb" style={{ height: CARD_H }}>
+                  <Poster project={project} ratio={ratio} />
+                  <span className={`state ${project.state}`}>{STATE_LABEL[project.state]}</span>
+                  {project.running && <span className="working-dot on-card" title="The agent is working" />}
+                  {ratios.length > 0 && (
+                    <span className="tile-ratios">
+                      {ratios.map((item) => (
+                        <span key={item}>{ratioLabel(item)}</span>
+                      ))}
+                    </span>
+                  )}
+                  {take && take.frames > 0 && take.kind !== "asset" && <span className="tile-len">{(take.frames / take.fps).toFixed(1)}s</span>}
+                  {project.kind === "asset" && <span className="tile-len">Asset</span>}
+                </div>
+                <span className="tile-name">{project.slug}</span>
+                <span className="tile-meta">
+                  {project.brand && <span className="swatch-dot" style={{ background: colourOf(project.brand) }} />}
+                  {[project.brand, ago(project.updated)].filter(Boolean).join(" · ") || "No queue folder yet"}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+        {!shown.length && !starting.length && <li className="grid-empty">No projects here yet. Write a brief above to start one.</li>}
       </ul>
-      {creating && <NewProject brands={state.brands.filter((kit) => kit.made)} onClose={() => setCreating(false)} go={go} />}
     </Shell>
   );
 }

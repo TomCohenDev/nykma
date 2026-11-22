@@ -1,28 +1,105 @@
-/* The desk, in Figma's clothes: dark panels, a neutral board so an ad's colours read true, small type, one blue. */
+/*
+ * The desk (spec.md §10.7). Neutral greys so an ad's colours read true, 13 px type, one accent for what's live or
+ * selected. Two themes share the token names: Ink (default: nykma's own ink, paper and red marker, as on
+ * nobodyknowsmyapp.com and in brands/nykma/brand.md) and Studio (warm), picked in Settings. The old names
+ * (--canvas, --panel, --blue…) are kept as aliases so every page follows the theme.
+ */
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../../brands/nykma/assets/JetBrainsMono-wght.ttf") format("truetype");
+  font-weight: 100 800;
+  font-display: swap;
+}
+
+:root,
+:root[data-theme="graphite"] {
+  --bg-0: #0d0d0d; /* the app frame, behind the viewer: the site's deep */
+  --bg-1: #141414; /* panels: Ink */
+  --bg-2: #1b1b1b; /* fields, cards, track lanes */
+  --bg-3: #242424; /* hover */
+  --bg-4: #2e2e2e; /* pressed, selected */
+  --line-1: #242424;
+  --line-2: #343332;
+  --text-1: #f4efe6; /* Paper */
+  --text-2: #c8c2b7;
+  --text-3: #a39d92;
+  --text-4: #69645c;
+  --accent: #e8301f; /* Marker, the red pen */
+  --accent-ink: #ffffff;
+  --accent-hover: #ff4734;
+  --accent-soft: rgba(232, 48, 31, 0.16);
+  --info: #5aa9ff;
+  --viewer: #0a0a0a;
+  --t-scene: #5b7cff;
+  --t-image: #8b9bb8;
+  --t-text: #b07cff;
+  --t-voice: #2ec5b6;
+  --t-music: #3ccf8e;
+  --t-sfx: #ff9f43;
+  --t-note: #ffc933;
+  --green: #3ccf8e;
+  --orange: #ff9f43;
+  --red: #ff6b5e;
+  --purple: #b07cff;
+  --font: "Geist Variable", "Noto Sans Hebrew", "Rubik Variable", system-ui, sans-serif;
+  --mono: "JetBrains Mono", "Geist Mono Variable", ui-monospace, monospace;
+  /* Page titles and the wordmark, as the site sets its headings. */
+  --display: "JetBrains Mono", "Geist Variable", system-ui, sans-serif;
+  --pop: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="studio"] {
+  --bg-0: #121110;
+  --bg-1: #1a1816;
+  --bg-2: #221f1c;
+  --bg-3: #2b2724;
+  --bg-4: #36312c;
+  --line-1: #2a2622;
+  --line-2: #3a342e;
+  --text-1: #f1ebe2;
+  --text-2: #bfb6a8;
+  --text-3: #958b7e;
+  --text-4: #635c52;
+  --accent: #e3a34a;
+  --accent-ink: #1f1405;
+  --accent-hover: #f0b765;
+  --accent-soft: rgba(227, 163, 74, 0.15);
+  --info: #79b3e8;
+  --viewer: #0c0b0a;
+  --t-scene: #d9824a;
+  --t-image: #a89a88;
+  --t-text: #c79bd9;
+  --t-voice: #6fc2b0;
+  --t-music: #a8c46a;
+  --t-sfx: #e8b45a;
+  --t-note: #f0b765;
+  --green: #7fcf8a;
+  --orange: #f08a4b;
+  --red: #ef6a5a;
+  --purple: #c79bd9;
+  --font: "IBM Plex Sans", "IBM Plex Sans Hebrew", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --display: "IBM Plex Sans", system-ui, sans-serif;
+  --pop: 0 14px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 240, 220, 0.06);
+}
+
 :root {
-  --canvas: #1e1e1e;
-  --panel: #2c2c2c;
-  --panel-2: #383838;
-  --panel-3: #444444;
-  --line: #3d3d3d;
-  --line-soft: #333333;
-  --text: #ffffff;
-  --text-2: #c4c4c4;
-  --text-3: #8f8f8f;
-  --blue: #0d99ff;
-  --blue-2: #0b84db;
-  --blue-soft: rgba(13, 153, 255, 0.16);
-  --green: #14ae5c;
-  --orange: #ffa629;
-  --red: #f24822;
-  --purple: #9747ff;
+  --canvas: var(--bg-0);
+  --panel: var(--bg-1);
+  --panel-2: var(--bg-3);
+  --panel-3: var(--bg-4);
+  --line: var(--line-2);
+  --line-soft: var(--line-1);
+  --text: var(--text-1);
+  --blue: var(--accent);
+  --blue-2: var(--accent-hover);
+  --blue-soft: var(--accent-soft);
   --radius: 6px;
-  font-family: "Inter Variable", Inter, system-ui, sans-serif;
-  font-size: 12px;
+  font-family: var(--font);
+  font-size: 13px;
   line-height: 1.45;
-  font-feature-settings: "cv11", "ss01";
-  color: var(--text);
-  background: var(--canvas);
+  color: var(--text-1);
+  background: var(--bg-0);
   color-scheme: dark;
 }
 
@@ -102,7 +179,7 @@ textarea:focus-visible {
 }
 
 .primary {
-  color: #fff;
+  color: var(--accent-ink);
   background: var(--blue);
 }
 
@@ -130,7 +207,7 @@ textarea:focus-visible {
 .primary.small {
   height: 24px;
   padding: 0 8px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .icon-button {
@@ -205,7 +282,7 @@ input[type="range"] {
   height: 20px;
   padding: 0 7px;
   border-radius: 10px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
   color: var(--text);
@@ -264,7 +341,7 @@ input[type="range"] {
 
 .hint {
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .loading {
@@ -338,25 +415,24 @@ input[type="range"] {
   overflow-y: auto;
 }
 
+/* nykma's wordmark, as on the site: the icon, then nykma in bold mono with the red cursor after it. */
 .wordmark {
   display: flex;
   align-items: center;
   gap: 9px;
   padding: 2px 8px 16px;
-  font-size: 15px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-.wordmark-mark {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
-  color: #fff;
-  background: conic-gradient(from 210deg, var(--blue), var(--purple), #ff5c8a, var(--orange), var(--blue));
-  font-size: 14px;
+.wordmark svg {
+  flex: none;
+}
+
+.wordmark b {
+  color: var(--accent);
   font-weight: 800;
 }
 
@@ -393,7 +469,7 @@ input[type="range"] {
 .nav-title {
   margin: 20px 8px 6px;
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -411,7 +487,7 @@ input[type="range"] {
 .sidebar-foot {
   margin-top: auto;
   padding: 10px 8px 0;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .sidebar-foot a {
@@ -436,9 +512,10 @@ input[type="range"] {
 
 .page-head h1 {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--display);
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
 
 .page-lede {
@@ -586,7 +663,7 @@ input[type="range"] {
   color: var(--text);
   background: rgba(30, 30, 30, 0.75);
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -608,7 +685,7 @@ input[type="range"] {
 
 .card-meta {
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .kit-thumb {
@@ -814,7 +891,7 @@ input[type="range"] {
   margin: 0;
   padding: 14px 18px !important;
   font-family: ui-monospace, "SF Mono", Menlo, "Cascadia Code", Consolas, monospace !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
   line-height: 1.55;
   border: 0 !important;
   border-radius: 0 !important;
@@ -875,7 +952,7 @@ input[type="range"] {
 .crumb-here {
   margin: 0 4px 0 0;
   overflow: hidden;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -912,14 +989,14 @@ input[type="range"] {
   align-items: center;
   justify-content: space-between;
   margin: 0 8px 6px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .panel-section h4 {
   margin: 12px 8px 4px;
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -932,7 +1009,7 @@ input[type="range"] {
   padding: 12px 16px;
   color: var(--text-2);
   white-space: pre-line;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .panel-empty {
@@ -997,7 +1074,7 @@ input[type="range"] {
   color: var(--blue);
   background: var(--blue-soft);
   border-radius: 5px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -1017,7 +1094,7 @@ input[type="range"] {
 .layer-sub {
   margin-inline-start: auto;
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1217,7 +1294,7 @@ input[type="range"] {
   height: 18px;
   overflow: hidden;
   color: var(--text-2);
-  font-size: 11px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -1236,10 +1313,10 @@ input[type="range"] {
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  color: #fff;
+  color: var(--accent-ink);
   background: var(--blue);
   border-radius: 8px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -1258,10 +1335,10 @@ input[type="range"] {
   padding: 0 6px;
   height: 16px;
   line-height: 16px;
-  color: #fff;
+  color: var(--accent-ink);
   background: var(--blue);
   border-radius: 3px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
 }
 
@@ -1270,7 +1347,7 @@ input[type="range"] {
   color: #fff;
   background: var(--red);
   border-radius: 3px;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .scene-error-note {
@@ -1279,14 +1356,14 @@ input[type="range"] {
   color: #fff;
   background: rgba(242, 72, 34, 0.92);
   border-radius: var(--radius);
-  font-size: 11px;
+  font-size: 12px;
   overflow-wrap: anywhere;
 }
 
 .ratio-caption {
   position: absolute;
   color: var(--text-3);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .scene-outline {
@@ -1346,7 +1423,7 @@ input[type="range"] {
 .scrubber output {
   min-width: 82px;
   color: var(--text-2);
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   text-align: end;
   white-space: nowrap;
@@ -1390,7 +1467,7 @@ input[type="range"] {
 }
 
 .toolbar button.on {
-  color: #fff;
+  color: var(--accent-ink);
   background: var(--blue);
 }
 
@@ -1507,14 +1584,14 @@ body.resizing .board {
 
 .panel-head h2 {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .panel-head p {
   margin: 0;
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .panel-head > div {
@@ -1527,8 +1604,8 @@ body.resizing .board {
   place-items: center;
   width: 26px;
   height: 26px;
-  color: #fff;
-  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: var(--accent-ink);
+  background: var(--accent);
   border-radius: 8px;
 }
 
@@ -1576,7 +1653,7 @@ body.resizing .board {
   color: var(--text);
   background: var(--panel-3);
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -1599,7 +1676,7 @@ body.resizing .board {
 .turn-cost {
   margin: 6px 0 0;
   color: var(--text-3);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .thinking {
@@ -1636,7 +1713,7 @@ body.resizing .board {
 
 .steps-tick {
   color: var(--green);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .steps-count {
@@ -1653,7 +1730,7 @@ body.resizing .board {
 .steps ol {
   margin: 2px 0 4px;
   padding-inline-start: 22px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .steps li {
@@ -1713,7 +1790,7 @@ body.resizing .board {
   background: none;
   border: 0;
   resize: none;
-  font-size: 12.5px;
+  font-size: 13.5px;
   line-height: 1.5;
 }
 
@@ -1733,7 +1810,7 @@ body.resizing .board {
   color: #9fd3ff;
   background: var(--blue-soft);
   border-radius: 5px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -1774,7 +1851,7 @@ body.resizing .board {
 .compose-hint {
   flex: 1;
   color: var(--text-3);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .send {
@@ -1783,7 +1860,7 @@ body.resizing .board {
   width: 26px;
   height: 26px;
   padding: 0;
-  color: #fff;
+  color: var(--accent-ink);
   background: var(--blue);
   border: 0;
   border-radius: 50%;
@@ -1844,7 +1921,7 @@ body.resizing .board {
 .md h5,
 .md h6 {
   margin: 14px 0 6px;
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 600;
 }
 
@@ -1862,7 +1939,7 @@ body.resizing .board {
   background: var(--canvas);
   border-radius: var(--radius);
   font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .md blockquote {
@@ -1877,7 +1954,7 @@ body.resizing .board {
 
 .md table {
   border-collapse: collapse;
-  font-size: 11.5px;
+  font-size: 12.5px;
 }
 
 .md th,
@@ -1903,7 +1980,7 @@ body.resizing .board {
 }
 
 .say {
-  font-size: 12.5px;
+  font-size: 13.5px;
   line-height: 1.55;
   margin: 6px 0;
 }
@@ -1988,7 +2065,7 @@ body.resizing .board {
 .renders-row figcaption {
   margin-top: 6px;
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .transport {
@@ -2034,7 +2111,7 @@ body.resizing .board {
 .stills figcaption {
   margin-top: 4px;
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .animatic {
@@ -2161,7 +2238,7 @@ body.resizing .board {
   margin-top: 6px;
   color: var(--text-2);
   font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .specimens {
@@ -2188,7 +2265,7 @@ body.resizing .board {
 .specimen-meta {
   margin: 0;
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
   overflow-wrap: anywhere;
 }
 
@@ -2205,7 +2282,7 @@ body.resizing .board {
   padding: 0;
   list-style: none;
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .logo-tile {
@@ -2228,7 +2305,7 @@ body.resizing .board {
 
 .kit-md {
   color: var(--text-2);
-  font-size: 12.5px;
+  font-size: 13.5px;
 }
 
 .sources,
@@ -2240,7 +2317,7 @@ body.resizing .board {
   background: var(--panel);
   border-radius: 8px;
   font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-  font-size: 11px;
+  font-size: 12px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -2284,7 +2361,7 @@ body.resizing .board {
   left: 50%;
   translate: -50% -50%;
   padding: 10px 16px;
-  color: #fff;
+  color: var(--accent-ink);
   background: var(--blue);
   border-radius: 8px;
   pointer-events: none;
@@ -2425,7 +2502,7 @@ body.resizing .board {
 .settings .choice small,
 .settings .note {
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .settings .choices {
@@ -2471,13 +2548,13 @@ body.resizing .board {
 
 .saved-note {
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
 }
 
 .settings .settings-sub {
   margin: 6px 0 0;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -2511,7 +2588,7 @@ body.resizing .board {
 
 .saved-voices code {
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .settings .add-voice input[type="text"] {
@@ -2588,7 +2665,7 @@ body.resizing .board {
 .gen-kind,
 .gen-model {
   color: var(--text-3);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .gen-cost {
@@ -2616,17 +2693,17 @@ body.resizing .board {
 
 .gen-problem {
   color: #ff8a65;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .gen-job {
   color: var(--blue);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .gen-ok {
   color: var(--green);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .gen-review {
@@ -2652,7 +2729,7 @@ body.resizing .board {
   width: 100%;
   resize: vertical;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .gen-money {
@@ -2688,7 +2765,7 @@ body.resizing .board {
 }
 
 .instruction-group-name {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-3);
 }
 
@@ -2738,7 +2815,7 @@ body.resizing .board {
 
 .instruction-md {
   max-width: 78ch;
-  font-size: 12.5px;
+  font-size: 13.5px;
   line-height: 1.6;
 }
 
@@ -2760,7 +2837,7 @@ body.resizing .board {
   padding: 8px 12px;
   background: var(--canvas);
   border-radius: var(--radius);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .front-matter div {
@@ -2794,7 +2871,7 @@ body.resizing .board {
 }
 
 .md-editor.live .cm-content {
-  font-family: "Inter Variable", Inter, system-ui, sans-serif;
+  font-family: var(--font);
   font-size: 13.5px;
   line-height: 1.65;
 }
@@ -2808,7 +2885,7 @@ body.resizing .board {
 .md-editor.source .cm-content,
 .md-editor.source .cm-gutters {
   font-family: ui-monospace, "SF Mono", Menlo, "Cascadia Code", Consolas, monospace;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.6;
 }
 
@@ -2860,7 +2937,7 @@ body.resizing .board {
 .md-editor.live .cm-table,
 .md-editor.live .cm-front {
   font-family: ui-monospace, "SF Mono", Menlo, "Cascadia Code", Consolas, monospace;
-  font-size: 12px;
+  font-size: 13px;
   background: var(--canvas);
 }
 
@@ -2921,4 +2998,291 @@ body.resizing .board {
 
 .instruction-actions .grow {
   flex: 1;
+}
+
+/* ── Publishing (spec.md §10.12) ── */
+
+button.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.pub-page details > summary,
+.pub-dialog details > summary {
+  color: var(--text-2);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.pub-caveat {
+  padding: 6px 9px;
+  border-left: 2px solid var(--orange);
+  background: rgba(255, 166, 41, 0.07);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.pub-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 8px 0 4px;
+  padding-inline-start: 20px;
+  color: var(--text-2);
+}
+
+.pub-redirect code,
+.pub-url {
+  padding: 3px 7px;
+  background: var(--panel-2);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.pub-url {
+  align-self: flex-start;
+  color: var(--blue);
+}
+
+.pub-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pub-field,
+.pub-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pub-field > span,
+.pub-option > span {
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+.pub-field input,
+.pub-option input[type="text"],
+.pub-option select,
+.pub-option textarea,
+.pub-when-pick input[type="datetime-local"] {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 8px;
+  background: var(--canvas);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.pub-option textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.pub-option.check {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.note.over {
+  color: var(--red);
+}
+
+.pub-jobs,
+.pub-accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pub-job {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 9px 11px;
+  background: var(--panel-2);
+  border-radius: var(--radius);
+}
+
+.pub-job-head,
+.pub-accounts li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.pub-accounts li {
+  padding: 7px 10px;
+  background: var(--panel-2);
+  border-radius: var(--radius);
+}
+
+.pub-accounts li .status-line {
+  margin-inline-start: auto;
+}
+
+.pub-when {
+  margin-inline-start: auto;
+  color: var(--text-3);
+}
+
+.pub-badge {
+  padding: 1px 7px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.pub-badge.wait { color: #7cc4ff; background: var(--blue-soft); }
+.pub-badge.ok { color: #5fd391; background: rgba(20, 174, 92, 0.18); }
+.pub-badge.bad { color: #ffb38a; background: rgba(242, 72, 34, 0.18); }
+.pub-badge.off { color: var(--text-3); background: var(--panel-3); }
+
+.pub-error {
+  margin: 0;
+  color: #ffb38a;
+}
+
+.pub-log {
+  margin-inline-start: auto;
+}
+
+.pub-log ul {
+  margin: 6px 0 0;
+  padding-inline-start: 16px;
+  color: var(--text-2);
+}
+
+.pub-dialog-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 14px 18px;
+  overflow: auto;
+}
+
+.pub-sub {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pub-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pub-pick-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.pub-pick-item:has(input:checked) {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+
+.pub-pick-item.off {
+  opacity: 0.6;
+}
+
+.pub-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--panel-2);
+  border-radius: 8px;
+}
+
+.pub-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pub-card-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pub-byhand {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pub-hand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.pub-hand b {
+  width: 150px;
+}
+
+.pub-footer {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.pub-when-pick {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-inline-end: auto;
+}
+
+.pub-when-pick .check {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pub-when-pick input[type="datetime-local"] {
+  width: auto;
+}
+
+.pub-summary {
+  flex-basis: 100%;
+  order: 3;
+}
+
+.pub-done {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
 }

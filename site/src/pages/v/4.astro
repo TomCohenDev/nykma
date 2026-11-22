@@ -1,0 +1,101 @@
+---
+// Variation 4, "the work first": the headline and explanation, then straight into the ads, large, each with its spec
+// sheet. Then the session that makes one, the facts, and how to start.
+import Term from "../../layouts/Term.astro";
+import Terminal from "../../components/Terminal.astro";
+import Examples from "../../components/Examples.astro";
+import Install from "../../components/Install.astro";
+import { headline, lede, session, facts, price } from "../../nykma";
+---
+
+<Term title="nykma: nobody knows my app" description={lede} preview>
+  <div class="t-wrap">
+    <section class="hero">
+      <h1 class="t-h1">{headline}<span class="cur"></span></h1>
+      <div class="side">
+        <p class="t-lede">{lede}</p>
+        <div class="t-btns">
+          <a class="t-btn primary" href="#start">get started</a>
+          <a class="t-btn" href="#how">how it works</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="work" id="examples" aria-label="Examples">
+      <Examples detail />
+    </section>
+
+    <section class="t-section split" id="how">
+      <div>
+        <h2 class="t-h2">how one gets made</h2>
+        <p class="t-note">
+          You ask, it pitches and waits. You say go, it builds and shows you a first look. You give notes or say finish
+          it, and it hands off a folder you can post from.
+        </p>
+      </div>
+      <Terminal lines={session} title="claude, in your project" />
+    </section>
+
+    <section class="t-section">
+      <h2 class="t-h2">at a glance</h2>
+      <dl class="t-dl glance">
+        {
+          facts.map(([key, value]) => (
+            <>
+              <dt>{key}</dt>
+              <dd>{value}</dd>
+            </>
+          ))
+        }
+      </dl>
+    </section>
+
+    <section class="t-section" id="start">
+      <h2 class="t-h2">start</h2>
+      <div class="gap"><Install /></div>
+      <p class="t-note gap">{price} <a href="/pricing">pricing</a></p>
+    </section>
+  </div>
+</Term>
+
+<style>
+  .hero {
+    padding-top: clamp(48px, 8vw, 100px);
+    display: grid;
+    gap: 8px 56px;
+  }
+  @media (min-width: 1000px) {
+    .hero {
+      grid-template-columns: 1fr 1fr;
+      align-items: end;
+    }
+    .hero .t-lede {
+      margin-top: 0;
+    }
+  }
+  .work {
+    margin-top: clamp(56px, 8vw, 96px);
+  }
+  .split {
+    display: grid;
+    gap: 28px 56px;
+  }
+  @media (min-width: 1000px) {
+    .split {
+      grid-template-columns: 0.8fr 1.2fr;
+      align-items: start;
+    }
+  }
+  .split .t-note {
+    margin-top: 20px;
+  }
+  .glance {
+    margin-top: 28px;
+    border-top: 1px solid var(--line);
+    padding-top: 20px;
+    max-width: 900px;
+  }
+  .gap {
+    margin-top: 28px;
+  }
+</style>

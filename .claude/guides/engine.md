@@ -40,6 +40,11 @@ A scene's `frames` can be a function of the timeline, `(tl) => …`. A scene's `
 - `<Plate src first length loop>`: a numbered image sequence (Blender layers, unpacked recordings) for the current frame.
 - `<Footage>` and `<ScreenInsert>`: real or generated video, and your scene on a screen in it (the footage and generated guides).
 - `holdFrame(promise)`: makes captures wait for something loading that the page can't see, like a WebGL texture (`src/engine/ready.ts`).
+- `useTune()`: knobs the user can turn on the desk without asking you. `k("headline.size", 86)` is a value, `nudge("headline")` an offset to spread into a style (`translate`/`scale`, so your own `transform` still plays), `at("headline.in", 30)` a named frame. The values live in `src/ads/<slug>/tune.json`; read it before you change a value it overrides, and fold it into the code if you'd rather own it. Give the few things a person would want to adjust a knob: the headline's size and place, the moment the end card lands.
+- `data-fx="in:fade-up@12+15 loop:float out:fade@80+10"` on any element: a stock entrance, emphasis loop and exit, counted in the scene's own frames (`slot:effect[@start][+frames][*amount][~ease]`; the list is `EFFECTS` in `src/engine/fx.ts`). Good for the plain moves you'd otherwise hand-write, and the desk can edit them. It writes `translate`/`scale`/`rotate`/`filter`/`mask-image` and composes with your own values for those, so keep your `transform` and `opacity` motion as it is.
+- Transitions between scenes are story.json's `transitions` (`{ "two": { "type": "push-left", "frames": 15 } }`, the list is `TRANSITIONS` in `src/engine/transitions.ts`). They don't move anything in time: the outgoing scene holds its last frame under the incoming one's first frames, so a scene that a transition comes into should open on something worth seeing from frame 0, and the one before it should end on a frame that can be held.
+
+**The desk edits your code too.** The user can click an element in the viewer and change plain literals in place: JSX text, and numbers or strings in a `style={{ … }}` object or an attribute. So write the copy and the sizes people tweak as literals on the element where it's natural, keep `isolate()` and `dir` around Hebrew text, and expect the file to have changed since you last read it.
 
 ## The parts bin (`src/parts/`)
 

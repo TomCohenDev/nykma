@@ -51,7 +51,8 @@ async function imagesDecoded(root: HTMLElement) {
   const urls = new Set<string>();
   for (const el of root.querySelectorAll("image")) urls.add(new URL(el.href.baseVal, location.href).href);
   for (const el of root.querySelectorAll<HTMLElement>('[style*="url("]')) {
-    for (const [, url] of el.style.cssText.matchAll(/url\("?([^")]+)"?\)/g)) urls.add(new URL(url, location.href).href);
+    // url(#id) is an SVG reference (a filter, a mask), not an image.
+    for (const [, url] of el.style.cssText.matchAll(/url\("?([^")]+)"?\)/g)) if (!url.startsWith("#")) urls.add(new URL(url, location.href).href);
   }
   const elements = [...root.querySelectorAll("img")].filter((image) => image.src);
   await Promise.all([
@@ -97,6 +98,8 @@ function ancestry(el: Element, root: Element) {
   for (let at: Element | null = el; at && at !== root; at = at.parentElement) {
     const style = getComputedStyle(at);
     opacity *= Number(style.opacity);
+    // `data-fx` fades through filter: opacity() (fx.ts), so a hidden element reads as hidden.
+    if (style.filter !== "none") for (const [, value, unit] of style.filter.matchAll(/opacity\(([\d.]+)(%?)\)/g)) opacity *= unit ? Number(value) / 100 : Number(value);
     if (style.transform !== "none") {
       const m = new DOMMatrix(style.transform);
       scale *= Math.hypot(m.a, m.b);

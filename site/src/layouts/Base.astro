@@ -5,8 +5,9 @@ interface Props {
   title: string;
   description: string;
   page?: "home" | "pricing";
+  preview?: boolean;
 }
-const { title, description, page } = Astro.props;
+const { title, description, page, preview = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const repo = "https://github.com/TomCohenDev/nykma";
 ---
@@ -18,8 +19,12 @@ const repo = "https://github.com/TomCohenDev/nykma";
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {preview && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/JetBrainsMono-wght.ttf" as="font" type="font/ttf" crossorigin />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

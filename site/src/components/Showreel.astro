@@ -1,0 +1,202 @@
+---
+// The spec ads from src/spec-ads.json in one row that scrolls sideways, each at its own shape and the same height.
+// A video plays muted while most of it is in view. On a phone each takes most of the screen's width and you swipe.
+// With reduced motion none plays by itself. The ads are silent, so there's no sound button.
+import all from "../spec-ads.json";
+
+interface Props {
+  group?: string;
+}
+const { group } = Astro.props;
+const ads = group ? all.filter((ad) => ad.group === group) : all;
+const aspect = { "16x9": 16 / 9, "9x16": 9 / 16, "1x1": 1 } as const;
+const size = { "16x9": "16:9", "9x16": "9:16", "1x1": "1:1" } as const;
+---
+
+<div class="reel" data-reel>
+  <div class="reel-top">
+    <p class="reel-note">
+      Spec ads: made with nykma as examples, from each company's public pages. Not affiliated with or endorsed by any of
+      them.
+    </p>
+    <div class="reel-nav">
+      <button type="button" data-step="-1" aria-label="Previous ads">←</button>
+      <button type="button" data-step="1" aria-label="Next ads">→</button>
+    </div>
+  </div>
+  <ul class="reel-row" tabindex="0" aria-label="Spec ads">
+    {
+      ads.map((ad) => (
+        <li class={`reel-ad r-${ad.ratio}`} style={`--ar: ${aspect[ad.ratio as keyof typeof aspect]}`}>
+          <div class="reel-frame">
+            <video
+              src={`/examples/${ad.slug}.mp4`}
+              poster={`/examples/${ad.slug}.jpg`}
+              muted
+              loop
+              playsinline
+              preload="none"
+              aria-label={`${ad.brand}: ${ad.title}. A spec ad in ${ad.lang}.`}
+              data-reel-video
+            />
+          </div>
+          <p class="reel-brand">
+            <b>{ad.brand}</b> <span>{ad.title}</span>
+          </p>
+          <p class="reel-line">{ad.line}</p>
+          <p class="reel-meta">
+            {ad.lang}, {size[ad.ratio as keyof typeof size]}, {ad.seconds} s, silent
+          </p>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .reel {
+    --h: 440px;
+    text-align: left;
+  }
+  .reel-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .reel-note {
+    margin: 0;
+    color: var(--dim);
+    font-size: 14px;
+    max-width: 70ch;
+  }
+  .reel-nav {
+    display: flex;
+    gap: 8px;
+    flex: none;
+  }
+  .reel-nav button {
+    font: 700 16px/1 var(--mono);
+    color: var(--paper);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    width: 44px;
+    height: 40px;
+    cursor: pointer;
+  }
+  .reel-nav button:hover {
+    border-color: var(--paper);
+  }
+  .reel-row {
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0 0 14px;
+    display: flex;
+    gap: 22px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .reel-row {
+      scroll-behavior: smooth;
+    }
+  }
+  .reel-ad {
+    flex: none;
+    width: calc(var(--h) * var(--ar));
+    scroll-snap-align: start;
+  }
+  .reel-ad.r-9x16 {
+    width: max(calc(var(--h) * var(--ar)), 230px);
+  }
+  .reel-frame {
+    height: var(--h);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    display: grid;
+    place-items: center;
+  }
+  .reel-frame video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .reel-brand {
+    margin: 14px 0 0;
+    font-size: 16px;
+  }
+  .reel-brand b {
+    font-weight: 800;
+  }
+  .reel-brand span {
+    color: var(--dim);
+  }
+  .reel-line {
+    margin: 6px 0 0;
+    font-size: 14.5px;
+    line-height: 1.55;
+  }
+  .reel-meta {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--dim);
+  }
+  @media (max-width: 640px) {
+    .reel-nav {
+      display: none;
+    }
+    .reel-row {
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .reel-ad.r-16x9 {
+      width: 78vw;
+    }
+    .reel-ad.r-1x1 {
+      width: 70vw;
+    }
+    .reel-ad.r-9x16 {
+      width: 56vw;
+    }
+    .reel-frame {
+      height: auto;
+      aspect-ratio: var(--ar);
+    }
+  }
+</style>
+
+<script>
+  for (const reel of document.querySelectorAll<HTMLElement>("[data-reel]")) {
+    const row = reel.querySelector<HTMLElement>(".reel-row")!;
+    for (const button of reel.querySelectorAll<HTMLButtonElement>("[data-step]")) {
+      button.addEventListener("click", () => row.scrollBy({ left: Number(button.dataset.step) * row.clientWidth * 0.8 }));
+    }
+    const videos = [...reel.querySelectorAll<HTMLVideoElement>("video[data-reel-video]")];
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+      videos.forEach((video) => {
+        video.controls = true;
+        video.preload = "metadata";
+      });
+      continue;
+    }
+    const seen = new IntersectionObserver(
+      (entries) => {
+        for (const { target, isIntersecting } of entries) {
+          const video = target as HTMLVideoElement;
+          if (isIntersecting) {
+            video.preload = "auto";
+            video.play().catch(() => {});
+          } else video.pause();
+        }
+      },
+      { threshold: 0.6 },
+    );
+    videos.forEach((video) => seen.observe(video));
+  }
+</script>

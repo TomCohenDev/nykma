@@ -50,3 +50,12 @@ const ads: Ad[] = [
 export const videos = ads.flatMap(videosOf);
 
 export const findVideo = (id: string) => videos.find((video) => video.id === id);
+
+// A change to an ad's code stops here: the desk's frames (src/board/frame.tsx) draw the new registry in place. A page
+// that doesn't listen reloads itself, instead of Vite reloading every open page, the desk with them.
+if (import.meta.hot)
+  import.meta.hot.accept((next) => {
+    const listeners = (globalThis as { __nykmaRegistry?: Set<(next: unknown) => void> }).__nykmaRegistry;
+    if (next && listeners?.size) listeners.forEach((listen) => listen(next));
+    else location.reload();
+  });

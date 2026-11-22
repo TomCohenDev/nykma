@@ -1,0 +1,201 @@
+---
+// Every ad on one wall, each with only its brand's icon and name under it. The icons are 64 px copies of each site's
+// own favicon or touch icon (public/icons/, fetched 2026-11-20 from the <link rel="icon"> on each home page; ours from
+// brands/<brand>/assets): the three made for our own apps (src/examples.json, square, with sound) and
+// the spec ads (src/spec-ads.json, each at its own shape, silent), mixed by shape in a fixed order (`order`) so each
+// row has a wide, a square and a tall ad and every row comes out full at desktop width. Rows wrap and stretch to the page's width, each ad keeping its shape, so nothing
+// scrolls sideways and each video fits on screen. A video plays muted while it's in view; the sound button on ours
+// plays it with sound. With reduced motion none plays by itself.
+import examples from "../examples.json";
+import specs from "../spec-ads.json";
+import more from "../more-ads.json";
+
+const aspect = { "16x9": 16 / 9, "9x16": 9 / 16, "1x1": 1 } as const;
+type Ratio = keyof typeof aspect;
+
+// Six full rows on a desktop, worked out for 21 ads at the base height; shapes are mixed in every row.
+// listed goes at the end.
+const order = [
+  "tiktok-feed", "lo-maamin", "capcut-cut", "duolingo-streak",
+  "linear-backlog", "instagram-one-photo", "under-pressure",
+  "madrich", "achuzim", "waze-reroute",
+  "canva-resize", "stripe-checkout", "altos-suns", "think-up", "lightroom-grade",
+  "three-tries", "one-tile", "spring-moves",
+  "notion-views", "pag-tokef", "compile-tom",
+];
+const rank = (slug: string) => (order.includes(slug) ? order.indexOf(slug) : order.length);
+// On a phone: each wide ad on a row of its own, and every other row one tall and one square ad side by side,
+// alternating sides. The base height (half the wall's width) lets a tall and a square share a row but not a third ad.
+const phone = [
+  "lo-maamin",
+  "tiktok-feed", "under-pressure",
+  "madrich", "duolingo-streak",
+  "linear-backlog",
+  "waze-reroute", "three-tries",
+  "stripe-checkout", "instagram-one-photo",
+  "achuzim",
+  "capcut-cut", "spring-moves",
+  "one-tile",
+  "think-up", "canva-resize",
+  "altos-suns", "notion-views",
+  "pag-tokef",
+  "lightroom-grade", "compile-tom",
+];
+const phoneRank = (slug: string) => (phone.includes(slug) ? phone.indexOf(slug) : phone.length);
+const ads = [
+  ...examples.map((ad) => ({ slug: ad.slug, brand: ad.brand, title: ad.title, lang: ad.lang, ratio: "1x1" as Ratio, seconds: ad.seconds, spec: false })),
+  ...more.map((ad) => ({ slug: ad.slug, brand: ad.brand, title: ad.title, lang: ad.lang, ratio: ad.ratio as Ratio, seconds: ad.seconds, spec: false, silent: true, icon: ad.icon })),
+  ...specs.map((ad) => ({ slug: ad.slug, brand: ad.brand, title: ad.title, lang: ad.lang, ratio: ad.ratio as Ratio, seconds: ad.seconds, spec: true, icon: "icon" in ad ? (ad.icon as string) : undefined })),
+].sort((a, b) => rank(a.slug) - rank(b.slug));
+const icon = (ad: { brand: string; icon?: string }) => ad.icon ?? `/icons/${ad.brand.toLowerCase()}.png`;
+---
+
+<div class="wall-wrap">
+  <ul class="wall">
+    {
+      ads.map((ad) => (
+        <li style={`--ar: ${aspect[ad.ratio]}; --phone: ${phoneRank(ad.slug)}`}>
+          <div class="wall-frame">
+            <video
+              src={`/examples/${ad.slug}.mp4`}
+              poster={`/examples/${ad.slug}.jpg`}
+              muted
+              loop
+              playsinline
+              preload="none"
+              aria-label={`${ad.brand}: ${ad.title}, in ${ad.lang}${ad.spec ? ", a spec ad" : ""}`}
+              data-wall-video
+            />
+            {!ad.spec && !("silent" in ad) && (
+              <button type="button" class="wall-sound" aria-pressed="false" aria-label={`Sound for ${ad.title}`} data-wall-sound>
+                sound on
+              </button>
+            )}
+          </div>
+          <p class="wall-name">
+            {icon(ad) && <img src={icon(ad)} alt="" width="20" height="20" />}
+            {ad.brand}
+          </p>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  /* The wall scales with its own width: the base height and the gap between ads are fixed shares of it (260 px
+     and 10 px at 1040 px wide, where `order` was worked out), so the rows break the same way at any desktop width. */
+  .wall-wrap {
+    container-type: inline-size;
+    text-align: left;
+  }
+  .wall {
+    --h: calc(100cqw * 0.25);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px calc(100cqw * 10 / 1040);
+  }
+  @media (max-width: 640px) {
+    .wall {
+      --h: 50cqw;
+      gap: 18px 10px;
+    }
+    .wall li {
+      order: var(--phone);
+    }
+  }
+  /* Each ad grows in proportion to its width at the base height, so every row comes out one height and fills the
+     page. None grows past twice its base width, so a short last row can't blow up. */
+  .wall li {
+    flex: var(--ar) 1 calc(var(--h) * var(--ar));
+    max-width: calc(var(--h) * var(--ar) * 2);
+    min-width: 0;
+  }
+  .wall-frame {
+    position: relative;
+    aspect-ratio: var(--ar);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+  }
+  .wall-frame video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .wall-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0 0;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .wall-name img {
+    border-radius: 5px;
+  }
+  .wall-sound {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    font: 600 12px/1 var(--mono);
+    color: #fff;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  .wall-sound:hover {
+    border-color: #fff;
+  }
+  .wall-sound[aria-pressed="true"] {
+    background: var(--red);
+    border-color: var(--red);
+  }
+</style>
+
+<script>
+  const videos = [...document.querySelectorAll<HTMLVideoElement>("video[data-wall-video]")];
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const buttonOf = (video: HTMLVideoElement) => video.closest("li")!.querySelector<HTMLButtonElement>("[data-wall-sound]");
+  const setSound = (video: HTMLVideoElement, on: boolean) => {
+    video.muted = !on;
+    const button = buttonOf(video);
+    if (!button) return;
+    button.setAttribute("aria-pressed", String(on));
+    button.textContent = on ? "sound off" : "sound on";
+  };
+  for (const video of videos) {
+    buttonOf(video)?.addEventListener("click", () => {
+      const on = video.muted;
+      for (const other of videos) if (other !== video) setSound(other, false);
+      setSound(video, on);
+      if (on) video.play().catch(() => {});
+    });
+    if (still) {
+      video.controls = true;
+      video.preload = "metadata";
+    }
+  }
+  if (!still && "IntersectionObserver" in window) {
+    const seen = new IntersectionObserver(
+      (entries) => {
+        for (const { target, isIntersecting } of entries) {
+          const video = target as HTMLVideoElement;
+          if (isIntersecting) {
+            video.preload = "auto";
+            video.play().catch(() => {});
+          } else video.pause();
+        }
+      },
+      { threshold: 0.5 },
+    );
+    videos.forEach((video) => seen.observe(video));
+  }
+</script>

@@ -8,11 +8,13 @@
 // A failure in Render, Layout or Brand that's the idea rather than a mistake (a deliberate five-second freeze, type that
 // bleeds off the frame) goes in the queue README as `Deliberate: layout 120-300 the giant word is the backdrop`. It then
 // shows as a warning with that reason, so the user still sees it. Sound, Truth and Copy can't be waived.
-import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Page } from "playwright";
 import type { Ratio, TextItem, Video } from "../src/engine/index.ts";
-import { captureFrame, cli, inspectFrame, openSession, outDir, resolveVideos, run, seek, type Session } from "./lib/index.ts";
+import { checkFx } from "../src/engine/fx.ts";
+import { isTransition } from "../src/engine/transitions.ts";
+import { captureFrame, cli, inspectFrame, openSession, outDir, resolveVideos, ROOT, run, seek, type Session } from "./lib/index.ts";
 import { brandFor, HEBREW, locate, quarterFrames, queueFolder, readIf, sourceFolders, stripNiqqud, tables, type Brand } from "./lib/queue.ts";
 
 /** Margins kept clear in output pixels. 9x16 leaves room for the app's own UI: top bar, caption block, action rail. */
@@ -635,6 +637,73 @@ function checkHand(slug: string) {
   }
 }
 
+// ---- Knobs ----
+
+/** A tune.json key no code reads is a knob that was renamed or removed: the desk shows it, and it does nothing. */
+function checkTune(slug: string) {
+  const dir = join(ROOT, "src", "ads", slug);
+  if (!existsSync(dir)) return;
+  const files = readdirSync(dir, { recursive: true, encoding: "utf8" });
+  const code = files.filter((file) => /\.tsx?$/.test(file)).map((file) => readFileSync(join(dir, file), "utf8")).join("\n");
+  for (const file of files.filter((name) => /^tune(-[^/\\]+)?\.json$/.test(name))) {
+    let tune: Record<string, Record<string, unknown>>;
+    try {
+      tune = JSON.parse(readFileSync(join(dir, file), "utf8"));
+    } catch {
+      add("Render", "fail", `src/ads/${slug}/${file} isn't valid JSON, so every knob plays its fallback`);
+      continue;
+    }
+    const ids = new Set(Object.values(tune).flatMap((values) => (values && typeof values === "object" ? Object.keys(values) : [])));
+    for (const id of ids) {
+      const quoted = ['"', "'", "`"].some((quote) => code.includes(`${quote}${id}${quote}`));
+      if (!quoted) add("Render", "warn", `${file} sets "${id}", which no knob in src/ads/${slug}/ reads`);
+    }
+  }
+}
+
+// ---- Transitions and effects ----
+
+/**
+ * story.json's transitions: each names a scene on the story that isn't the first, a type the engine knows, and a length
+ * the scene can hold. They can't break a render (a bad one plays as a cut or is clamped), so these are warnings.
+ */
+function checkTransitions(videos: Video[]) {
+  const seen = new Set<string>();
+  for (const video of videos) {
+    const entries = Object.entries(video.story?.transitions ?? {});
+    const key = `${video.take ?? ""}`;
+    if (!entries.length || seen.has(key)) continue;
+    seen.add(key);
+    const file = `story.json${video.take ? ` (take ${video.take})` : ""}`;
+    if (video.kind === "asset") {
+      add("Render", "warn", `${file} has transitions, but an asset is stills and plays none`);
+      continue;
+    }
+    for (const [id, entry] of entries) {
+      const at = video.order.indexOf(id);
+      const scene = video.scenes.find((item) => item.id === id);
+      const type = typeof entry?.type === "string" ? entry.type : "";
+      if (at < 0) add("Render", "warn", `${file}: a transition into "${id}", which isn't on the story`);
+      else if (at === 0) add("Render", "warn", `${file}: a transition into "${id}", the first scene, which has nothing before it`);
+      else if (!isTransition(type)) add("Render", "warn", `${file}: transition "${type}" into "${id}" isn't one the engine knows, so it plays as a cut`);
+      else if (type !== "cut" && !(Number.isInteger(entry.frames) && entry.frames > 0)) add("Render", "warn", `${file}: the ${type} into "${id}" needs whole \`frames\` above 0, so it plays as a cut`);
+      else if (scene && entry.frames > scene.frames) add("Render", "warn", `${file}: the ${type} into "${id}" is ${entry.frames} frames, longer than the scene's ${scene.frames}, so it covers all of it`);
+    }
+  }
+}
+
+/** Every literal `data-fx` in the ad's code that won't parse: those steps do nothing. */
+function checkEffects(slug: string) {
+  const dir = join(ROOT, "src", "ads", slug);
+  if (!existsSync(dir)) return;
+  for (const file of readdirSync(dir, { recursive: true, encoding: "utf8" }).filter((name) => /\.tsx?$/.test(name))) {
+    const code = readFileSync(join(dir, file), "utf8");
+    for (const [, a, b, c] of code.matchAll(/data-fx=(?:"([^"]*)"|\{\s*"([^"]*)"\s*\}|\{\s*'([^']*)'\s*\})/g)) {
+      for (const problem of checkFx(a ?? b ?? c ?? "")) add("Render", "warn", `data-fx in src/ads/${slug}/${file.replaceAll("\\", "/")}: ${problem}, so that step does nothing`);
+    }
+  }
+}
+
 // ---- Deliberate choices, and the report ----
 
 function deliberate(readme: string) {
@@ -751,6 +820,9 @@ if (folder) {
   else add("Copy", "warn", "no post.md yet, so its links and claims weren't checked");
 }
 checkHand(slug);
+checkTune(slug);
+checkTransitions(videos);
+checkEffects(slug);
 if (readme) deliberate(readme);
 
 const failed = report(slug, videos, [...new Set(skipped)], folder);

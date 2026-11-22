@@ -1,0 +1,133 @@
+---
+// A terminal window. Lines are what you type ("in"), what nykma says ("out"), a result ("ok") or an aside ("dim").
+// With `typing`, the session plays once when it's on screen: typed lines letter by letter, the rest a beat apart.
+// With reduced motion it's all there from the start.
+export type Line = { k: "in" | "out" | "ok" | "dim"; t: string };
+interface Props {
+  lines: Line[];
+  title?: string;
+  typing?: boolean;
+  class?: string;
+}
+const { lines, title = "claude", typing = false, class: extra = "" } = Astro.props;
+---
+
+<figure class:list={["tw", extra]} data-typing={typing ? "" : undefined}>
+  <div class="tw-bar" aria-hidden="true"><i></i><i></i><i></i><span>{title}</span></div>
+  <div class="tw-body">
+    {
+      lines.map((line) => (
+        <div class={"tw-l tw-" + line.k}>
+          {line.k === "in" ? <span class="tw-p">{"> "}</span> : null}
+          <span class="tw-t">{line.t}</span>
+        </div>
+      ))
+    }
+  </div>
+</figure>
+
+<style>
+  .tw {
+    margin: 0;
+    background: var(--deep);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .tw-bar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    font-size: 12.5px;
+    color: var(--dim);
+  }
+  .tw-bar i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3a3a3a;
+  }
+  .tw-bar i:first-child {
+    background: var(--red);
+  }
+  .tw-bar span {
+    margin-left: auto;
+  }
+  .tw-body {
+    margin: 0;
+    padding: 16px 18px 20px;
+    font: 400 14.5px/1.85 var(--mono);
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .tw-l {
+    display: block;
+    min-height: 1.85em;
+  }
+  .tw-p {
+    white-space: pre;
+    color: var(--red);
+    font-weight: 700;
+  }
+  .tw-in .tw-t {
+    color: var(--paper);
+    font-weight: 700;
+  }
+  .tw-out {
+    color: var(--paper);
+  }
+  .tw-ok {
+    color: #ffb4a8;
+  }
+  .tw-dim {
+    color: var(--dim);
+  }
+  .tw.playing .tw-l {
+    visibility: hidden;
+  }
+  .tw.playing .tw-l.shown {
+    visibility: visible;
+  }
+</style>
+
+<script>
+  for (const box of document.querySelectorAll<HTMLElement>(".tw[data-typing]")) {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) continue;
+    const lines = [...box.querySelectorAll<HTMLElement>(".tw-l")];
+    box.classList.add("playing");
+    const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+    const play = async () => {
+      for (const line of lines) {
+        const text = line.querySelector<HTMLElement>(".tw-t")!;
+        if (line.classList.contains("tw-in")) {
+          const full = text.textContent ?? "";
+          text.textContent = "";
+          line.classList.add("shown");
+          await wait(250);
+          for (let i = 1; i <= full.length; i++) {
+            text.textContent = full.slice(0, i);
+            await wait(26);
+          }
+          await wait(380);
+        } else {
+          line.classList.add("shown");
+          await wait(line.classList.contains("tw-ok") ? 520 : 240);
+        }
+      }
+      box.classList.remove("playing");
+    };
+    const seen = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          seen.disconnect();
+          play();
+        }
+      },
+      { threshold: 0.4 },
+    );
+    seen.observe(box);
+  }
+</script>

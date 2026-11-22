@@ -1,0 +1,84 @@
+---
+// How to start: the clone and install commands with a copy button, then the first request.
+const repo = "https://github.com/TomCohenDev/nykma";
+const commands = [`git clone ${repo}`, "cd nykma", "bun install && bunx playwright install chromium"];
+---
+
+<div class="in">
+  <div class="in-box">
+    <div class="in-cmds">{commands.map((line) => <div><span class="in-p">$ </span>{line}</div>)}</div>
+    <button type="button" class="in-copy" data-copy={commands.join("\n")}>copy</button>
+  </div>
+  <p class="in-then">
+    Then, in Claude Code inside that folder: <code class="t-code">use the ad-agent to make an ad about X for &lt;brand&gt;</code>.
+    Or run <code class="t-code">bun run dev</code> and ask on the desk.
+  </p>
+  <p class="in-needs">
+    Needs Claude Code, bun, Node 22 and ffmpeg. Optional: an ElevenLabs key for voices, Blender for 3D, an NVIDIA GPU for
+    video made on your own machine.
+  </p>
+</div>
+
+<style>
+  .in-box {
+    position: relative;
+    background: var(--deep);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .in-box .in-cmds {
+    white-space: pre;
+    margin: 0;
+    padding: 18px 90px 18px 18px;
+    font: 400 14.5px/1.9 var(--mono);
+    overflow-x: auto;
+  }
+  @media (max-width: 640px) {
+    .in-box .in-cmds {
+      padding: 52px 18px 18px;
+    }
+  }
+  .in-p {
+    color: var(--red);
+    user-select: none;
+  }
+  .in-copy {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font: 600 13px/1 var(--mono);
+    color: var(--paper);
+    background: var(--raise);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 7px 10px;
+    cursor: pointer;
+  }
+  .in-copy:hover {
+    border-color: var(--paper);
+  }
+  .in-then {
+    margin: 18px 0 0;
+    max-width: 70ch;
+  }
+  .in-needs {
+    margin: 12px 0 0;
+    color: var(--dim);
+    font-size: 17px;
+    max-width: 70ch;
+  }
+</style>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>(".in-copy")) {
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? "");
+        button.textContent = "copied";
+      } catch {
+        button.textContent = "select it";
+      }
+      setTimeout(() => (button.textContent = "copy"), 1600);
+    });
+  }
+</script>

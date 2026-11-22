@@ -146,6 +146,15 @@ export const RenderIcon = (p: P) => (
     <path d="M8 2v7m-3-3l3 3 3-3M3 11v2.5h10V11" />
   </Icon>
 );
+/** nykma's icon (brands/nykma/assets/icon.svg): a play button and the red cursor on a black tile. Not in currentColor. */
+export const NykmaIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden>
+    <rect width="64" height="64" rx="16" fill="#0b0b0d" />
+    <rect x="0.5" y="0.5" width="63" height="63" rx="15.5" fill="none" stroke="rgba(244,239,230,0.12)" />
+    <path d="M19 18.5 L37 30 L19 41.5 Z" fill="#fff" stroke="#fff" strokeWidth="4" strokeLinejoin="round" />
+    <rect x="34" y="42" width="15" height="5.5" rx="2.5" fill="#e8301f" />
+  </svg>
+);
 export const GearIcon = (p: P) => (
   <Icon {...p}>
     <circle cx="8" cy="8" r="2" />

@@ -2,9 +2,12 @@ import react from "@vitejs/plugin-react";
 import sirv from "sirv";
 import { defineConfig } from "vite";
 import { deskApi } from "./scripts/lib/desk.ts";
+import { sourceTags } from "./scripts/lib/source-tag.ts";
 
 export default defineConfig({
   plugins: [
+    // Dev server only: data-nk="<file>:<line>:<col>" on each element of an ad, so the desk can edit its values.
+    sourceTags(),
     react(),
     // public/ can hold gigabytes of plates, so builds don't copy it: the preview server reads it in place.
     // The dev server doesn't watch gen/ (below), so it never learns of plates made after it started and would answer

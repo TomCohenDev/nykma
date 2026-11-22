@@ -1,0 +1,2246 @@
+---
+// The top of /v/1 as a video that the scroll plays. The hero stays put while a paper card rises over it; where the
+// card covers the hero its text turns dark, and the title's letters fly down into the agent's input and become the
+// prompt. Then four chapters play in the card: ask the agent, get pitched and pick one, build it in code, ship it,
+// with a player bar under them. Every value is worked out from how far the page is scrolled (`t`, in screen heights),
+// the way an ad's values are worked out from the frame. The video being built is a generated clip from the lo-maamin
+// ad (public/story/couch/: every third frame at half size, the hand over the screen as its own layer) with myapp's
+// screen warped onto the phone by the clip's own screen track (story-couch.json, from src/ads/lo-maamin). Without
+// JavaScript, or with reduced motion, the chapters show as still frames one under the other.
+import Icon from "./Icon.astro";
+import StoryApp from "./StoryApp.astro";
+import couch from "../story-couch.json";
+import { quadMatrix, type Quad } from "../story-quad";
+
+interface Props {
+  lede: string;
+}
+const { lede } = Astro.props;
+
+const title = "Nobody knows your app?";
+const prompt = "nobody knows my app, create a launch video for myapp";
+const words = (text: string) => text.split(" ").map((word) => [...word]);
+
+const replies = [
+  "On it. Reading myapp: the repo, the site and 4 screenshots.",
+  "Saved a brand kit for myapp: colours, fonts, logo and facts.",
+  "Sent three explorers down three routes. Six ideas coming up.",
+];
+const routes = [
+  [
+    ["a", "The empty party"],
+    ["b", "Before and after"],
+  ],
+  [
+    ["c", "One tap"],
+    ["d", "In their hands"],
+  ],
+  [
+    ["e", "A day with myapp"],
+    ["f", "The race"],
+  ],
+];
+// Every tool that goes into the ad, in the order the build reaches it. The items at 3, 5, 7, 8 and 9 each put a layer
+// in the preview (LAYER_LINES in the script), so keep those positions when the list changes.
+const tools = [
+  { name: "Claude Code", job: "the agent: picks the idea, writes every scene" },
+  { name: "React + TypeScript", job: "the engine: every value worked out from the frame" },
+  { name: "Pexels · Pixabay", job: "free stock, searched before anything is generated" },
+  { name: "Generated video", job: "the couch clip, LTX on your own GPU or Veo" },
+  { name: "OpenCV", job: "finds the phone's screen in every frame" },
+  { name: "Screen tracking", job: "your real app, warped onto the phone" },
+  { name: "rough.js", job: "hand-drawn marks, stroke by stroke" },
+  { name: "Blender", job: "the 3D phone, modelled, lit and rendered headless" },
+  { name: "ElevenLabs", job: "the voiceover, timed word by word with Whisper" },
+  { name: "Music + sound", job: "scored, ducked under the voice, mixed to −14 LUFS" },
+  { name: "Playwright + ffmpeg", job: "captures every frame and encodes the MP4s" },
+];
+// Each tool's icon, in the same order: plain 24 × 24 line drawings of what it does, not the tools' own logos.
+const icons = [
+  `<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9.5l3 2.5-3 2.5M12.5 15h4.5"/>`,
+  `<ellipse cx="12" cy="12" rx="9.5" ry="3.8"/><ellipse cx="12" cy="12" rx="9.5" ry="3.8" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9.5" ry="3.8" transform="rotate(-60 12 12)"/><circle cx="12" cy="12" r="1.3"/>`,
+  `<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.6"/>`,
+  `<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10.5l5-3v9l-5-3"/><path d="M9.5 8.5l.9 2 2 .9-2 .9-.9 2-.9-2-2-.9 2-.9z"/>`,
+  `<path d="M2 12s3.8-7 10-7 10 7 10 7-3.8 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3.2"/>`,
+  `<rect x="8.5" y="4" width="7" height="16" rx="1.8"/><path d="M3 7.5V4h3.5M21 7.5V4h-3.5M3 16.5V20h3.5M21 16.5V20h-3.5"/>`,
+  `<path d="M3.5 20c2.5-.5 3.5-4 6.5-4s3 3.5 6 2.5"/><path d="M14.5 3.5l4 4L10 16H6v-4z"/>`,
+  `<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/>`,
+  `<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 10.5v3"/>`,
+  `<path d="M9 18V6l11-2.5v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="15.5" r="2.5"/>`,
+  `<path d="M4 9h16v11H4z"/><path d="M4 9l1.6-4h14.8L20 9M9.5 5L8 9M15 5l-1.5 4"/>`,
+];
+// Each layer, the tool that adds it, its name on the preview and its bar on the timeline.
+const layers = [
+  { line: 3, chip: "generated video", track: "video", from: 0, to: 100 },
+  { line: 5, chip: "your app, tracked to the phone", track: "your app", from: 10, to: 100 },
+  { line: 7, chip: "3D · Blender", track: "3D", from: 58, to: 100 },
+  { line: 8, chip: "voiceover · ElevenLabs", track: "voice", from: 24, to: 80 },
+  { line: 9, chip: "music, mixed to −14 LUFS", track: "music", from: 0, to: 100 },
+];
+const still = 24; // the frame shown without motion
+const screenAt = (i: number) => quadMatrix(180, 400, couch.corners[i] as Quad);
+const [fx, fy, fw, fh] = couch.front;
+const caption = "Your week, planned in one tap.";
+const posts = [
+  ["X", "myapp plans your whole week in one tap. Free to try"],
+  ["LinkedIn", "We built myapp because planning a week shouldn't take an hour."],
+  ["Instagram", "Your week, planned before the coffee's done. Link in bio."],
+  ["TikTok", "POV: Sunday night, one tap, whole week sorted #productivity"],
+];
+const chapters = ["nobody knows", "ask the agent", "get pitched", "build in code", "ship it"];
+const heads = ["Ask the agent.", "Get pitched. Pick one.", "Build it in code.", "Ship it."];
+---
+
+<section class="story" data-story>
+  <span class="st-anchor" id="how" aria-hidden="true"></span>
+  <div class="st-pin" data-pin>
+    <!-- the hero, light on ink -->
+    <div class="st-hero" data-hero>
+      <div class="t-wrap st-hero-in">
+        <h1 class="st-h1" aria-label={title} data-title>
+          {words(title).map((word, i) => (
+            <Fragment>
+              <span class="w">{word.map((c) => <span class="c">{c}</span>)}</span>
+              {i < words(title).length - 1 ? " " : ""}
+            </Fragment>
+          ))}
+        </h1>
+        <p class="st-lede" data-fade>{lede}</p>
+        <div class="st-btns" data-fade>
+          <a class="t-btn primary" href="#start">get started</a>
+          <a class="t-btn" href="#examples">see the ads</a>
+        </div>
+      </div>
+    </div>
+    <div class="st-fly st-fly-light" aria-hidden="true" data-fly></div>
+
+    <!-- the card -->
+    <div class="st-card" data-card>
+      <div class="st-head" aria-hidden="true">
+        <p class="st-num" data-num>02 / 05</p>
+        <div class="st-slot">{heads.map((head) => <span data-head>{head}</span>)}</div>
+      </div>
+
+      <div class="st-stage">
+        <!-- 2: ask the agent -->
+        <article class="sc sc-ask" data-scene>
+          <h2 class="sc-h">Ask the agent.</h2>
+          <div class="chat">
+            <p class="chat-bar"><Icon size={20} /><b>nykma</b><span>ad-agent</span></p>
+            <div class="chat-log">
+              <p class="msg me" data-me>{prompt}</p>
+              {
+                replies.map((reply) => (
+                  <div class="msg agent" data-reply>
+                    <Icon size={22} />
+                    <p data-type={reply}>{reply}</p>
+                  </div>
+                ))
+              }
+            </div>
+            <div class="chat-in" data-in>
+              <p class="chat-hint" data-hint>ask nykma for a video</p>
+              <p class="chat-text" data-prompt>
+                {words(prompt).map((word, i) => (
+                  <Fragment>
+                    <span class="w">{word.map((c) => <span class="c">{c}</span>)}</span>
+                    {i < words(prompt).length - 1 ? " " : ""}
+                  </Fragment>
+                ))}
+              </p>
+              <span class="chat-send" data-send>↑</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- 3: get pitched, pick one -->
+        <article class="sc sc-pitch" data-scene>
+          <h2 class="sc-h">Get pitched. Pick one.</h2>
+          <div class="pitch-in" data-pitch>
+            <div class="ideas">
+              {
+                routes.map((ideas, r) => (
+                  <div class="route">
+                    <p class="explorer" data-explorer>explorer {r + 1}</p>
+                    {ideas.map(([k, name]) => (
+                      <div class:list={["idea", { picked: k === "d" }]} data-idea={k}>
+                        <b>idea {k}</b>
+                        <span>{name}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))
+              }
+            </div>
+            <div class="pitch">
+              <div class="pitch-slot" data-slot></div>
+              <p class="pitch-line" data-pline>Someone on the couch opens myapp. The phone shows your real app, and a voice says why.</p>
+              <div class="board">
+                <figure data-frame>
+                  <div class="bf" style="background-image: url(/story/couch-chill.jpg)"></div>
+                  <figcaption>0s · the couch</figcaption>
+                </figure>
+                <figure data-frame>
+                  <div class="bf" style="background-image: url(/story/couch-wide.jpg)"></div>
+                  <figcaption>2s · his phone</figcaption>
+                </figure>
+                <figure data-frame>
+                  <div class="bf bf-app"><div class="fit" data-fit="contain"><StoryApp /></div></div>
+                  <figcaption>4s · your app</figcaption>
+                </figure>
+                <figure data-frame>
+                  <div class="bf bf-end"><b>myapp</b><span>{caption}</span></div>
+                  <figcaption>6s · end card</figcaption>
+                </figure>
+              </div>
+              <div class="pitch-foot" data-pfoot>
+                <span class="animatic"><i>▶</i> animatic.mp4 <em><span data-abar></span></em> free</span>
+                <span class="go" data-go>go</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- 4: build it in code -->
+        <article class="sc sc-build" data-scene>
+          <h2 class="sc-h">Build it in code.</h2>
+          <div class="build" data-build>
+            <div class="pv-col">
+              <div class="pv" data-pv>
+                <div class="pv-stage" data-pvstage>
+                  <img class="pv-plate" src={`/story/couch/p${String(still + 1).padStart(2, "0")}.webp`} alt="" data-plateimg />
+                  <canvas class="pv-plate" width="640" height="352" data-plate></canvas>
+                  <div class="pv-screen" style={`transform: ${screenAt(still)}`} data-screen><StoryApp /></div>
+                  <img class="pv-front" src={`/story/couch/f${String(still + 1).padStart(2, "0")}.webp`} alt="" style={`left:${fx}px;top:${fy}px;width:${fw}px;height:${fh}px`} data-frontimg />
+                  <canvas class="pv-front" width="126" height="246" style={`left:${fx}px;top:${fy}px;width:${fw}px;height:${fh}px`} data-front></canvas>
+                  <svg class="pv-cv" viewBox="0 0 640 352" width="640" height="352" aria-hidden="true" data-cv>
+                    <polygon data-cvpoly />
+                    {[0, 1, 2, 3].map(() => <circle r="6" data-cvdot />)}
+                  </svg>
+                  <svg class="pv-ring" viewBox="-80 -140 160 280" width="160" height="280" data-ring aria-hidden="true">
+                    <path pathLength="1" d="M-6,-128 C52,-131 74,-96 72,-18 C70,62 60,118 4,124 C-54,130 -73,96 -71,6 C-69,-80 -50,-126 18,-133" data-ringpath />
+                  </svg>
+                </div>
+                <div class="pv-solo" data-solo>
+                  <div class="solo-stage">
+                    <div class="solo-shadow" data-soloshadow></div>
+                    <div class="solo-phone" data-solophone>
+                      <span class="side l"></span>
+                      <span class="side r"></span>
+                      <span class="back"></span>
+                      <div class="front"><div class="solo-screen fit" data-fit="fill"><StoryApp /></div></div>
+                    </div>
+                  </div>
+                </div>
+                <p class="pv-sub" data-sub>{caption.split(" ").map((word) => <span data-word>{word} </span>)}</p>
+                <ul class="pv-chips">{layers.map((layer) => <li data-chip>{layer.chip}</li>)}</ul>
+                <div class="pv-render" data-render><span>rendering 16:9 · 1:1 · 9:16</span><em><i data-renderbar></i></em></div>
+              </div>
+            </div>
+            <ol class="tray">
+              {
+                tools.map(({ name, job }, j) => (
+                  <li class="tile done" data-tile>
+                    <span class="tile-ico"><svg viewBox="0 0 24 24" aria-hidden="true" set:html={icons[j]} /></span>
+                    <b>{name}</b>
+                    <span class="sr">{job}</span>
+                  </li>
+                ))
+              }
+            </ol>
+            <p class="tray-now" data-now><b data-nowname>{tools[0].name}</b><span data-nowjob>{tools[0].job}</span></p>
+            <div class="flyers" aria-hidden="true">
+              {
+                tools.map((_, j) => (
+                  <span class="flyer" data-flyer>
+                    <svg viewBox="0 0 24 24" set:html={icons[j]} />
+                    <i class="burst" />
+                  </span>
+                ))
+              }
+            </div>
+          </div>
+        </article>
+
+        <!-- 5: ship it -->
+        <article class="sc sc-ship" data-scene>
+          <h2 class="sc-h">Ship it.</h2>
+          <div class="ship" data-ship>
+            <div class="sizes">
+              {
+                ["16x9", "1x1", "9x16"].map((ratio) => (
+                  <figure class={`sz sz-${ratio}`} data-size>
+                    <div class="shot">
+                      <div class={ratio === "9x16" ? "frame tall" : "frame wide"}>
+                        <img src={ratio === "9x16" ? "/story/couch-tall.jpg" : "/story/couch-wide.jpg"} alt="" />
+                        <div class="fit shot-screen" data-fit="fill"><StoryApp /></div>
+                      </div>
+                      <p class="shot-cap">{caption}</p>
+                    </div>
+                    <figcaption>{ratio.replace("x", ":")}</figcaption>
+                  </figure>
+                ))
+              }
+            </div>
+            <div class="posts">
+              {
+                posts.map(([where, text]) => (
+                  <div class="post" data-post>
+                    <b>{where}</b>
+                    <p>{text}</p>
+                    <em>?utm_source={where.toLowerCase()}</em>
+                  </div>
+                ))
+              }
+            </div>
+            <p class="ready" data-ready><b>✓</b> Ready to post. <span>Nothing goes out until you approve it.</span></p>
+          </div>
+        </article>
+      </div>
+
+      <div class="st-player" aria-hidden="true" data-player>
+        <span class="pl-play">▶</span>
+        <ol>
+          {
+            chapters.map((name, i) => (
+              <li data-ch={i}>
+                <button type="button" tabindex="-1" data-jump={i}>
+                  <span class="pl-bar">
+                    <span data-fill />
+                  </span>
+                  <em>{name}</em>
+                </button>
+              </li>
+            ))
+          }
+        </ol>
+        <span class="pl-time" data-time>0:00 / 0:30</span>
+      </div>
+    </div>
+
+    <!-- the hero again, dark, shown only where the card covers it -->
+    <div class="st-hero st-dark" aria-hidden="true" inert data-dark>
+      <div class="t-wrap st-hero-in">
+        <p class="st-h1">
+          {words(title).map((word, i) => (
+            <Fragment>
+              <span class="w">{word.map((c) => <span class="c">{c}</span>)}</span>
+              {i < words(title).length - 1 ? " " : ""}
+            </Fragment>
+          ))}
+        </p>
+        <p class="st-lede" data-fade>{lede}</p>
+        <div class="st-btns" data-fade>
+          <span class="t-btn primary">get started</span>
+          <span class="t-btn">see the ads</span>
+        </div>
+      </div>
+    </div>
+    <div class="st-fly st-fly-dark" aria-hidden="true" data-fly data-darkfly></div>
+  </div>
+</section>
+
+<style>
+  /* ---------- still (no JavaScript, or reduced motion): the hero, then the chapters one under the other ---------- */
+  .story {
+    position: relative;
+    --ink2: rgba(20, 20, 20, 0.55);
+    --rule: rgba(20, 20, 20, 0.14);
+    --sheet: #fbf8f2;
+  }
+  .st-hero-in {
+    padding-top: clamp(48px, 9vw, 110px);
+    padding-bottom: clamp(64px, 9vw, 110px);
+    display: grid;
+    justify-items: center;
+    gap: 28px;
+    text-align: center;
+  }
+  .st-h1 {
+    margin: 0;
+    font-weight: 800;
+    font-size: clamp(40px, 6.6vw, 82px);
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+  }
+  .w {
+    white-space: nowrap;
+  }
+  .c {
+    display: inline-block;
+  }
+  .st-lede {
+    margin: 0;
+    max-width: 62ch;
+    font-size: clamp(18px, 1.7vw, 21px);
+    line-height: 1.65;
+  }
+  .st-btns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .st-dark,
+  .st-fly,
+  .st-head,
+  .st-player,
+  .chat-in {
+    display: none;
+  }
+  .st-card {
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 36px;
+    padding: clamp(60px, 9vw, 110px) 16px;
+  }
+  .st-stage {
+    display: grid;
+    gap: clamp(80px, 10vw, 130px);
+  }
+  .sc {
+    display: grid;
+    justify-items: center;
+    gap: 36px;
+  }
+  .sc-h {
+    margin: 0;
+    font-weight: 800;
+    font-size: clamp(28px, 3.8vw, 44px);
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    text-align: center;
+  }
+  .sc > :not(.sc-h) {
+    width: 100%;
+  }
+
+  /* ---------- the chat ---------- */
+  .chat {
+    max-width: 760px;
+    background: var(--sheet);
+    border: 1px solid var(--rule);
+    border-radius: 18px;
+    box-shadow: 0 30px 80px -30px rgba(20, 20, 20, 0.35);
+    overflow: hidden;
+  }
+  .chat-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 14px;
+  }
+  .chat-bar span {
+    color: var(--ink2);
+  }
+  .chat-log {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 14px;
+    padding: 22px 20px;
+    min-height: clamp(150px, 30svh, 330px);
+    font-size: clamp(14px, 1.3vw, 16px);
+    line-height: 1.5;
+  }
+  .msg {
+    margin: 0;
+  }
+  .me {
+    align-self: flex-end;
+    max-width: 80%;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 10px 14px;
+    border-radius: 14px 14px 4px 14px;
+  }
+  .agent {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    max-width: 88%;
+  }
+  .agent :global(svg) {
+    flex: none;
+    margin-top: 1px;
+  }
+  .agent p {
+    margin: 0;
+  }
+  .chat-in {
+    position: relative;
+    margin: 0 14px 14px;
+    padding: 14px 64px 14px 18px;
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    background: #fff;
+  }
+  .chat-text,
+  .chat-hint {
+    margin: 0;
+    font-size: clamp(16px, 1.8vw, 22px);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .chat-text .c {
+    line-height: 1.02;
+  }
+  .chat-hint {
+    position: absolute;
+    left: 18px;
+    top: 14px;
+    color: var(--ink2);
+    font-weight: 400;
+  }
+  .chat-text .c.caret::after {
+    content: "";
+    position: absolute;
+    width: 2px;
+    height: 1.1em;
+    margin-left: 2px;
+    background: var(--red);
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  .chat-send {
+    position: absolute;
+    right: 12px;
+    bottom: 10px;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 800;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .chat-send.on {
+    background: var(--red);
+    transform: scale(0.9);
+  }
+
+  /* ---------- the pitch ---------- */
+  .pitch-in {
+    position: relative;
+    max-width: 980px;
+    display: grid;
+    gap: 36px;
+  }
+  .ideas {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(8px, 1.6vw, 18px);
+  }
+  .route {
+    display: grid;
+    gap: clamp(8px, 1.2vw, 14px);
+    align-content: start;
+  }
+  .explorer {
+    justify-self: center;
+    margin: 0 0 4px;
+    padding: 5px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    font: 700 11px/1 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .idea,
+  .pitch-slot {
+    height: clamp(78px, 10svh, 104px);
+  }
+  .idea {
+    position: relative;
+    display: grid;
+    align-content: center;
+    gap: 4px;
+    padding: 12px clamp(10px, 1.4vw, 18px);
+    background: var(--sheet);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    box-shadow: 0 12px 30px -18px rgba(20, 20, 20, 0.4);
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+  .idea b {
+    font: 700 11px/1 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink2);
+  }
+  .idea span {
+    font-weight: 800;
+    font-size: clamp(13px, 1.5vw, 18px);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .idea.picked,
+  .idea.on {
+    border-color: var(--red);
+    box-shadow: 0 0 0 2px var(--red), 0 18px 40px -16px rgba(232, 48, 31, 0.55);
+  }
+  .idea.picked b,
+  .idea.on b {
+    color: var(--red);
+  }
+  .pitch {
+    display: grid;
+    justify-items: center;
+    gap: clamp(12px, 2svh, 20px);
+  }
+  .pitch-slot {
+    display: none;
+  }
+  .pitch-line {
+    margin: 0;
+    max-width: 46ch;
+    text-align: center;
+    font-size: clamp(15px, 1.5vw, 19px);
+    font-weight: 600;
+    line-height: 1.45;
+  }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(6px, 1vw, 12px);
+    width: min(100%, 720px);
+  }
+  .board figure {
+    margin: 0;
+  }
+  .bf {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    display: grid;
+    place-items: center;
+    background: var(--ink) center / cover no-repeat;
+    color: var(--paper);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .bf-app .fit {
+    position: absolute;
+    top: 6%;
+    bottom: 6%;
+    left: 50%;
+    aspect-ratio: 180 / 400;
+    transform: translateX(-50%);
+  }
+  .bf-end {
+    align-content: center;
+    gap: 2px;
+    text-align: center;
+    padding: 4px;
+  }
+  .bf-end b {
+    font-size: clamp(11px, 1.6vw, 20px);
+    font-weight: 800;
+  }
+  .bf-end span {
+    font-size: clamp(6px, 0.75vw, 10px);
+    color: var(--red);
+    font-weight: 700;
+  }
+  .board figcaption {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--ink2);
+    text-align: center;
+  }
+  .pitch-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 13px;
+  }
+  .animatic {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: var(--sheet);
+  }
+  .animatic i {
+    font-style: normal;
+    color: var(--red);
+  }
+  .animatic em {
+    position: relative;
+    width: 70px;
+    height: 3px;
+    background: var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .animatic em span {
+    position: absolute;
+    inset: 0;
+    background: var(--red);
+    transform-origin: left;
+  }
+  .go {
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 800;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .go.on {
+    background: var(--red);
+    transform: scale(0.94);
+  }
+
+  /* ---------- the build ---------- */
+  .build {
+    position: relative;
+    max-width: 1000px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: clamp(14px, 2.4svh, 24px);
+  }
+  .build .pv-col {
+    width: 100%;
+  }
+  .tray {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 10px;
+  }
+  .tile {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 7px;
+    width: 76px;
+    text-align: center;
+    font-size: 10.5px;
+    line-height: 1.2;
+    color: var(--ink2);
+    transition: opacity 0.3s, color 0.3s;
+  }
+  .tile b {
+    font-weight: 700;
+  }
+  .tile-ico {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+    background: var(--ink);
+    transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+  }
+  .tile svg,
+  .flyer svg {
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: var(--paper);
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .live .tile.wait {
+    opacity: 0.38;
+  }
+  .tile.work {
+    color: var(--ink);
+  }
+  .tile.work .tile-ico {
+    background: var(--red);
+    transform: translateY(-5px);
+    box-shadow: 0 14px 28px -10px rgba(232, 48, 31, 0.7);
+  }
+  .tile.done .tile-ico::after {
+    content: "";
+    position: absolute;
+    right: -5px;
+    top: -5px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--paper);
+    background: var(--red) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 6.3l2 2L9 4' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px no-repeat;
+  }
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .tray-now {
+    display: none;
+    margin: 0;
+    max-width: 62ch;
+    min-height: 3em;
+    text-align: center;
+    font-size: clamp(13px, 1.2vw, 15px);
+  }
+  .live .tray-now {
+    display: block;
+  }
+  .tray-now b {
+    color: var(--red);
+    margin-right: 10px;
+  }
+  .flyers {
+    display: none;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .live .flyers {
+    display: block;
+  }
+  .flyer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+    background: var(--red);
+    box-shadow: 0 16px 34px -10px rgba(232, 48, 31, 0.75);
+    opacity: 0;
+  }
+  .flyer svg {
+    stroke: #fff;
+  }
+  .burst {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--red);
+    border-radius: 50%;
+    opacity: 0;
+  }
+  .pv-cv {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+    opacity: 0;
+  }
+  .pv-cv polygon {
+    fill: rgba(232, 48, 31, 0.12);
+    stroke: var(--red);
+    stroke-width: 3;
+    stroke-dasharray: 7 5;
+  }
+  .pv-cv circle {
+    fill: #fff;
+    stroke: var(--red);
+    stroke-width: 3;
+  }
+  .pv-render {
+    position: absolute;
+    left: 63%;
+    right: 12px;
+    top: 12px;
+    display: grid;
+    gap: 5px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(12, 12, 14, 0.78);
+    font-size: clamp(9px, 0.9vw, 11px);
+    font-weight: 700;
+    opacity: 0;
+  }
+  .pv-render em {
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+  }
+  .pv-render i {
+    display: block;
+    height: 100%;
+    background: var(--red);
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+  @media (max-width: 640px) {
+    .tray {
+      gap: 8px;
+    }
+    .tile {
+      width: auto;
+    }
+    .tile b {
+      display: none;
+    }
+    .tile-ico,
+    .flyer {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+    }
+    .tile svg,
+    .flyer svg {
+      width: 21px;
+      height: 21px;
+    }
+  }
+  .tools {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 16px;
+    padding: clamp(14px, 1.6vw, 20px);
+    box-shadow: 0 30px 80px -30px rgba(20, 20, 20, 0.5);
+  }
+  .tools-h {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: var(--dim);
+  }
+  .tools-h em {
+    font-style: normal;
+    color: var(--red);
+  }
+  .tools ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+  .tool {
+    display: grid;
+    grid-template-columns: 16px minmax(0, 0.85fr) minmax(0, 1.6fr);
+    align-items: baseline;
+    gap: 0 10px;
+    padding: 5px 8px;
+    border-radius: 8px;
+    font-size: clamp(11px, 0.95vw, 13px);
+    line-height: 1.35;
+    color: #6d6860;
+    transition: background 0.25s, color 0.25s;
+  }
+  .tool b {
+    font-weight: 700;
+  }
+  .tool i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    align-self: center;
+  }
+  .tool.work {
+    color: var(--paper);
+    background: rgba(232, 48, 31, 0.16);
+  }
+  .tool.work i {
+    border-color: var(--red);
+    background: var(--red);
+    animation: pulse 0.9s ease-in-out infinite;
+  }
+  .tool.done {
+    color: #d9d3c7;
+  }
+  .tool.done i {
+    border: 0;
+    width: 12px;
+    height: 12px;
+    background: var(--red);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6.5l2.6 2.6L10 3.5' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6.5l2.6 2.6L10 3.5' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  .tool.done span {
+    color: var(--dim);
+  }
+  @keyframes pulse {
+    50% {
+      transform: scale(0.6);
+      opacity: 0.6;
+    }
+  }
+  .pv-ring {
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: visible;
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 3.5;
+    stroke-linecap: round;
+  }
+  .live .pv-ring path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .code-win {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 16px;
+    padding: clamp(12px, 1.6vw, 20px);
+    box-shadow: 0 30px 80px -30px rgba(20, 20, 20, 0.5);
+  }
+  .code-file {
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: var(--dim);
+  }
+  .code {
+    display: grid;
+    font-size: clamp(11px, 1.05vw, 13.5px);
+    line-height: 1.75;
+  }
+  .code code {
+    font: inherit;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .code :global(b) {
+    color: var(--red);
+    font-weight: 700;
+  }
+  .code :global(i) {
+    font-style: normal;
+    color: #c9c2b5;
+  }
+  .pv-col {
+    display: grid;
+    gap: 12px;
+  }
+  @media (max-width: 899px) {
+    .pv-col {
+      order: -1;
+    }
+  }
+  /* The preview is drawn at the clip's own 640 × 352 and scaled to fit (--s, set by the script). */
+  .pv {
+    position: relative;
+    aspect-ratio: 640 / 352;
+    width: 100%;
+    max-width: calc(46svh * 640 / 352);
+    margin: 0 auto;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #0b0b0d;
+    color: #fff;
+    --s: 1;
+  }
+  .pv-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 640px;
+    height: 352px;
+    transform-origin: 0 0;
+    transform: scale(var(--s));
+  }
+  .pv-plate {
+    position: absolute;
+    inset: 0;
+    width: 640px;
+    height: 352px;
+  }
+  .pv-screen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 180px;
+    height: 400px;
+    transform-origin: 0 0;
+  }
+  .pv-front {
+    position: absolute;
+  }
+  canvas.pv-plate,
+  canvas.pv-front {
+    display: none;
+  }
+  .live canvas.pv-plate,
+  .live canvas.pv-front {
+    display: block;
+  }
+  .live img.pv-plate,
+  .live img.pv-front {
+    display: none;
+  }
+  .pv-chips {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    display: grid;
+    justify-items: start;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .pv-chips li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px 4px 7px;
+    border-radius: 999px;
+    background: rgba(12, 12, 14, 0.72);
+    backdrop-filter: blur(6px);
+    font-size: clamp(9px, 0.9vw, 11px);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .pv-chips li::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--red);
+  }
+  /* Blender's shot: zoomed in past the room, the phone alone on a solid colour, turning in 3D. */
+  .pv-solo {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 42%, #f04a35 0%, var(--red) 55%, #c4210f 100%);
+    opacity: 0;
+    overflow: hidden;
+  }
+  .solo-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 640px;
+    height: 352px;
+    transform-origin: 0 0;
+    transform: scale(var(--s));
+    perspective: 900px;
+  }
+  .solo-shadow {
+    position: absolute;
+    left: 262px;
+    top: 286px;
+    width: 116px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(60, 8, 2, 0.55);
+    filter: blur(8px);
+  }
+  .solo-phone {
+    position: absolute;
+    left: 260px;
+    top: 26px;
+    width: 120px;
+    height: 250px;
+    transform-style: preserve-3d;
+  }
+  .solo-phone .front,
+  .solo-phone .back {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    background: #121212;
+  }
+  .solo-phone .front {
+    transform: translateZ(5px);
+    padding: 6px;
+    box-shadow: inset 0 0 0 1.5px #3a3a3a;
+  }
+  .solo-phone .back {
+    transform: rotateY(180deg) translateZ(5px);
+    background: #1b1b1b;
+  }
+  .solo-phone .side {
+    position: absolute;
+    top: 16px;
+    bottom: 16px;
+    width: 10px;
+    background: linear-gradient(90deg, #0c0c0c, #2c2c2c 50%, #0c0c0c);
+  }
+  .solo-phone .side.l {
+    left: -5px;
+    transform: rotateY(-90deg);
+  }
+  .solo-phone .side.r {
+    right: -5px;
+    transform: rotateY(90deg);
+  }
+  .solo-screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 19px;
+    overflow: hidden;
+  }
+  .pv-sub {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 7%;
+    margin: 0;
+    text-align: center;
+    font-size: clamp(12px, 1.5vw, 19px);
+    font-weight: 800;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+  }
+  .tracks {
+    position: relative;
+    display: grid;
+    gap: 5px;
+    padding: 10px 12px;
+    background: var(--sheet);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+  }
+  .track {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    align-items: center;
+    font-size: 11px;
+    color: var(--ink2);
+  }
+  .track em {
+    position: relative;
+    height: 10px;
+  }
+  .track i {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--a);
+    width: var(--w);
+    border-radius: 3px;
+    background: var(--ink);
+    transform-origin: left;
+  }
+  .track:nth-child(2) i {
+    background: var(--red);
+  }
+  .playhead {
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: calc(12px + 72px);
+    width: 2px;
+    background: var(--red);
+  }
+
+  /* ---------- ship ---------- */
+  .ship {
+    max-width: 1080px;
+    min-width: 0;
+    display: grid;
+    justify-items: center;
+    gap: clamp(16px, 3svh, 30px);
+  }
+  .sizes {
+    --fh: clamp(80px, min(26svh, 36vw), 250px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: clamp(10px, 2.4vw, 28px);
+  }
+  .sz {
+    position: relative;
+    margin: 0;
+  }
+  .shot {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #0b0b0d;
+    box-shadow: 0 24px 60px -24px rgba(20, 20, 20, 0.6);
+    container-type: inline-size;
+  }
+  .sz-16x9 .shot {
+    height: calc(var(--fh) * 0.62);
+    aspect-ratio: 16 / 9;
+  }
+  .sz-1x1 .shot {
+    height: calc(var(--fh) * 0.8);
+    aspect-ratio: 1;
+  }
+  .sz-9x16 .shot {
+    height: var(--fh);
+    aspect-ratio: 9 / 16;
+  }
+  /* The 1:1 is the 16:9 shot cropped around the phone. */
+  .frame {
+    position: absolute;
+    top: 0;
+    height: 100%;
+  }
+  .frame.wide {
+    left: 0;
+    aspect-ratio: 16 / 9;
+  }
+  .sz-1x1 .frame.wide {
+    left: -38.4%;
+  }
+  .frame.tall {
+    left: 0;
+    width: 100%;
+  }
+  .frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .shot-screen {
+    position: absolute;
+    left: 43.1%;
+    top: 15.1%;
+    width: 13.3%;
+    height: 53.4%;
+    border-radius: 8% / 3.6%;
+    overflow: hidden;
+  }
+  .frame.tall .shot-screen {
+    left: 34.9%;
+    top: 21.7%;
+    width: 30.2%;
+    height: 37.8%;
+  }
+  .shot-cap {
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    bottom: 7%;
+    margin: 0;
+    text-align: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: clamp(8px, 6cqw, 16px);
+    line-height: 1.2;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
+  }
+  .sz-16x9 .shot-cap {
+    font-size: clamp(8px, 4.4cqw, 16px);
+  }
+  .sz figcaption {
+    margin-top: 8px;
+    font-size: 12px;
+    text-align: center;
+    color: var(--ink2);
+  }
+  .posts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .post {
+    padding: 12px 14px;
+    background: var(--sheet);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .post b {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .post p {
+    margin: 4px 0 6px;
+  }
+  .post em {
+    font-style: normal;
+    font-size: 11px;
+    color: var(--red);
+  }
+  .ready {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 6px 12px;
+    font-weight: 800;
+    font-size: clamp(18px, 2vw, 24px);
+  }
+  .ready b {
+    color: var(--red);
+  }
+  .ready span {
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--ink2);
+  }
+  @media (max-width: 760px) {
+    .posts {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .post:nth-child(n + 3) {
+      display: none;
+    }
+    .post {
+      font-size: 12px;
+      padding: 10px;
+    }
+  }
+
+  /* ---------- the player ---------- */
+  .st-player {
+    align-items: center;
+    gap: 16px;
+    padding: 0 0 clamp(12px, 2svh, 20px);
+    font-size: 12px;
+  }
+  .pl-play {
+    color: var(--red);
+  }
+  .st-player ol {
+    flex: 1;
+    display: flex;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .st-player li {
+    flex: 1;
+  }
+  .st-player li:first-child {
+    flex: 0.8;
+  }
+  .st-player button {
+    width: 100%;
+    display: grid;
+    gap: 7px;
+    padding: 6px 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    color: var(--ink2);
+    text-align: left;
+    cursor: pointer;
+  }
+  .st-player li.on button {
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .pl-bar {
+    position: relative;
+    height: 3px;
+    background: var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .pl-bar span {
+    position: absolute;
+    inset: 0;
+    background: var(--red);
+    transform-origin: left;
+    transform: scaleX(0);
+  }
+  .st-player em {
+    font-style: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pl-time {
+    font-variant-numeric: tabular-nums;
+    color: var(--ink2);
+  }
+  @media (max-width: 640px) {
+    .st-player li:not(.on) em {
+      visibility: hidden;
+    }
+    .st-player li.on {
+      flex: 2.4;
+    }
+  }
+
+  /* "how it works" in the header lands on the first chapter, once the card has covered the hero. */
+  .st-anchor {
+    position: absolute;
+    top: 0;
+  }
+  .live .st-anchor {
+    top: calc(100svh * 1.35);
+  }
+
+  /* ---------- live: the page plays it ---------- */
+  .story.live .st-pin {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    overflow: hidden;
+  }
+  .live .st-hero {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+  }
+  .live .st-hero .st-h1 {
+    color: transparent;
+  }
+  .live .st-dark {
+    display: block;
+    z-index: 3;
+    color: var(--ink);
+    pointer-events: none;
+  }
+  .live .st-dark .t-btn:not(.primary) {
+    border-color: rgba(20, 20, 20, 0.3);
+  }
+  .live .st-fly {
+    display: block;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .live .st-fly-dark {
+    z-index: 4;
+    color: var(--ink);
+  }
+  .live .st-fly :global(.fl) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-weight: 800;
+    line-height: 1.02;
+    white-space: pre;
+    transform-origin: 0 0;
+  }
+  .live .st-fly :global(.fl i) {
+    font-style: normal;
+  }
+  .live .st-fly :global(.fl i + i) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+  }
+  .live .st-card {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    padding: 0;
+    border-radius: 36px 36px 0 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    will-change: transform;
+  }
+  .live .st-head {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    padding: clamp(16px, 4svh, 44px) 16px 0;
+  }
+  .st-num {
+    margin: 0;
+    font: 700 12px/1 var(--mono);
+    letter-spacing: 0.12em;
+    color: var(--ink2);
+  }
+  .st-slot {
+    position: relative;
+    width: 100%;
+    height: 1.2em;
+    overflow: hidden;
+    font-weight: 800;
+    font-size: clamp(26px, 3.8vw, 46px);
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+    text-align: center;
+  }
+  .st-slot span {
+    position: absolute;
+    inset: 0;
+    transform: translateY(110%);
+  }
+  .live .st-stage {
+    position: relative;
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1440px;
+    padding: 0 16px;
+  }
+  @media (min-width: 768px) {
+    .live .st-stage {
+      padding: 0 32px;
+    }
+  }
+  .live .sc {
+    position: absolute;
+    inset: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  @media (min-width: 768px) {
+    .live .sc {
+      inset: 0 32px;
+    }
+  }
+  .live .sc + .sc {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .live .sc-h {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .live .chat-in {
+    display: block;
+  }
+  .live .chat-text .c,
+  .live [data-me],
+  .live [data-reply] {
+    opacity: 0;
+  }
+  .live .pitch-in {
+    display: grid;
+    place-items: center;
+  }
+  .live .ideas,
+  .live .pitch {
+    grid-area: 1 / 1;
+    width: 100%;
+  }
+  .live .pitch-slot {
+    display: block;
+    width: var(--slot-w, 260px);
+    visibility: hidden;
+  }
+  .live .idea.picked {
+    border-color: var(--rule);
+    box-shadow: 0 12px 30px -18px rgba(20, 20, 20, 0.4);
+  }
+  .live .idea.picked.on {
+    border-color: var(--red);
+    box-shadow: 0 0 0 2px var(--red), 0 18px 40px -16px rgba(232, 48, 31, 0.55);
+  }
+  .live .idea.picked b {
+    color: var(--ink2);
+  }
+  .live .idea.picked.on b {
+    color: var(--red);
+  }
+  .live .st-player {
+    display: flex;
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  @media (min-width: 768px) {
+    .live .st-player {
+      padding-left: 32px;
+      padding-right: 32px;
+    }
+  }
+  @media (max-width: 640px) {
+    .st-hero-in {
+      padding-top: 36px;
+    }
+    .live .code code:nth-child(n + 10) {
+      display: none;
+    }
+    .live .track:nth-child(n + 4) {
+      display: none;
+    }
+  }
+  @media (max-width: 640px) {
+    .live .tracks {
+      display: none;
+    }
+    .tool {
+      grid-template-columns: 14px minmax(0, 1fr);
+      padding: 3px 6px;
+    }
+    .tool span {
+      display: none;
+    }
+    .tools ol {
+      grid-template-columns: 1fr 1fr;
+      gap: 0 6px;
+    }
+  }
+  @media (max-width: 640px) and (max-height: 700px) {
+    .live .tracks,
+    .live .code code:nth-child(n + 8) {
+      display: none;
+    }
+    .chat-log {
+      padding: 14px;
+      gap: 10px;
+      font-size: 13px;
+    }
+  }
+</style>
+
+<script>
+  import couch from "../story-couch.json";
+  import { quadMatrix, type Quad } from "../story-quad";
+
+  // myapp's screen, drawn at 180 × 400, scaled into each box that shows it (stretched onto a phone, or fitted).
+  const fit = () => {
+    for (const box of document.querySelectorAll<HTMLElement>("[data-fit]")) {
+      const app = box.querySelector<HTMLElement>(".app");
+      if (!app || !box.offsetWidth) continue;
+      const sx = box.offsetWidth / 180;
+      const sy = box.offsetHeight / 400;
+      app.style.transform = box.dataset.fit === "fill" ? `scale(${sx}, ${sy})` : `scale(${Math.min(sx, sy)})`;
+    }
+  };
+  fit();
+  addEventListener("resize", fit);
+  document.fonts?.ready.then(fit);
+
+  const story = document.querySelector<HTMLElement>("[data-story]");
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (story && !still) play(story);
+
+  function play(story: HTMLElement) {
+    story.classList.add("live");
+    const $ = <T extends Element = HTMLElement>(s: string, root: ParentNode = story) => root.querySelector<T>(s)!;
+    const $$ = <T extends Element = HTMLElement>(s: string, root: ParentNode = story) => [...root.querySelectorAll<T>(s)];
+
+    // ---- timing, in screen heights of scroll ----
+    const END = 7; // the last chapter holds until here, then the card scrolls away
+    const BOUNDS = [-0.08, 1.3, 3.0, 4.2, 5.4, 6.6]; // where each of the five chapters starts and the last ends
+    const MAP = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, -1, -1, -1, 13, 14, 15, 16]; // title letter -> prompt letter
+    const LANDED = 1.3; // every title letter is in the input
+    const SECONDS = 30;
+
+    const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+    const seg = (t: number, a: number, b: number) => clamp((t - a) / (b - a));
+    const lerp = (a: number, b: number, p: number) => a + (b - a) * p;
+    const io = (p: number) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+    const out = (p: number) => 1 - Math.pow(1 - p, 3);
+    const back = (p: number) => 1 + 2.2 * Math.pow(p - 1, 3) + 1.2 * Math.pow(p - 1, 2);
+    const off = (el: HTMLElement, root: HTMLElement) => {
+      let x = 0;
+      let y = 0;
+      let node: HTMLElement | null = el;
+      while (node && node !== root) {
+        x += node.offsetLeft;
+        y += node.offsetTop;
+        node = node.offsetParent as HTMLElement | null;
+      }
+      return { x, y };
+    };
+    const css = new WeakMap<HTMLElement, string>();
+    const set = (el: HTMLElement, style: string) => {
+      if (css.get(el) === style) return;
+      css.set(el, style);
+      el.style.cssText = style;
+    };
+    const cls = (el: HTMLElement, name: string, on: boolean) => el.classList.toggle(name, on);
+
+    // ---- elements ----
+    const pin = $("[data-pin]");
+    const card = $("[data-card]");
+    const dark = $("[data-dark]");
+    const darkFly = $("[data-darkfly]");
+    const fades = $$("[data-fade]");
+    const titleChars = $$(".c", $("[data-title]"));
+    const promptChars = $$(".c", $("[data-prompt]"));
+    const hint = $("[data-hint]");
+    const send = $("[data-send]");
+    const me = $("[data-me]");
+    const replies = $$("[data-reply]");
+    const scenes = $$("[data-scene]");
+    const heads = $$("[data-head]");
+    const num = $("[data-num]");
+    const explorers = $$("[data-explorer]");
+    const ideas = $$("[data-idea]");
+    const pick = $('[data-idea="d"]');
+    const slot = $("[data-slot]");
+    const pitchRoot = $("[data-pitch]");
+    const pline = $("[data-pline]");
+    const frames = $$("[data-frame]");
+    const pfoot = $("[data-pfoot]");
+    const abar = $("[data-abar]");
+    const go = $("[data-go]");
+    const build = $("[data-build]");
+    const tiles = $$("[data-tile]");
+    const flyers = $$("[data-flyer]");
+    const nowName = $("[data-nowname]");
+    const nowJob = $("[data-nowjob]");
+    const cv = $("[data-cv]");
+    const cvPoly = $<SVGPolygonElement & HTMLElement>("[data-cvpoly]");
+    const cvDots = $$<SVGCircleElement & HTMLElement>("[data-cvdot]");
+    const render2 = $("[data-render]");
+    const renderBar = $("[data-renderbar]");
+    const toolData = tiles.map((tile) => ({ name: tile.querySelector("b")!.textContent!, job: tile.querySelector(".sr")!.textContent! }));
+    const ring = $<SVGSVGElement & HTMLElement>("[data-ring]");
+    const ringPath = $<SVGPathElement & HTMLElement>("[data-ringpath]");
+    const pv = $("[data-pv]");
+    const pvStage = $("[data-pvstage]");
+    const plate = $<HTMLCanvasElement>("[data-plate]");
+    const front = $<HTMLCanvasElement>("[data-front]");
+    const screen = $("[data-screen]");
+    const solo = $("[data-solo]");
+    const soloPhone = $("[data-solophone]");
+    const soloShadow = $("[data-soloshadow]");
+    const tasks = [...$$("[data-task]", screen), ...$$("[data-task]", solo)];
+    const appBtns = [$("[data-appbtn]", screen), $("[data-appbtn]", solo)];
+    const words = $$("[data-word]");
+    const chips = $$("[data-chip]");
+    const shipRoot = $("[data-ship]");
+    const sizes = $$("[data-size]");
+    const posts = $$("[data-post]");
+    const ready = $("[data-ready]");
+    const chapterEls = $$("[data-ch]");
+    const fills = $$("[data-fill]");
+    const time = $("[data-time]");
+
+    // The title's letters, drawn twice: light under the card, dark over it (clipped to the card).
+    const flyLayers = $$("[data-fly]");
+    const fly = flyLayers.map((layer) =>
+      titleChars.map((c, i) => {
+        const el = document.createElement("span");
+        el.className = "fl";
+        const to = MAP[i] >= 0 ? promptChars[MAP[i]].textContent! : c.textContent!;
+        el.innerHTML = `<i>${c.textContent}</i>${to !== c.textContent ? `<i>${to}</i>` : ""}`;
+        layer.append(el);
+        return el;
+      }),
+    );
+
+    // The agent's replies type out: what's typed, then the rest kept in place but unseen.
+    const typers = $$("[data-type]").map((el) => {
+      const text = el.dataset.type!;
+      el.textContent = "";
+      const shown = document.createElement("span");
+      const rest = document.createElement("span");
+      rest.style.color = "transparent";
+      el.append(shown, rest);
+      let last = -1;
+      return (p: number) => {
+        const n = Math.round(text.length * p);
+        if (n === last) return;
+        last = n;
+        shown.textContent = text.slice(0, n);
+        rest.textContent = text.slice(n);
+      };
+    });
+
+    // The generated clip, every third frame: the room, and the hand over the screen as its own layer. Loaded once the
+    // page has settled, drawn on canvases so a scrub never flickers.
+    const FRAMES = couch.corners.length;
+    const LAYER_LINES = [3, 5, 7, 8, 9]; // the tool that adds each layer: video, your app, 3D (Blender), voice, music
+    // When each tool works, as shares of the build chapter: Claude Code runs the whole time, the render comes last.
+    const WORK: [number, number][] = [
+      [0.0, 0.95],
+      [0.03, 0.1],
+      [0.08, 0.15],
+      [0.14, 0.24],
+      [0.22, 0.3],
+      [0.28, 0.38],
+      [0.38, 0.45],
+      [0.44, 0.52],
+      [0.52, 0.6],
+      [0.6, 0.68],
+      [0.82, 0.95],
+    ];
+    const pctx = plate.getContext("2d")!;
+    const fctx = front.getContext("2d")!;
+    const plates: HTMLImageElement[] = [];
+    const fronts: HTMLImageElement[] = [];
+    let drawn = -1;
+    let narrow = false;
+    let tileAt: { x: number; y: number }[] = [];
+    let stage = { x: 0, y: 0, s: 1 };
+    let flyHalf = 26;
+    let nowShown = -1;
+    let want = 24;
+    const draw = (i: number) => {
+      want = i;
+      const a = plates[i];
+      const b = fronts[i];
+      if (i === drawn || !a?.complete || !a.naturalWidth || !b?.complete) return;
+      drawn = i;
+      pctx.drawImage(a, 0, 0, 640, 352);
+      fctx.clearRect(0, 0, 126, 246);
+      fctx.drawImage(b, 0, 0, 126, 246);
+    };
+    const load = () => {
+      if (plates.length) return;
+      const two = (i: number) => String(i + 1).padStart(2, "0");
+      for (let i = 0; i < FRAMES; i++) {
+        const a = new Image();
+        const b = new Image();
+        a.src = `/story/couch/p${two(i)}.webp`;
+        b.src = `/story/couch/f${two(i)}.webp`;
+        const done = () => i === want && draw(i);
+        a.onload = done;
+        b.onload = done;
+        plates.push(a);
+        fronts.push(b);
+      }
+    };
+    if (document.readyState === "complete") setTimeout(load, 800);
+    else addEventListener("load", () => setTimeout(load, 800));
+
+    // ---- layout, measured without transforms ----
+    let L: {
+      pinH: number;
+      top: number;
+      cardY0: number;
+      src: { x: number; y: number }[];
+      dst: { x: number; y: number }[];
+      srcSize: number;
+      dstSize: number;
+      pick: { x: number; y: number };
+      sizes: { x: number; y: number }[];
+    };
+    const measure = () => {
+      const pinH = pin.offsetHeight;
+      story.style.height = `${pinH * (END + 1)}px`;
+      const top = story.getBoundingClientRect().top + scrollY;
+      const btns = fades[1];
+      const heroBottom = off(btns, pin).y + btns.offsetHeight;
+      const cardY0 = Math.min(pinH - 40, heroBottom + 56);
+      const srcSize = parseFloat(getComputedStyle(titleChars[0]).fontSize);
+      const dstSize = parseFloat(getComputedStyle(promptChars[0]).fontSize);
+      const src = titleChars.map((c) => off(c, pin));
+      const dst = promptChars.map((c) => off(c, card));
+      pitchRoot.style.setProperty("--slot-w", `${pick.offsetWidth}px`);
+      const a = off(pick, pitchRoot);
+      const b = off(slot, pitchRoot);
+      const one = sizes[1];
+      const center = (el: HTMLElement) => {
+        const o = off(el, shipRoot);
+        return { x: o.x + el.offsetWidth / 2, y: o.y + el.offsetHeight / 2 };
+      };
+      const c1 = center(one);
+      pv.style.setProperty("--s", String(pv.offsetWidth / 640));
+      const pvAt = off(pv, build);
+      tileAt = tiles.map((tile) => {
+        const ico = tile.querySelector<HTMLElement>(".tile-ico")!;
+        const o = off(ico, build);
+        return { x: o.x + ico.offsetWidth / 2, y: o.y + ico.offsetHeight / 2 };
+      });
+      stage = { x: pvAt.x, y: pvAt.y, s: pv.offsetWidth / 640 };
+      flyHalf = flyers[0].offsetWidth / 2;
+      narrow = pv.offsetWidth < 520;
+      fit();
+      L = {
+        pinH,
+        top,
+        cardY0,
+        src,
+        dst,
+        srcSize,
+        dstSize,
+        pick: { x: b.x - a.x, y: b.y - a.y },
+        sizes: sizes.map((el) => {
+          const c = center(el);
+          return { x: c1.x - c.x, y: c1.y - c.y };
+        }),
+      };
+    };
+
+    // ---- one frame ----
+    const render = (t: number) => {
+      // the card rises over the hero; where it covers, the hero is drawn dark
+      const rise = io(seg(t, BOUNDS[0], 1));
+      const y = L.cardY0 * (1 - rise);
+      const r = 36 * (1 - seg(t, 0.8, 1)) + 36 * seg(t, END - 0.35, END);
+      set(card, `transform: translate3d(0, ${y}px, 0); border-radius: ${36 * (1 - seg(t, 0.8, 1))}px ${36 * (1 - seg(t, 0.8, 1))}px ${36 * seg(t, END - 0.35, END)}px ${36 * seg(t, END - 0.35, END)}px`);
+      const clip = `clip-path: inset(${y}px 0 0 0 round ${r}px ${r}px 0 0)`;
+      set(dark, clip);
+      set(darkFly, clip);
+      const fade = seg(t, 0.22, 0.6);
+      fades.forEach((el) => set(el, `opacity: ${1 - fade}; transform: translateY(${-24 * io(fade)}px)`));
+      for (const el of $$("[data-fade]", dark)) set(el, `opacity: ${1 - fade}; transform: translateY(${-24 * io(fade)}px)`);
+
+      // the title's letters fly into the input
+      const landed = t >= LANDED;
+      titleChars.forEach((_, i) => {
+        const start = 0.4 + i * 0.014;
+        const p = seg(t, start, start + 0.62);
+        const k = MAP[i] >= 0 ? MAP[i] : 12;
+        const d = L.dst[k];
+        const s = lerp(1, L.dstSize / L.srcSize, io(p));
+        const dx = lerp(0, d.x - L.src[i].x, io(p));
+        const dy = lerp(0, d.y + y - L.src[i].y, io(Math.pow(p, 0.85))) - Math.sin(Math.PI * p) * L.pinH * 0.06;
+        const rot = Math.sin(Math.PI * p) * (i % 2 ? 7 : -7);
+        const gone = MAP[i] < 0 ? seg(p, 0.1, 0.7) : 0;
+        const weight = Math.round(lerp(800, 600, p));
+        const style = landed
+          ? "visibility: hidden"
+          : `font-size: ${L.srcSize}px; transform: translate3d(${L.src[i].x + dx}px, ${L.src[i].y + dy}px, 0) rotate(${rot}deg) scale(${s}); opacity: ${1 - gone}; font-weight: ${weight}`;
+        fly.forEach((letters) => {
+          set(letters[i], style);
+          const morph = letters[i].children[1] as HTMLElement | undefined;
+          if (morph) {
+            const m = seg(p, 0.55, 0.95);
+            set(letters[i].children[0] as HTMLElement, `opacity: ${1 - m}`);
+            set(morph, `opacity: ${m}`);
+          }
+        });
+      });
+
+      // the prompt: the landed letters, the new "m", then the rest typed out, then sent
+      const typed = seg(t, 1.34, 1.92);
+      const rest = promptChars.length - 17;
+      const sent = seg(t, 1.98, 2.06);
+      let caret = -1;
+      promptChars.forEach((c, k) => {
+        let o = 0;
+        let sc = 1;
+        if (k === 11) {
+          const pop = seg(t, 1.24, 1.36);
+          o = pop;
+          sc = lerp(0.4, 1, back(pop));
+        } else if (k < 17) o = landed ? 1 : 0;
+        else o = k - 17 < Math.round(rest * typed) ? 1 : 0;
+        o *= 1 - sent;
+        if (o > 0) caret = k;
+        set(c, `opacity: ${o}${sc !== 1 ? `; transform: scale(${sc})` : ""}`);
+      });
+      promptChars.forEach((c, k) => cls(c, "caret", k === caret && t < 1.98 && t > LANDED));
+      set(hint, `opacity: ${t < 0.4 ? 1 - seg(t, 0.3, 0.4) : t > 2.06 ? seg(t, 2.06, 2.14) : 0}`);
+      cls(send, "on", t > 1.95 && t < 2.08);
+      const bubble = seg(t, 2.0, 2.12);
+      set(me, `opacity: ${bubble}; transform: translateY(${(1 - out(bubble)) * 60}px)`);
+      [2.16, 2.46, 2.72].forEach((a, j) => {
+        const b = [2.42, 2.68, 2.92][j];
+        set(replies[j], `opacity: ${seg(t, a - 0.04, a)}; transform: translateY(${(1 - out(seg(t, a - 0.04, a + 0.04))) * 16}px)`);
+        typers[j](seg(t, a, b));
+      });
+
+      // the scenes swap at each chapter's end, with the heading above them
+      const swaps = [BOUNDS[2], BOUNDS[3], BOUNDS[4]];
+      let s = -1 + io(seg(t, 0.82, 1.02));
+      swaps.forEach((at) => (s += io(seg(t, at - 0.1, at + 0.06))));
+      scenes.forEach((scene, i) => {
+        const d = i - s;
+        const o = clamp(1 - Math.abs(d) * 1.6);
+        if (i === 0 && s <= 0) return set(scene, "");
+        set(scene, o <= 0 ? "opacity: 0; visibility: hidden" : `opacity: ${o}; visibility: visible; transform: translate3d(0, ${d * 70}px, 0)`);
+      });
+      heads.forEach((h, i) => {
+        const d = i - s;
+        set(h, `transform: translate3d(0, ${d * 110}%, 0); opacity: ${clamp(1 - Math.abs(d))}`);
+      });
+      const chapter = Math.round(clamp(s, 0, 3)) + 2;
+      if (num.textContent !== `0${chapter} / 05`) num.textContent = `0${chapter} / 05`;
+      set(num, `opacity: ${seg(t, 0.85, 1)}`);
+
+      // pitched: six ideas dealt, one picked, the rest gone, its storyboard and animatic, then your go
+      const l3 = seg(t, BOUNDS[2] - 0.08, BOUNDS[3] - 0.12);
+      const gone = io(seg(l3, 0.4, 0.56));
+      explorers.forEach((el, k) => set(el, `opacity: ${seg(l3, 0.02 + k * 0.03, 0.1 + k * 0.03) * (1 - gone)}`));
+      ideas.forEach((el, k) => {
+        const p = out(seg(l3, 0.06 + k * 0.035, 0.22 + k * 0.035));
+        if (el === pick) {
+          const f = io(seg(l3, 0.42, 0.62));
+          set(el, `opacity: ${p}; transform: translate3d(${L.pick.x * f}px, ${L.pick.y * f + (1 - p) * 50}px, 0) rotate(${(1 - p) * 4}deg) scale(${1 + 0.04 * Math.sin(Math.PI * f)})`);
+          cls(el, "on", l3 > 0.32);
+          return;
+        }
+        set(el, `opacity: ${p * (1 - gone)}; transform: translate3d(0, ${(1 - p) * 50 + gone * 40}px, 0) rotate(${(k % 2 ? 4 : -4) * (1 - p)}deg) scale(${1 - 0.06 * gone})`);
+      });
+      set(pline, `opacity: ${seg(l3, 0.56, 0.64)}; transform: translateY(${(1 - out(seg(l3, 0.56, 0.66))) * 16}px)`);
+      frames.forEach((el, j) => {
+        const p = seg(l3, 0.6 + j * 0.04, 0.68 + j * 0.04);
+        set(el, `opacity: ${p}; transform: scale(${lerp(0.85, 1, back(p))})`);
+      });
+      set(pfoot, `opacity: ${seg(l3, 0.74, 0.8)}`);
+      set(abar, `transform: scaleX(${seg(l3, 0.76, 0.9)})`);
+      cls(go, "on", l3 > 0.92);
+
+      // built: the code types out, and each line puts its layer in the frame, its name on it and its bar on the
+      // timeline; the generated clip plays as you scroll, with myapp's screen tracked onto the phone
+      const l4 = seg(t, BOUNDS[3] - 0.08, BOUNDS[4] - 0.1);
+      if (t > BOUNDS[2]) load();
+      const lineDone = (j: number) => WORK[j][1];
+      tiles.forEach((el, j) => {
+        const [a, b] = WORK[j];
+        cls(el, "wait", l4 < a);
+        cls(el, "work", l4 >= a && l4 < b);
+        cls(el, "done", l4 >= b);
+      });
+      // the tool at work, named under the tray
+      let now = 0;
+      WORK.forEach(([a, b], j) => {
+        if (j && l4 >= a && l4 < b) now = j;
+      });
+      if (l4 >= WORK[10][1]) now = 10;
+      if (now !== nowShown) {
+        nowShown = now;
+        nowName.textContent = toolData[now].name;
+        nowJob.textContent = toolData[now].job;
+      }
+      const on = LAYER_LINES.map((j) => out(seg(l4, lineDone(j), lineDone(j) + 0.06)));
+      const run = seg(l4, lineDone(3), 0.97);
+      // rough.js draws a ring around the phone, wherever the hand has moved it
+      const pc = couch.corners[Math.round(run * (FRAMES - 1))] as Quad;
+      const ringX = pc.reduce((m, [x]) => m + x, 0) / 4;
+      const ringY = pc.reduce((m, [, y]) => m + y, 0) / 4;
+      set(ring, `transform: translate(${ringX - 80}px, ${ringY - 140}px)`);
+      ringPath.style.strokeDashoffset = String(1 - io(seg(l4, WORK[6][0], WORK[6][1])));
+      ringPath.style.opacity = String(1 - seg(l4, WORK[7][1] - 0.02, WORK[7][1] + 0.03));
+      const fi = Math.round(run * (FRAMES - 1));
+      // each tool's icon lifts out of the tray, arcs into the video and lands where its layer goes
+      const toStage = (x: number, y: number) => ({ x: stage.x + x * stage.s, y: stage.y + y * stage.s });
+      const lands = [
+        null,
+        toStage(320, 176),
+        toStage(320, 176),
+        toStage(320, 176),
+        toStage(ringX, ringY),
+        toStage(ringX, ringY),
+        toStage(ringX + 58, ringY - 70),
+        toStage(ringX, ringY),
+        toStage(320, 318),
+        toStage(110, 300),
+        toStage(320, 330),
+      ];
+      flyers.forEach((el, j) => {
+        const [a, b] = WORK[j];
+        const end = lands[j];
+        if (!end || l4 < a || l4 >= b || !tileAt[j]) return set(el, "opacity: 0");
+        const m = a + (b - a) * 0.55;
+        const p = seg(l4, a, m);
+        const q = seg(l4, m, b);
+        const from = tileAt[j];
+        const x = lerp(from.x, end.x, io(p));
+        const y = lerp(from.y, end.y, io(p)) - Math.sin(Math.PI * p) * 110;
+        const sc = lerp(1, 0.62, io(p)) * (1 - 0.7 * q);
+        const rot = Math.sin(Math.PI * p) * (j % 2 ? 14 : -14);
+        set(el, `opacity: ${1 - q}; transform: translate3d(${x - flyHalf}px, ${y - flyHalf}px, 0) rotate(${rot}deg) scale(${sc})`);
+        set(el.lastElementChild as HTMLElement, `opacity: ${q > 0 ? 1 - q : 0}; transform: scale(${lerp(0.8, 3.4, out(q)) / Math.max(sc, 0.2)})`);
+      });
+      // OpenCV finds the screen: its four corners, followed frame by frame
+      const cvOn = seg(l4, WORK[4][0] + 0.03, WORK[4][0] + 0.05) * (1 - seg(l4, WORK[5][1] - 0.02, WORK[5][1] + 0.03));
+      set(cv, `opacity: ${cvOn}`);
+      if (cvOn > 0) {
+        const q4 = couch.corners[fi] as Quad;
+        cvPoly.setAttribute("points", q4.map(([x, y]) => `${x},${y}`).join(" "));
+        cvDots.forEach((dot, k) => {
+          dot.setAttribute("cx", String(q4[k][0]));
+          dot.setAttribute("cy", String(q4[k][1]));
+        });
+      }
+      // Playwright and ffmpeg render it
+      set(render2, `opacity: ${seg(l4, WORK[10][0], WORK[10][0] + 0.03)}`);
+      set(renderBar, `transform: scaleX(${seg(l4, WORK[10][0] + 0.02, WORK[10][1])})`);
+      if (t > BOUNDS[3] - 0.3 && t < BOUNDS[4] + 0.2) draw(fi);
+      // Blender's shot: the camera pushes into the phone, the room gives way to a solid colour, and the phone turns in 3D
+      const push = io(seg(l4, WORK[7][1] - 0.02, WORK[7][1] + 0.08));
+      const zoom = lerp(1, 2.5, push);
+      const cx = lerp(ringX, 320, push);
+      const cy = lerp(ringY, 176, push);
+      set(pvStage, `opacity: ${on[0]}; transform: scale(${stage.s}) translate(${cx}px, ${cy}px) scale(${zoom}) translate(${-ringX}px, ${-ringY}px)`);
+      // it takes over at the size the pushed-in phone has reached, then settles back and turns
+      const alone = seg(l4, WORK[7][1] + 0.06, WORK[7][1] + 0.085);
+      const settle = io(seg(l4, WORK[7][1] + 0.06, WORK[7][1] + 0.16));
+      const turn = seg(l4, WORK[7][1] + 0.1, 1);
+      set(solo, `opacity: ${alone}`);
+      set(soloPhone, `transform: translateY(${lerp(22, 0, settle) - Math.sin(turn * Math.PI * 2) * 5}px) scale(${lerp(2.05, 1, settle)}) rotateX(${lerp(0, 8, settle) - 3 * turn}deg) rotateY(${30 * Math.sin(turn * 2.2 * Math.PI)}deg) rotateZ(${lerp(-7, 0, settle)}deg)`);
+      set(soloShadow, `opacity: ${settle}; transform: scaleX(${0.85 + 0.15 * Math.cos(turn * 2.2 * Math.PI)})`);
+      set(screen, `transform: ${quadMatrix(180, 400, couch.corners[fi] as Quad)}; opacity: ${on[1]}`);
+      tasks.forEach((task, m) => cls(task, "done", fi >= 14 + (m % 5) * 6));
+      appBtns.forEach((btn) => cls(btn, "tap", fi >= 42 && fi <= 46));
+      const said = seg(l4, lineDone(8), lineDone(8) + 0.2) * words.length;
+      words.forEach((word, w) => set(word, `opacity: ${clamp(said - w)}`));
+      // a narrow preview names only the newest layer, so the names never cover the phone
+      const newest = on.reduce((m, v, k) => (v > 0 ? k : m), -1);
+      chips.forEach((chip, k) => {
+        const o = narrow && k !== newest ? 0 : on[k];
+        set(chip, `opacity: ${o}; transform: translateX(${(1 - on[k]) * -12}px)${narrow ? `; position: absolute; top: 0; left: 0` : ""}`);
+      });
+
+      // shipped: one video opens into three sizes, a caption for each platform, ready for you
+      const l5 = seg(t, BOUNDS[4] - 0.08, BOUNDS[5] - 0.1);
+      const open = io(seg(l5, 0.08, 0.36));
+      sizes.forEach((el, k) => {
+        const v = L.sizes[k];
+        const o = k === 1 ? seg(l5, 0, 0.06) : seg(l5, 0.08, 0.16);
+        set(el, `opacity: ${o}; transform: translate3d(${v.x * (1 - open)}px, ${v.y * (1 - open)}px, 0) scale(${lerp(k === 1 ? 1 : 0.7, 1, open)})`);
+      });
+      posts.forEach((el, k) => {
+        const p = seg(l5, 0.4 + k * 0.06, 0.52 + k * 0.06);
+        set(el, `opacity: ${p}; transform: translate3d(0, ${(1 - out(p)) * 40}px, 0)`);
+      });
+      const rd = seg(l5, 0.74, 0.84);
+      set(ready, `opacity: ${rd}; transform: scale(${lerp(0.92, 1, back(rd))})`);
+
+      // the player bar
+      BOUNDS.slice(0, 5).forEach((a, i) => {
+        const p = seg(t, a, BOUNDS[i + 1]);
+        set(fills[i], `transform: scaleX(${p})`);
+        cls(chapterEls[i], "on", t >= a && (t < BOUNDS[i + 1] || i === 4));
+      });
+      const sec = Math.round(SECONDS * seg(t, BOUNDS[0], BOUNDS[5]));
+      const stamp = `0:${String(sec).padStart(2, "0")} / 0:${SECONDS}`;
+      if (time.textContent !== stamp) time.textContent = stamp;
+    };
+
+    // ---- the playhead follows the scroll, eased ----
+    let shown = NaN;
+    let ticking = false;
+    let lastFrame = 0;
+    const target = () => (scrollY - L.top) / L.pinH;
+    const tick = (now: number) => {
+      const goal = target();
+      const dt = lastFrame ? Math.min(64, now - lastFrame) : 16.7;
+      lastFrame = now;
+      shown = Number.isNaN(shown) ? goal : shown + (goal - shown) * (1 - Math.pow(1 - 0.16, dt / 16.7));
+      if (Math.abs(goal - shown) < 0.0004) shown = goal;
+      render(clamp(shown, -0.2, END + 0.2));
+      if (shown !== goal) requestAnimationFrame(tick);
+      else {
+        ticking = false;
+        lastFrame = 0;
+      }
+    };
+    const kick = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(tick);
+    };
+    const relayout = () => {
+      measure();
+      shown = target();
+      render(clamp(shown, -0.2, END + 0.2));
+    };
+
+    $$("[data-jump]").forEach((button) =>
+      button.addEventListener("click", () => {
+        const i = Number(button.dataset.jump);
+        const at = i === 0 ? 0 : BOUNDS[i] + 0.05;
+        scrollTo({ top: L.top + at * L.pinH, behavior: "instant" });
+      }),
+    );
+    addEventListener("scroll", kick, { passive: true });
+    new ResizeObserver(relayout).observe(pin);
+    relayout();
+    document.fonts?.ready.then(relayout);
+  }
+</script>

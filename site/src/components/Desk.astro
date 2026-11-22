@@ -1,0 +1,2581 @@
+---
+// "The desk" on the home page: a tutorial player, the way ComfyUI shows its app. Four chapters (projects, edit,
+// effects, publish), each a mock of the real desk in HTML and CSS that a cursor works through, with the steps beside
+// it and, under it, the same thing asked of the agent or typed as a command, since everything on the desk can be done
+// from either. The timeline is scripts/desk.ts. All the data is made up (myapp, free-plan). It pauses off screen;
+// with reduced motion each chapter shows its end state and no cursor.
+import Editor from "./desk/Editor.astro";
+import Icon from "./Icon.astro";
+import Platform, { type Platform as P } from "./desk/Platform.astro";
+
+type Kind = "in" | "sh" | "out" | "ok" | "dim";
+const chapters: { name: string; steps: [string, string][]; term: [Kind, string][] }[] = [
+  {
+    name: "projects",
+    steps: [
+      ["Write the brief", "One line about the ad you want."],
+      ["Press Go", "An agent reads the brand kit and works on a pitch."],
+      ["Your move", "The idea in two lines and a storyboard. Go, or another idea."],
+      ["The library", "Every ad you've made, each in its own shape."],
+    ],
+    term: [
+      ["in", "make an ad about the free plan for myapp"],
+      ["dim", "reading brands/myapp/brand.md and the ideas used before"],
+      ["out", "three explorers, six ideas, picked one"],
+      ["ok", "pitch ready: queue/2026-11-22-free-plan/pitch.md, animatic.mp4"],
+      ["dim", "waiting for your go"],
+    ],
+  },
+  {
+    name: "edit",
+    steps: [
+      ["Click the headline", "Anything in the viewer can be picked."],
+      ["Change its text", "In the inspector. The ad's code changes with it."],
+      ["Drag it", "To where it reads better."],
+      ["Undo anything", "Every change is in History."],
+    ],
+    term: [
+      ["in", 'make the headline say "Free. Forever." and move it down a bit'],
+      ["dim", "src/ads/free-plan/Hook.tsx:24  h1 text, top 330 → 586"],
+      ["ok", "done. checked the 9:16 still at frame 30: nothing overlaps"],
+    ],
+  },
+  {
+    name: "effects",
+    steps: [
+      ["Open Effects", "Entrances, loops and exits for what's selected."],
+      ["Pick Fade up", "It plays in the viewer straight away."],
+      ["Click a diamond", "The one between two clips on the timeline."],
+      ["Pick Push left", "The next scene pushes this one out."],
+    ],
+    term: [
+      ["in", "fade the headline in from below, and push into the next scene"],
+      ["dim", 'Hook.tsx:24  data-fx="in:fade-up@12+15"'],
+      ["dim", "story.json  hook → week: push-left, 15 frames"],
+      ["ok", "done. it's in the viewer; nothing rendered yet"],
+    ],
+  },
+  {
+    name: "publish",
+    steps: [
+      ["Pick the accounts", "The ones you connected on Publishing."],
+      ["Pick a time", "Now, or a time you choose."],
+      ["Approve", "It asks once more, with what goes where."],
+      ["Scheduled, then posted", "Each post shows its state, then a link."],
+    ],
+    term: [
+      ["sh", 'bun run publish free-plan --to instagram,youtube --at "2026-11-27 18:00"'],
+      ["dim", "Scheduling for Fri 27 Nov 18:00: queue/2026-11-22-free-plan/"],
+      ["dim", "  Instagram @myapp · free-plan-9x16.mp4 · caption from post.md"],
+      ["dim", "  YouTube myapp · free-plan-16x9.mp4 · title and caption from post.md"],
+      ["ok", "Approved 2 posts. The desk posts them at 18:00."],
+      ["dim", "run by you, or by an agent you asked to post. never unasked."],
+    ],
+  },
+];
+const prompt: Record<Kind, string> = { in: "> ", sh: "$ ", out: "", ok: "✓ ", dim: "" };
+
+const accounts: { p: P; name: string; label: string; k?: string }[] = [
+  { p: "youtube", name: "myapp", label: "YouTube", k: "yt" },
+  { p: "instagram", name: "@myapp", label: "Instagram", k: "ig" },
+  { p: "tiktok", name: "@myapp", label: "TikTok" },
+  { p: "linkedin", name: "myapp", label: "LinkedIn" },
+  { p: "x", name: "@myapp", label: "X" },
+  { p: "facebook", name: "myapp", label: "Facebook" },
+];
+// The library: made-up ads for myapp, each card in its ad's shape.
+const library = [
+  { slug: "tasks-view", ratio: "16:9", w: 213, art: "a1", state: "Ready", secs: "14.0s", big: "One list. Every week." },
+  { slug: "one-tap", ratio: "1:1", w: 120, art: "a2", state: "Ready", secs: "8.5s", big: "1 tap" },
+  { slug: "sunday", ratio: "9:16", w: 68, art: "a3", state: "First look", secs: "12.2s", big: "Sunday, sorted." },
+  { slug: "streaks", ratio: "9:16", w: 68, art: "a4", state: "Ready", secs: "9.0s", big: "" },
+  { slug: "widgets", ratio: "1:1", w: 120, art: "a5", state: "Ready", secs: "10.4s", big: "" },
+  { slug: "launch", ratio: "16:9", w: 213, art: "a6", state: "Ready", secs: "20.0s", big: "v1.2 is out" },
+];
+const nav = [
+  ["Projects", `<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>`],
+  ["Brand kits", `<circle cx="12" cy="12" r="8"/><circle cx="9" cy="9.5" r="1.3"/><circle cx="14.5" cy="9" r="1.3"/><circle cx="16" cy="13.5" r="1.3"/>`],
+  ["Publishing", `<path d="M12 19V5M6 11l6-6 6 6"/>`],
+  ["Settings", `<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>`],
+];
+---
+
+<section class="t-wrap dk-section" id="desk">
+  <p class="dk-tag">the desk</p>
+  <h2 class="dk-h2">Click it, or just ask.</h2>
+  <p class="dk-lede">
+    <code>bun run dev</code> opens the desk on your machine: your projects, an editor and Publishing. Everything on it, the
+    agent can do from a prompt, and the terminal from a command. Use whichever is closer.
+  </p>
+
+  <div class="dk" data-desk>
+    <div class="dk-bar">
+      <div class="dk-chs" role="tablist" aria-label="Desk chapters">
+        {
+          chapters.map((chapter, i) => (
+            <button type="button" class="dk-ch-btn" role="tab" aria-selected={i === 0 ? "true" : "false"} data-tab>
+              <span class="dk-ch-fill"><i /></span>
+              <span class="dk-ch-name"><em>0{i + 1}</em> {chapter.name}</span>
+            </button>
+          ))
+        }
+      </div>
+      <button type="button" class="dk-pause" aria-pressed="false" data-pause>pause</button>
+    </div>
+
+    <div class="dk-grid">
+      <div class="dk-steps-col">
+        {
+          chapters.map((chapter, i) => (
+            <ol class="dk-steps" data-steps hidden={i !== 0}>
+              {chapter.steps.map(([title, text], j) => (
+                <li class:list={{ "is-now": j === 0 }}>
+                  <span class="dk-step-n">{j + 1}</span>
+                  <span class="dk-step-t">
+                    <b>{title}</b>
+                    <span>{text}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          ))
+        }
+      </div>
+
+      <div class="dk-stage-col">
+        <div class="dk-win" data-win aria-hidden="true">
+          <div class="dk-in" data-in>
+            <div class="dk-chrome"><i></i><i></i><i></i><span>localhost:5173</span></div>
+
+            <!-- 1: projects -->
+            <div class="dk-ch dk-c-projects is-active" data-chapter>
+              <div class="dk-app">
+                <aside class="dk-side">
+                  <p class="dk-logo"><Icon size={22} /><span>nykma<b>_</b></span></p>
+                  <ul class="dk-nav">{nav.map(([name, d], i) => <li class:list={{ "dk-on": i === 0 }}><svg viewBox="0 0 24 24" set:html={d} />{name}</li>)}</ul>
+                  <p class="dk-side-h">Brands</p>
+                  <ul class="dk-brands"><li><i></i>myapp</li></ul>
+                </aside>
+                <div class="dk-main">
+                  <div class="dk-head"><h3>Projects</h3><span class="dk-btn">+ New project</span></div>
+                  <div class="dk-brief" data-k="brief">
+                    <p class="dk-brief-text">
+                      <span class="dk-placeholder">What should the next ad be about?</span><span data-k="brieftext"></span><i class="dk-caret"></i>
+                    </p>
+                    <div class="dk-brief-row">
+                      <span class="dk-sel"><i></i>myapp<em>▾</em></span>
+                      <span class="dk-seg"><b>Video</b><span>Asset</span></span>
+                      <span class="dk-seg"><b>16:9</b><b>1:1</b><b>9:16</b></span>
+                      <span class="dk-chk"><i>✓</i>Pitch first</span>
+                      <span class="dk-note">A pitch costs a few cents.</span>
+                      <span class="dk-btn dk-go" data-k="go">Go</span>
+                    </div>
+                  </div>
+
+                  <p class="dk-row-h">Your move</p>
+                  <div class="dk-moves">
+                    <div class="dk-card dk-card-old">
+                      <span class="dk-thumb dk-a1"><b>One list. Every week.</b></span>
+                      <div>
+                        <p class="dk-state dk-blue">● First look ready</p>
+                        <p class="dk-name">tasks-view</p>
+                        <p class="dk-meta">myapp · yesterday</p>
+                        <span class="dk-btn">Watch it</span>
+                      </div>
+                    </div>
+                    <div class="dk-card dk-pitch" data-k="pitch">
+                      <div class="dk-pitching">
+                        <p class="dk-state"><span class="dk-spin"></span>Pitching…</p>
+                        <p class="dk-meta">reading brands/myapp · three explorers, six ideas</p>
+                        <span class="dk-pbar"><i></i></span>
+                      </div>
+                      <div class="dk-pitched">
+                        <div class="dk-board">
+                          {
+                            ["0s · Sunday night", "2s · one tap", "4s · the week", "6s · end card"].map((cap, i) => (
+                              <figure>
+                                <span class={`dk-bf dk-bf${i}`} />
+                                <figcaption>{cap}</figcaption>
+                              </figure>
+                            ))
+                          }
+                        </div>
+                        <div class="dk-pitch-txt">
+                          <p class="dk-state dk-redt">● Pitch waiting for you</p>
+                          <p class="dk-name">free-plan</p>
+                          <p class="dk-idea">One week planned in myapp, start to finish, on the free plan. The end card says what it cost: nothing.</p>
+                          <p class="dk-acts"><span class="dk-btn dk-primary" data-k="pgo">Go</span><span class="dk-btn">Another idea</span></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="dk-lib-head">
+                    <p class="dk-chips">
+                      <b>All <em class="dk-n0">6</em><em class="dk-n1">7</em></b>
+                      <span>Pitch <em class="dk-n0">0</em><em class="dk-n1">1</em></span>
+                      <span>First look 2</span>
+                      <span>Ready 5</span>
+                    </p>
+                    <span class="dk-sel">Every brand<em>▾</em></span>
+                  </div>
+                  <ul class="dk-lib">
+                    {
+                      library.map((ad, i) => (
+                        <li style={`width:${ad.w}px`} data-k={i === 2 ? "lib3" : undefined}>
+                          <span class={`dk-thumb dk-${ad.art}`}>
+                            {ad.big && <b>{ad.big}</b>}
+                            <em class="dk-badge">● {ad.state}</em>
+                            <em class="dk-rt">{ad.ratio}</em>
+                            <em class="dk-secs">{ad.secs}</em>
+                            <i class="dk-playbar" />
+                          </span>
+                          <p class="dk-name">{ad.slug}</p>
+                        </li>
+                      ))
+                    }
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2: edit -->
+            <div class="dk-ch dk-c-edit" data-chapter><Editor mode="edit" /></div>
+
+            <!-- 3: effects -->
+            <div class="dk-ch dk-c-effects" data-chapter><Editor mode="effects" /></div>
+
+            <!-- 4: publish -->
+            <div class="dk-ch dk-c-publish" data-chapter>
+              <div class="dk-app">
+                <aside class="dk-side">
+                  <p class="dk-logo"><Icon size={22} /><span>nykma<b>_</b></span></p>
+                  <ul class="dk-nav">{nav.map(([name, d], i) => <li class:list={{ "dk-on": i === 2 }}><svg viewBox="0 0 24 24" set:html={d} />{name}</li>)}</ul>
+                  <p class="dk-side-h">Brands</p>
+                  <ul class="dk-brands"><li><i></i>myapp</li></ul>
+                </aside>
+                <div class="dk-main">
+                  <div class="dk-head">
+                    <h3>Publishing</h3>
+                    <span class="dk-clock"><span class="dk-c0">Sun 22 Nov · 10:00</span><span class="dk-c1">Fri 27 Nov · 18:00</span></span>
+                  </div>
+                  <p class="dk-sub">The desk posts only what you approve, at the time you pick. Logins stay on this PC.</p>
+                  <div class="dk-stats">
+                    <div><p>Needs you</p><b>0</b></div>
+                    <div><p>Coming up</p><b><em class="dk-s0">0</em><em class="dk-s2">2</em><em class="dk-s1">1</em></b></div>
+                    <div><p>Posted</p><b><em class="dk-p0">0</em><em class="dk-p1">1</em></b></div>
+                    <div><p>Accounts</p><b>6</b></div>
+                  </div>
+                  <p class="dk-tabs-line"><b>Posts</b><span>Accounts 6</span><span>Connect</span></p>
+                  <div class="dk-posts">
+                    <p class="dk-empty">Nothing here yet. Publish an ad from its page.</p>
+                    {
+                      [
+                        { p: "instagram" as P, who: "@myapp", where: "Instagram", file: "free-plan-9x16.mp4", row: 1 },
+                        { p: "youtube" as P, who: "myapp", where: "YouTube", file: "free-plan-16x9.mp4", row: 2 },
+                      ].map((post) => (
+                        <div class={`dk-post dk-post-${post.row}`}>
+                          <Platform platform={post.p} size={30} />
+                          <p class="dk-post-who">
+                            <b>{post.who}</b> <span>{post.where}</span>
+                            <br />
+                            <u>free-plan</u> <code>{post.file}</code>
+                          </p>
+                          <span class="dk-chip-state">
+                            <span class="dk-sch">● Scheduled</span>
+                            <span class="dk-pst">● Posted</span>
+                          </span>
+                          <span class="dk-when">Fri 27 Nov, 18:00</span>
+                          <span class="dk-view" data-k={post.row === 1 ? "view" : undefined}>View ↗</span>
+                          <span class="dk-dim">Cancel</span>
+                        </div>
+                      ))
+                    }
+                  </div>
+                  <p class="dk-posts-note">
+                    YouTube holds a scheduled post itself, so this PC can be off at its time. The rest are posted by the
+                    desk: keep it running (bun run dev) until then.
+                  </p>
+                </div>
+              </div>
+
+              <div class="dk-scrim"></div>
+              <div class="dk-dialog">
+                <p class="dk-dlg-head"><b>Publish free-plan</b><span>×</span></p>
+                <div class="dk-dlg-body">
+                  <p class="dk-label">Post to</p>
+                  <ul class="dk-accts">
+                    {
+                      accounts.map((a) => (
+                        <li class={a.k ? `dk-acct-${a.k}` : undefined} data-k={a.k}>
+                          <Platform platform={a.p} size={30} />
+                          <span>
+                            <b>{a.name}</b>
+                            <em>{a.label}</em>
+                          </span>
+                          <i class="dk-box" />
+                        </li>
+                      ))
+                    }
+                  </ul>
+                  <div class="dk-post-form">
+                    <p class="dk-label">Video <span class="dk-dim">the ratio that suits each platform</span></p>
+                    <p class="dk-input">free-plan-9x16.mp4 · 3 MB<em>▾</em></p>
+                    <p class="dk-label">Caption <span class="dk-dim">from post.md's Instagram</span></p>
+                    <p class="dk-input dk-area">
+                      Your week, planned. Free, forever.<br />
+                      <span class="dk-dim">myapp.com?utm_source=instagram&amp;utm_medium=social&amp;utm_campaign=free-plan</span>
+                    </p>
+                  </div>
+                </div>
+                <div class="dk-dlg-foot">
+                  <span class="dk-radio dk-r-now"><i></i>Now</span>
+                  <span class="dk-radio dk-r-at" data-k="at"><i></i>At</span>
+                  <span class="dk-input dk-time">Fri 27 Nov, 18:00</span>
+                  <span class="dk-btn dk-primary dk-approve" data-k="approve">
+                    <span>Approve and <span class="dk-v-post">post</span><span class="dk-v-sch">schedule</span> (<span class="dk-c-0">0</span><span class="dk-c-1">1</span><span class="dk-c-2">2</span>)</span>
+                  </span>
+                </div>
+                <div class="dk-confirm">
+                  <p><b>Schedule this for Fri 18:00 to:</b></p>
+                  <ul>
+                    <li><Platform platform="instagram" size={20} /> Instagram @myapp</li>
+                    <li><Platform platform="youtube" size={20} /> YouTube myapp</li>
+                  </ul>
+                  <p class="dk-dim">Approving locks these exact files. If an MP4 changes after this, it won't post.</p>
+                  <p class="dk-acts"><span class="dk-btn">Back</span><span class="dk-btn dk-primary" data-k="ok">Schedule</span></p>
+                </div>
+              </div>
+            </div>
+
+            <span class="dk-cursor" data-cursor>
+              <i class="dk-rip"></i>
+              <svg viewBox="0 0 20 22" width="20" height="22"><path d="M2 1.5v16.2l4.3-4.1 2.8 6.4 3-1.3-2.8-6.3h6z" /></svg>
+            </span>
+          </div>
+        </div>
+
+        <div class="dk-ask">
+          <p class="dk-ask-h"><span>or just ask</span></p>
+          {
+            chapters.map((chapter, i) => (
+              <div class="dk-term" data-term hidden={i !== 0}>
+                {chapter.term.map(([kind, text]) => (
+                  <p class={`dk-tl-${kind}`} data-line data-kind={kind} data-text={text}>
+                    <span class="dk-pr">{prompt[kind]}</span>
+                    <span data-text>{text}</span>
+                  </p>
+                ))}
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="dk-foot">
+    Nothing is posted until you approve it: on the desk, or by asking an agent, which posts through the same desk with
+    <code>bun run publish</code>. Unasked, an ad waits in <code>queue/</code>.
+  </p>
+</section>
+
+<script>
+  import { startDesk } from "../scripts/desk";
+  const root = document.querySelector<HTMLElement>("[data-desk]");
+  if (root) startDesk(root);
+</script>
+
+<style is:global>
+  /* ---------- the section ---------- */
+  .dk-section {
+    padding-top: clamp(90px, 12vw, 150px);
+  }
+  .dk-tag {
+    display: inline-block;
+    margin: 0;
+    padding: 3px 8px;
+    font: 700 12px/1.4 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid currentColor;
+    border-radius: 5px;
+  }
+  .dk-h2 {
+    margin: 22px 0 0;
+    font-weight: 800;
+    font-size: clamp(28px, 3.8vw, 44px);
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+  }
+  .dk-lede,
+  .dk-foot {
+    margin: 22px 0 0;
+    color: var(--dim);
+    max-width: 66ch;
+  }
+  .dk-foot {
+    margin-top: 28px;
+    font-size: 15px;
+  }
+  .dk-lede code,
+  .dk-foot code {
+    color: var(--paper);
+    background: var(--deep);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1px 6px;
+    font-size: 0.92em;
+  }
+
+  /* ---------- the player ---------- */
+  .dk {
+    margin-top: 40px;
+  }
+  .dk-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+  }
+  .dk-chs {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    min-width: 0;
+  }
+  .dk-ch-btn {
+    all: unset;
+    cursor: pointer;
+    display: block;
+    min-width: 0;
+    padding: 6px 0 4px;
+    color: var(--dim);
+    font: 600 14px/1.3 var(--mono);
+  }
+  .dk-ch-btn:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 4px;
+  }
+  .dk-ch-btn[aria-selected="true"],
+  .dk-ch-btn:hover {
+    color: var(--paper);
+  }
+  .dk-ch-fill {
+    display: block;
+    height: 3px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .dk-ch-fill i {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: var(--red);
+    transform-origin: 0 0;
+    transform: scaleX(var(--fill, 0));
+  }
+  .dk-ch-name {
+    display: block;
+    margin-top: 9px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dk-ch-name em {
+    font-style: normal;
+    color: var(--red);
+    margin-right: 4px;
+  }
+  .dk-pause {
+    flex: none;
+    font: 600 13px/1 var(--mono);
+    color: var(--dim);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 12px;
+    cursor: pointer;
+  }
+  .dk-pause:hover {
+    color: var(--paper);
+    border-color: var(--paper);
+  }
+
+  .dk-grid {
+    display: grid;
+    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+    gap: 32px;
+    margin-top: 26px;
+    align-items: start;
+  }
+  .dk-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+  .dk-steps[hidden],
+  .dk-term[hidden] {
+    display: none;
+  }
+  .dk-steps li {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    color: var(--dim);
+    transition: background 0.3s, border-color 0.3s, color 0.3s;
+  }
+  .dk-steps li.is-now {
+    background: var(--raise);
+    border-color: var(--line);
+    color: var(--paper);
+  }
+  .dk-step-n {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font: 700 12px/1 var(--mono);
+    border: 1px solid var(--line);
+    margin-top: 1px;
+  }
+  .dk-steps li.is-now .dk-step-n {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+  .dk-steps li.is-past .dk-step-n {
+    color: var(--red);
+  }
+  .dk-step-t {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+  .dk-step-t b {
+    font-size: 16px;
+    line-height: 1.35;
+  }
+  .dk-step-t span {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--dim);
+  }
+
+  .dk-stage-col {
+    min-width: 0;
+  }
+  .dk-win {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1120 / 680;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    background: #101010;
+    box-shadow: 0 30px 80px -30px rgb(0 0 0 / 0.8);
+  }
+  .dk-in {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1120px;
+    height: 680px;
+    transform-origin: 0 0;
+    font: 400 13px/1.4 var(--mono);
+    color: var(--paper);
+    overflow: hidden;
+    user-select: none;
+  }
+  .dk-in p,
+  .dk-in h3,
+  .dk-in ul,
+  .dk-in ol,
+  .dk-in figure,
+  .dk-in dl,
+  .dk-in dd {
+    margin: 0;
+    padding: 0;
+  }
+  .dk-in ul,
+  .dk-in ol {
+    list-style: none;
+  }
+  .dk-in em {
+    font-style: normal;
+  }
+  .dk-chrome {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--deep);
+  }
+  .dk-chrome i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3a3a3a;
+  }
+  .dk-chrome i:first-child {
+    background: var(--red);
+  }
+  .dk-chrome span {
+    margin: 0 auto;
+    padding: 2px 60px;
+    border-radius: 6px;
+    background: var(--raise);
+    color: var(--dim);
+    font-size: 11.5px;
+    transform: translateX(-20px);
+  }
+  .dk-ch {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 34px;
+    bottom: 0;
+    display: none;
+  }
+  .dk-ch.is-active {
+    display: block;
+  }
+
+  /* the cursor */
+  .dk-cursor {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 60;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    will-change: transform;
+  }
+  .dk-cursor svg {
+    position: absolute;
+    left: -2px;
+    top: -1px;
+    filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.6));
+    transition: transform 0.12s;
+    transform-origin: 2px 2px;
+  }
+  .dk-cursor path {
+    fill: #fff;
+    stroke: #141414;
+    stroke-width: 1.4;
+    stroke-linejoin: round;
+  }
+  .dk-cursor.is-down svg {
+    transform: scale(0.86);
+  }
+  .dk-rip {
+    position: absolute;
+    left: -18px;
+    top: -18px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--red);
+    opacity: calc(1 - var(--rp, 1));
+    transform: scale(calc(0.3 + var(--rp, 1) * 0.9));
+  }
+  .is-still .dk-cursor {
+    display: none;
+  }
+
+  /* the terminal under it */
+  .dk-ask {
+    margin-top: 14px;
+    background: var(--deep);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 18px 16px;
+    font: 400 14px/1.75 var(--mono);
+  }
+  .dk-ask-h {
+    margin: 0 0 6px;
+    font: 700 11.5px/1.4 var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+  .dk-term {
+    min-height: calc(6 * 1.75em);
+  }
+  .dk-term p {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .dk-term .dk-pr {
+    white-space: pre;
+    font-weight: 700;
+    color: var(--red);
+  }
+  .dk-tl-in,
+  .dk-tl-sh {
+    font-weight: 700;
+  }
+  .dk-tl-ok {
+    color: #ffb4a8;
+  }
+  .dk-tl-ok .dk-pr {
+    color: #ffb4a8;
+  }
+  .dk-tl-dim {
+    color: var(--dim);
+    white-space: pre-wrap;
+  }
+  [data-desk]:not(.is-still) [data-line] {
+    visibility: hidden;
+  }
+  [data-desk] [data-line].is-shown {
+    visibility: visible;
+  }
+  [data-line].is-typing [data-text]::after {
+    content: "";
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    margin-left: 2px;
+    vertical-align: -0.18em;
+    background: var(--paper);
+  }
+
+  /* ---------- shared bits of the mock desk ---------- */
+  .dk-in .dk-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--raise);
+    font-weight: 600;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+  .dk-in .dk-primary {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+  .dk-dim {
+    color: var(--dim);
+  }
+  .dk-mono b {
+    font-weight: 700;
+  }
+  .dk-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--dim);
+    margin: 14px 0 6px !important;
+  }
+  .dk-caret {
+    display: none;
+    width: 1.5px;
+    height: 1.15em;
+    background: var(--red);
+    vertical-align: -0.2em;
+    margin-left: 1px;
+  }
+  @keyframes dk-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* the app frame: sidebar + main */
+  .dk-app {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    height: 100%;
+  }
+  .dk-side {
+    background: var(--deep);
+    border-right: 1px solid var(--line);
+    padding: 14px 10px;
+  }
+  .dk-logo {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-weight: 800;
+    font-size: 14px;
+    padding: 0 8px 14px !important;
+  }
+  .dk-logo b {
+    color: var(--red);
+  }
+  .dk-nav li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 8px;
+    border-radius: 7px;
+    color: var(--dim);
+  }
+  .dk-nav li.dk-on {
+    background: var(--raise);
+    color: var(--paper);
+  }
+  .dk-nav svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .dk-side-h {
+    margin: 22px 8px 6px !important;
+    font-size: 11.5px;
+    color: var(--dim);
+  }
+  .dk-brands li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 5px 8px;
+  }
+  .dk-brands i {
+    width: 11px;
+    height: 11px;
+    border-radius: 3px;
+    background: var(--paper);
+    border: 2px solid var(--red);
+  }
+  .dk-main {
+    padding: 18px 24px;
+    min-width: 0;
+    position: relative;
+  }
+  .dk-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 30px;
+  }
+  .dk-head h3 {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  /* ---------- 1: projects ---------- */
+  .dk-brief {
+    margin-top: 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--raise);
+    padding: 14px 14px 12px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .is-focus .dk-brief {
+    border-color: #5a5a5a;
+    box-shadow: 0 0 0 3px rgb(232 48 31 / 0.18);
+  }
+  .dk-brief-text {
+    height: 52px;
+    font-size: 15px;
+  }
+  .dk-placeholder {
+    color: #77736b;
+  }
+  .is-typed .dk-placeholder {
+    display: none;
+  }
+  .is-focus .dk-brief .dk-caret {
+    display: inline-block;
+    animation: dk-blink 1s steps(1) infinite;
+  }
+  .dk-brief-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .dk-sel {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--deep);
+    font-size: 12.5px;
+  }
+  .dk-sel i {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--paper);
+    border: 2px solid var(--red);
+  }
+  .dk-sel em {
+    color: var(--dim);
+    font-size: 10px;
+  }
+  .dk-seg {
+    display: inline-flex;
+    padding: 2px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--deep);
+    font-size: 12px;
+  }
+  .dk-seg > * {
+    padding: 2px 8px;
+    border-radius: 5px;
+    color: var(--dim);
+    font-weight: 600;
+  }
+  .dk-seg b {
+    background: var(--raise);
+    color: var(--paper);
+  }
+  .dk-chk {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    padding: 3px 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  .dk-chk i {
+    width: 13px;
+    height: 13px;
+    border-radius: 3px;
+    background: var(--red);
+    color: #fff;
+    font-style: normal;
+    font-size: 9px;
+    display: grid;
+    place-items: center;
+  }
+  .dk-note {
+    margin-left: auto;
+    color: var(--dim);
+    font-size: 11px;
+  }
+  .dk-in .dk-go {
+    padding: 5px 16px;
+    color: var(--dim);
+  }
+  .is-typed .dk-go {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+  .dk-row-h {
+    margin: 16px 0 8px !important;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--dim);
+  }
+  .dk-moves {
+    display: flex;
+    gap: 12px;
+    height: 160px;
+  }
+  .dk-card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--raise);
+    padding: 12px;
+    display: flex;
+    gap: 12px;
+  }
+  .dk-card-old {
+    width: 330px;
+    flex: none;
+  }
+  .dk-card-old .dk-thumb {
+    width: 140px;
+    height: 84px;
+    flex: none;
+  }
+  .dk-card-old .dk-btn {
+    margin-top: 10px;
+  }
+  .dk-state {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+  .dk-blue {
+    color: #8fb8ff;
+  }
+  .dk-redt {
+    color: #ff7a6b;
+  }
+  .dk-name {
+    font-weight: 700;
+    font-size: 13.5px;
+    margin-top: 4px !important;
+  }
+  .dk-meta {
+    color: var(--dim);
+    font-size: 11.5px;
+    margin-top: 2px !important;
+  }
+  .dk-pitch {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.35s, transform 0.35s, border-color 0.3s;
+  }
+  .is-pitching .dk-pitch {
+    opacity: 1;
+    transform: none;
+  }
+  .is-pitched .dk-pitch {
+    border-color: rgb(232 48 31 / 0.55);
+  }
+  .dk-pitching,
+  .dk-pitched {
+    position: absolute;
+    inset: 12px;
+    transition: opacity 0.35s;
+  }
+  .dk-pitched {
+    opacity: 0;
+    display: flex;
+    gap: 14px;
+  }
+  .is-pitched .dk-pitching {
+    opacity: 0;
+  }
+  .is-pitched .dk-pitched {
+    opacity: 1;
+  }
+  .dk-spin {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    border-top-color: var(--red);
+    animation: dk-spin 0.8s linear infinite;
+  }
+  @keyframes dk-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .dk-pbar {
+    display: block;
+    margin-top: 14px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line);
+    overflow: hidden;
+  }
+  .dk-pbar i {
+    display: block;
+    height: 100%;
+    background: var(--red);
+    transform-origin: 0 0;
+    transform: scaleX(var(--pp, 0));
+  }
+  .dk-board {
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(2, 104px);
+    gap: 6px 8px;
+  }
+  .dk-board figcaption {
+    font-size: 9.5px;
+    color: var(--dim);
+    margin-top: 2px;
+  }
+  .dk-bf {
+    display: block;
+    height: 44px;
+    border-radius: 5px;
+    border: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  .dk-bf0 {
+    background: linear-gradient(#2a2622, #2a2622) 50% 72% / 60% 22% no-repeat, radial-gradient(circle at 70% 30%, #f5c97a 0 8%, transparent 9%), #3b3530;
+  }
+  .dk-bf1 {
+    background: linear-gradient(#141414, #141414) 50% 78% / 70% 18% no-repeat, linear-gradient(#fbf8f2, #fbf8f2) 50% 40% / 26% 70% no-repeat, #e8301f;
+  }
+  .dk-bf2 {
+    background: repeating-linear-gradient(#fbf8f2 0 6px, transparent 6px 10px) 50% 50% / 70% 30px no-repeat, #f4efe6;
+    filter: contrast(0.9);
+    box-shadow: inset 0 0 0 1px rgb(20 20 20 / 0.1);
+  }
+  .dk-bf2::after {
+    content: "";
+    position: absolute;
+    left: 15%;
+    right: 15%;
+    top: 7px;
+    bottom: 7px;
+    background: repeating-linear-gradient(#ffffff 0 7px, #f4efe6 7px 10px);
+    border-left: 4px solid #e8301f;
+  }
+  .dk-bf3 {
+    background: #141414;
+  }
+  .dk-bf3::after {
+    content: "$0";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #f4efe6;
+    font-weight: 800;
+    font-size: 15px;
+  }
+  .dk-pitch-txt {
+    min-width: 0;
+  }
+  .dk-idea {
+    margin-top: 4px !important;
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: #d8d2c6;
+  }
+  .dk-acts {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px !important;
+  }
+  .dk-lib-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 18px;
+  }
+  .dk-chips {
+    display: flex;
+    gap: 6px;
+  }
+  .dk-chips > * {
+    padding: 3px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--dim);
+    font-weight: 600;
+  }
+  .dk-chips b {
+    background: var(--raise);
+    color: var(--paper);
+  }
+  .dk-chips em {
+    color: var(--dim);
+    margin-left: 3px;
+  }
+  .dk-n1,
+  .is-pitched .dk-n0 {
+    display: none;
+  }
+  .is-pitched .dk-n1 {
+    display: inline;
+  }
+  .dk-lib {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px !important;
+    align-items: flex-start;
+  }
+  .dk-lib li {
+    flex: none;
+    transition: transform 0.3s;
+  }
+  .dk-thumb {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 120px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    text-align: center;
+    font-weight: 800;
+    line-height: 1.05;
+  }
+  .dk-thumb > b {
+    padding: 0 10px;
+    letter-spacing: -0.03em;
+  }
+  .dk-badge,
+  .dk-rt,
+  .dk-secs {
+    position: absolute;
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.62);
+    color: #fff;
+    line-height: 1.5;
+  }
+  .dk-badge {
+    left: 6px;
+    top: 6px;
+  }
+  .dk-rt {
+    left: 6px;
+    bottom: 6px;
+  }
+  .dk-secs {
+    right: 6px;
+    bottom: 6px;
+  }
+  .dk-lib li:nth-child(3) .dk-secs,
+  .dk-lib li:nth-child(4) .dk-secs {
+    display: none;
+  }
+  .dk-playbar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 100%;
+    background: var(--red);
+    transform-origin: 0 0;
+    transform: scaleX(0);
+  }
+  .is-hover .dk-lib li:nth-child(3) {
+    transform: translateY(-4px);
+  }
+  .is-hover .dk-lib li:nth-child(3) .dk-thumb {
+    border-color: var(--paper);
+  }
+  .is-hover .dk-lib li:nth-child(3) .dk-playbar {
+    transform: scaleX(1);
+    transition: transform 2s linear;
+  }
+  .dk-a1 {
+    background: #fbf8f2;
+    color: #141414;
+    font-size: 17px;
+  }
+  .dk-card-old .dk-a1 {
+    font-size: 12px;
+  }
+  .dk-a2 {
+    background: #e8301f;
+    color: #fbf8f2;
+    font-size: 30px;
+  }
+  .dk-a3 {
+    background: #141414;
+    color: #f4efe6;
+    font-size: 12px;
+  }
+  .dk-a3 > b {
+    padding: 0 6px;
+  }
+  .dk-a4 {
+    background: radial-gradient(circle, #e8301f 0 4px, transparent 4.5px) 0 0 / 16px 16px, #fbf8f2;
+  }
+  .dk-a5 {
+    background: linear-gradient(#f4efe6, #f4efe6) 25% 30% / 30% 30% no-repeat, linear-gradient(#e8301f, #e8301f) 75% 30% / 30% 30% no-repeat,
+      linear-gradient(#f4efe6, #f4efe6) 25% 72% / 30% 30% no-repeat, linear-gradient(#f4efe6, #f4efe6) 75% 72% / 30% 30% no-repeat, #262626;
+  }
+  .dk-a6 {
+    background: linear-gradient(100deg, #141414 0 55%, #e8301f 55%);
+    color: #fbf8f2;
+    font-size: 20px;
+  }
+
+  /* ---------- 2 and 3: the editor ---------- */
+  .dk-ed {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-rows: 44px 1fr 172px;
+    background: #121212;
+  }
+  .dk-ed-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .dk-crumbs {
+    width: 300px;
+  }
+  .dk-stages {
+    display: flex;
+    gap: 4px;
+    padding: 3px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 12px;
+  }
+  .dk-stages span {
+    padding: 2px 10px;
+    color: var(--dim);
+    border-radius: 999px;
+  }
+  .dk-stages .dk-stage-now {
+    background: var(--red);
+    color: #fff;
+    font-weight: 700;
+  }
+  .dk-ed-acts {
+    width: 300px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .dk-ed-body {
+    display: grid;
+    grid-template-columns: 180px 1fr 290px;
+    min-height: 0;
+  }
+  .dk-tabs-sm {
+    display: flex;
+    gap: 4px;
+    padding: 8px !important;
+    border-bottom: 1px solid var(--line);
+    font-size: 12px;
+  }
+  .dk-tabs-sm > * {
+    padding: 4px 9px;
+    border-radius: 6px;
+    color: var(--dim);
+    font-weight: 600;
+  }
+  .dk-tabs-sm b {
+    background: var(--raise);
+    color: var(--paper);
+  }
+  .dk-scenes {
+    border-right: 1px solid var(--line);
+  }
+  .dk-scenes ol {
+    padding: 8px !important;
+    display: grid;
+    gap: 2px;
+  }
+  .dk-scenes li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12.5px;
+  }
+  .dk-scenes li.dk-on {
+    background: var(--raise);
+    box-shadow: inset 2px 0 0 var(--red);
+  }
+  .dk-scenes li i {
+    font-style: normal;
+    width: 17px;
+    height: 17px;
+    display: grid;
+    place-items: center;
+    border-radius: 4px;
+    background: #2a2a2a;
+    font-size: 10px;
+    color: var(--dim);
+  }
+  .dk-scenes li span {
+    flex: 1;
+  }
+  .dk-scenes li em {
+    color: var(--dim);
+    font-size: 11px;
+  }
+  .dk-add {
+    margin: 4px 8px !important;
+    padding: 6px;
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+    color: var(--dim);
+    font-size: 11.5px;
+    text-align: center;
+  }
+  .dk-viewer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #0b0b0b;
+    min-width: 0;
+  }
+  .dk-ratios {
+    align-self: flex-start;
+    display: flex;
+    gap: 2px;
+    margin: 8px 10px 0 !important;
+    padding: 2px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    font-size: 11.5px;
+  }
+  .dk-ratios > * {
+    padding: 2px 8px;
+    border-radius: 5px;
+    color: #6b675f;
+  }
+  .dk-ratios b {
+    background: var(--raise);
+    color: var(--paper);
+  }
+  .dk-transport {
+    flex: none;
+    margin-top: auto;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 14px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+  }
+  .dk-tp {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--dim);
+  }
+  .dk-tp i {
+    font-style: normal;
+  }
+  .dk-tp .dk-play {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--paper);
+    color: var(--ink);
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+  }
+
+  /* the ad in the viewer: 200 × 356, 9:16 */
+  .dk-ad {
+    position: relative;
+    width: 178px;
+    height: 316px;
+    margin-top: 8px;
+    overflow: hidden;
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px #262626;
+  }
+  .dk-sc {
+    position: absolute;
+    inset: 0;
+    padding: 16px;
+  }
+  .dk-sc1 {
+    background: #fbf8f2;
+    color: #141414;
+    transform: translateX(calc(var(--push, 0) * -100%));
+  }
+  .dk-sc2 {
+    background: #f4efe6;
+    color: #141414;
+    transform: translateX(calc((1 - var(--push, 0)) * 100%));
+  }
+  .dk-ad-logo {
+    display: block;
+    font-weight: 800;
+    font-size: 12px;
+  }
+  .dk-h1w {
+    position: absolute;
+    left: 16px;
+    top: 52px;
+    max-width: 150px;
+    opacity: var(--fu, 1);
+    transform: translateY(calc(var(--dy, 0) * 1px + (1 - var(--fu, 1)) * 24px));
+  }
+  .dk-h1 {
+    font-weight: 800;
+    font-size: 24px;
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    min-height: 1em;
+  }
+  .dk-selbox {
+    position: absolute;
+    inset: -5px -6px;
+    border: 1.5px solid var(--red);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .dk-selbox i {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    background: #fff;
+    border: 1.5px solid var(--red);
+  }
+  .dk-selbox i:nth-child(1) {
+    left: -4px;
+    top: -4px;
+  }
+  .dk-selbox i:nth-child(2) {
+    right: -4px;
+    top: -4px;
+  }
+  .dk-selbox i:nth-child(3) {
+    left: -4px;
+    bottom: -4px;
+  }
+  .dk-selbox i:nth-child(4) {
+    right: -4px;
+    bottom: -4px;
+  }
+  .dk-selbox em {
+    position: absolute;
+    left: -1.5px;
+    bottom: 100%;
+    margin-bottom: 4px;
+    padding: 0 5px;
+    background: var(--red);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.6;
+    border-radius: 3px;
+  }
+  .is-sel .dk-selbox,
+  .dk-ed-effects .dk-selbox {
+    opacity: 1;
+  }
+  .dk-ad-sub {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: 170px;
+    font-size: 9.5px;
+    font-weight: 600;
+    color: #5d5850;
+  }
+  .dk-ad-list li {
+    padding: 5px 8px;
+  }
+  .dk-ad-list {
+    gap: 5px !important;
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: 190px;
+    display: grid;
+    gap: 6px;
+  }
+  .dk-ad-list li,
+  .dk-week li {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 8px;
+    border-radius: 7px;
+    background: #fff;
+    border: 1px solid rgb(20 20 20 / 0.1);
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .dk-ad-list i,
+  .dk-week i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid rgb(20 20 20 / 0.35);
+    flex: none;
+  }
+  .dk-ad .dk-done i {
+    background: var(--red);
+    border-color: var(--red);
+  }
+  .dk-ad .dk-done {
+    color: rgb(20 20 20 / 0.45);
+    text-decoration: line-through;
+  }
+  .dk-ad-url {
+    position: absolute;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #141414;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .dk-week {
+    margin-top: 20px !important;
+    display: grid;
+    gap: 6px;
+  }
+  .dk-week b {
+    width: 26px;
+  }
+  .dk-sc2 .dk-ad-sub {
+    top: auto;
+    bottom: 22px;
+    font-size: 15px;
+    line-height: 1.15;
+    font-weight: 800;
+    color: #141414;
+    letter-spacing: -0.03em;
+  }
+
+  /* the inspector */
+  .dk-insp {
+    border-left: 1px solid var(--line);
+    min-width: 0;
+    position: relative;
+  }
+  .dk-tab-inspect {
+    background: var(--raise);
+    color: var(--paper) !important;
+  }
+  .dk-ed-effects.is-fx .dk-tab-inspect,
+  .is-fx .dk-tab-inspect {
+    background: none;
+    color: var(--dim) !important;
+  }
+  .is-fx .dk-tab-fx {
+    background: var(--raise);
+    color: var(--paper) !important;
+  }
+  .dk-pane-inspect,
+  .dk-pane-fx {
+    padding: 12px 14px;
+  }
+  .dk-pane-fx,
+  .is-fx .dk-pane-inspect {
+    display: none;
+  }
+  .is-fx .dk-pane-fx {
+    display: block;
+  }
+  .dk-hint {
+    color: var(--dim);
+    font-size: 12px;
+    padding: 30px 6px !important;
+    text-align: center;
+  }
+  .dk-props {
+    display: none;
+  }
+  .is-sel .dk-hint,
+  .dk-ed-effects .dk-hint {
+    display: none;
+  }
+  .is-sel .dk-props,
+  .dk-ed-effects .dk-props {
+    display: block;
+  }
+  .dk-el {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+  .dk-el code,
+  .dk-fxline code {
+    font: 600 11px/1 var(--mono);
+    padding: 3px 6px;
+    border-radius: 4px;
+    background: #2a2a2a;
+    color: var(--dim);
+  }
+  .dk-path {
+    margin-top: 4px !important;
+    color: #ff8a7c;
+    font-size: 11px;
+  }
+  .dk-field {
+    min-height: 34px;
+    padding: 7px 10px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--deep);
+    font-size: 13px;
+  }
+  .is-editing .dk-field {
+    border-color: var(--red);
+  }
+  .is-editing .dk-field .dk-caret {
+    display: inline-block;
+  }
+  .is-selall [data-k="fieldtext"] {
+    background: rgb(232 48 31 / 0.5);
+  }
+  .dk-dl {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    row-gap: 5px;
+    font-size: 12px;
+  }
+  .dk-dl dt {
+    color: var(--dim);
+  }
+  .dk-sw {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border-radius: 3px;
+    background: #141414;
+    border: 1px solid #555;
+    margin-right: 6px;
+    vertical-align: -1px;
+  }
+  .dk-top1,
+  .is-moved .dk-top0 {
+    display: none;
+  }
+  .dk-ed-effects .dk-top0 {
+    display: none;
+  }
+  .dk-ed-effects .dk-top1 {
+    display: inline;
+  }
+  .dk-ed-effects .dk-hist li {
+    opacity: 1;
+    transform: none;
+  }
+  .is-moved .dk-top1 {
+    display: inline;
+    color: #ff8a7c;
+  }
+  .dk-hist {
+    margin-top: 12px;
+    padding-top: 2px;
+    border-top: 1px solid var(--line);
+  }
+  .dk-hist ol {
+    display: grid;
+    gap: 4px;
+    min-height: 56px;
+  }
+  .dk-hist li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: var(--raise);
+    font-size: 11.5px;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .dk-hist li em {
+    color: var(--dim);
+  }
+  .is-h1 .dk-h-1,
+  .is-h2 .dk-h-2 {
+    opacity: 1;
+    transform: none;
+  }
+  .dk-undo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px !important;
+    font-size: 11px;
+  }
+  .is-undo [data-k="undo"] {
+    border-color: var(--paper);
+  }
+
+  /* effects */
+  .dk-fx {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .dk-fx li {
+    display: grid;
+    justify-items: center;
+    gap: 3px;
+    padding: 5px 4px 4px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--raise);
+    font-size: 11px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .is-picked [data-k="fadeup"] {
+    border-color: var(--red);
+    background: rgb(232 48 31 / 0.16);
+  }
+  .dk-g {
+    position: relative;
+    width: 26px;
+    height: 18px;
+    border-radius: 4px;
+    background: #101010;
+    overflow: hidden;
+  }
+  .dk-g b {
+    position: absolute;
+    left: 8px;
+    top: 5px;
+    width: 10px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--paper);
+  }
+  .dk-g-fade b {
+    opacity: 0.45;
+  }
+  .dk-g-up b {
+    top: 7px;
+    box-shadow: 0 4px 0 -1px rgb(244 239 230 / 0.25);
+  }
+  .dk-g-up2 b {
+    top: 3px;
+    box-shadow: 0 6px 0 -1px rgb(244 239 230 / 0.2);
+  }
+  .dk-g-down b {
+    top: 3px;
+    box-shadow: 0 -4px 0 -1px rgb(244 239 230 / 0.25);
+  }
+  .dk-g-pop b {
+    transform: scale(0.65);
+    box-shadow: 0 0 0 3px rgb(244 239 230 / 0.2);
+  }
+  .dk-g-blur b {
+    filter: blur(1.5px);
+  }
+  .dk-g-wipe b {
+    width: 6px;
+    border-radius: 2px 0 0 2px;
+  }
+  .dk-g-float b {
+    top: 3px;
+    box-shadow: 0 8px 0 -3px rgb(244 239 230 / 0.25);
+  }
+  .dk-g-wig b {
+    transform: rotate(-14deg);
+  }
+  .dk-pane-fx .dk-label {
+    margin: 10px 0 5px !important;
+  }
+  .dk-fxline {
+    margin-top: 10px !important;
+    padding: 8px 10px;
+    border-radius: 7px;
+    border: 1px dashed var(--line);
+    font-size: 11.5px;
+    color: var(--dim);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .is-picked .dk-fxline {
+    opacity: 1;
+    border-color: rgb(232 48 31 / 0.6);
+    color: var(--paper);
+  }
+
+  /* the timeline */
+  .dk-tl {
+    position: relative;
+    border-top: 1px solid var(--line);
+    background: #0f0f0f;
+  }
+  .dk-tl-head {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 12px !important;
+    font-size: 11px;
+    border-bottom: 1px solid var(--line);
+  }
+  .dk-tl-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    grid-template-rows: 22px 66px 42px;
+    padding-right: 12px;
+  }
+  .dk-ruler {
+    grid-column: 2;
+    position: relative;
+    margin-left: 12px !important;
+    border-bottom: 1px solid var(--line);
+    font-size: 10px;
+    color: var(--dim);
+  }
+  .dk-ruler span {
+    position: absolute;
+    top: 4px;
+    padding-left: 4px;
+    border-left: 1px solid #3a3a3a;
+    line-height: 14px;
+  }
+  .dk-track-name {
+    grid-column: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 12px !important;
+    font-size: 12px;
+    border-right: 1px solid var(--line);
+  }
+  .dk-track-name::before {
+    content: "";
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    background: var(--paper);
+  }
+  .dk-tn-s::before {
+    background: #6fcf97;
+  }
+  .dk-tn-v {
+    grid-row: 2;
+  }
+  .dk-tn-s {
+    grid-row: 3;
+  }
+  .dk-track {
+    position: relative;
+    margin-left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .dk-clip {
+    flex: none;
+    height: 58px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    display: flex;
+    flex-direction: column;
+  }
+  .dk-clip p {
+    display: flex;
+    gap: 6px;
+    padding: 1px 6px !important;
+    font-size: 10.5px;
+    font-weight: 600;
+    background: #333;
+    white-space: nowrap;
+  }
+  .dk-clip p em {
+    margin-left: auto;
+    color: var(--dim);
+  }
+  .dk-clip-on {
+    border-color: var(--red);
+  }
+  .dk-clip-on p {
+    background: rgb(232 48 31 / 0.85);
+  }
+  .dk-clip-on p em {
+    color: #fff;
+  }
+  .dk-strip {
+    flex: 1;
+    background-repeat: repeat-x;
+    background-size: auto 100%;
+  }
+  .dk-dia {
+    position: absolute;
+    top: 50%;
+    width: 13px;
+    height: 13px;
+    margin: -6.5px 0 0 -6.5px;
+    background: var(--deep);
+    border: 1.5px solid var(--paper);
+    transform: rotate(45deg);
+    z-index: 2;
+  }
+  .is-pop .dk-dia-1 {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgb(232 48 31 / 0.3);
+  }
+  .is-push .dk-dia-1 {
+    background: var(--red);
+    border-color: var(--red);
+  }
+  .dk-dia-label {
+    position: absolute;
+    left: 318px;
+    top: -19px;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: var(--red);
+    color: #fff;
+    font-size: 9.5px;
+    font-weight: 700;
+    opacity: 0;
+    z-index: 3;
+  }
+  .is-push .dk-dia-label {
+    opacity: 1;
+  }
+  .dk-wave {
+    position: relative;
+    width: 100%;
+    height: 32px;
+    border-radius: 5px;
+    background: #173b28;
+    border: 1px solid #2c6b4a;
+    overflow: hidden;
+  }
+  .dk-wave svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .dk-wave path {
+    stroke: #6fcf97;
+    stroke-width: 2;
+  }
+  .dk-wave b {
+    position: absolute;
+    left: 5px;
+    top: 4px;
+    z-index: 1;
+    padding: 0 5px;
+    border-radius: 3px;
+    background: rgb(0 0 0 / 0.7);
+    font-size: 10px;
+  }
+  .dk-ph {
+    position: absolute;
+    top: 0;
+    bottom: -6px;
+    left: calc(92px + var(--ph, 0) * 1px);
+    width: 1.5px;
+    background: var(--red);
+    z-index: 4;
+  }
+  .dk-ph::before {
+    content: "";
+    position: absolute;
+    left: -5px;
+    top: 0;
+    width: 11px;
+    height: 11px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    background: var(--red);
+  }
+  .dk-pop {
+    position: absolute;
+    left: 304px;
+    bottom: 150px;
+    width: 180px;
+    padding: 8px;
+    border-radius: 9px;
+    border: 1px solid #3a3a3a;
+    background: var(--raise);
+    box-shadow: 0 16px 40px rgb(0 0 0 / 0.6);
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+  }
+  .dk-pop > p {
+    font-size: 11px;
+    color: var(--dim);
+    padding: 0 6px 4px !important;
+  }
+  .dk-pop li {
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+  }
+  .dk-pop li.dk-cur {
+    color: var(--dim);
+  }
+  .is-pop .dk-pop {
+    opacity: 1;
+    transform: none;
+  }
+  .is-pop [data-k="push"] {
+    background: rgb(232 48 31 / 0.2);
+    box-shadow: inset 2px 0 0 var(--red);
+  }
+
+  /* ---------- 4: publish ---------- */
+  .dk-clock > * {
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--dim);
+  }
+  .dk-c1,
+  .is-clock .dk-c0 {
+    display: none;
+  }
+  .is-clock .dk-c1 {
+    display: inline;
+    color: var(--paper);
+    border-color: var(--red);
+  }
+  .dk-sub {
+    margin-top: 4px !important;
+    color: var(--dim);
+    font-size: 12px;
+  }
+  .dk-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .dk-stats > div {
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--raise);
+  }
+  .dk-stats p {
+    font-size: 11.5px;
+    color: var(--dim);
+  }
+  .dk-stats b {
+    font-size: 22px;
+    font-weight: 800;
+  }
+  .dk-s2,
+  .dk-s1,
+  .dk-p1,
+  .is-done .dk-s0,
+  .is-posted .dk-s2,
+  .is-posted .dk-p0 {
+    display: none;
+  }
+  .is-done .dk-s2,
+  .is-posted .dk-s1,
+  .is-posted .dk-p1 {
+    display: inline;
+  }
+  .is-done.is-posted .dk-s2 {
+    display: none;
+  }
+  .dk-tabs-line {
+    display: flex;
+    gap: 22px;
+    margin-top: 16px !important;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .dk-tabs-line > * {
+    padding-bottom: 8px;
+    color: var(--dim);
+  }
+  .dk-tabs-line b {
+    color: var(--paper);
+    box-shadow: inset 0 -2px 0 var(--red);
+  }
+  .dk-posts {
+    position: relative;
+    margin-top: 12px;
+    display: grid;
+    gap: 8px;
+  }
+  .dk-empty {
+    color: var(--dim);
+    font-size: 12px;
+    padding: 10px 2px !important;
+  }
+  .is-done .dk-empty {
+    display: none;
+  }
+  .dk-post {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--raise);
+    font-size: 12px;
+  }
+  .is-done .dk-post {
+    display: flex;
+    animation: dk-in 0.4s both;
+  }
+  .is-done .dk-post-2 {
+    animation-delay: 0.12s;
+  }
+  @keyframes dk-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+  .dk-post-who {
+    flex: 1;
+    line-height: 1.5;
+  }
+  .dk-post-who span {
+    color: var(--dim);
+  }
+  .dk-post-who u {
+    color: #ff8a7c;
+    text-underline-offset: 2px;
+  }
+  .dk-post-who code {
+    font: 11px var(--mono);
+    color: var(--dim);
+  }
+  .dk-chip-state > * {
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .dk-sch {
+    background: rgb(232 48 31 / 0.15);
+    color: #ff8a7c;
+  }
+  .dk-pst {
+    display: none;
+    background: rgb(111 207 151 / 0.15);
+    color: #6fcf97;
+  }
+  .is-posted .dk-post-1 .dk-sch {
+    display: none;
+  }
+  .is-posted .dk-post-1 .dk-pst {
+    display: inline;
+  }
+  .dk-when {
+    color: var(--dim);
+    width: 130px;
+  }
+  .dk-view {
+    font-weight: 700;
+    visibility: hidden;
+  }
+  .is-posted .dk-post-1 .dk-view {
+    visibility: visible;
+  }
+  .is-posted .dk-post-1 .dk-dim {
+    visibility: hidden;
+  }
+  .dk-posts-note {
+    margin-top: 14px !important;
+    max-width: 640px;
+    color: #77736b;
+    font-size: 11.5px;
+    line-height: 1.55;
+  }
+  .dk-scrim {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 0.55);
+    transition: opacity 0.3s;
+  }
+  .dk-dialog {
+    position: absolute;
+    left: 50%;
+    top: 26px;
+    width: 720px;
+    margin-left: -360px;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    background: #161616;
+    box-shadow: 0 30px 80px rgb(0 0 0 / 0.6);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .is-done .dk-scrim,
+  .is-done .dk-dialog {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .is-done .dk-dialog {
+    transform: translateY(10px) scale(0.98);
+  }
+  .dk-dlg-head {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px !important;
+    border-bottom: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+  .dk-dlg-head span {
+    color: var(--dim);
+  }
+  .dk-dlg-body {
+    padding: 0 16px 6px;
+  }
+  .dk-accts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .dk-accts li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--raise);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .dk-accts li > span:nth-child(2) {
+    flex: 1;
+    display: grid;
+    line-height: 1.3;
+  }
+  .dk-accts em {
+    font-size: 11px;
+    color: var(--dim);
+  }
+  .dk-box {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid #555;
+    display: grid;
+    place-items: center;
+  }
+  .is-ig .dk-acct-ig,
+  .is-yt .dk-acct-yt {
+    border-color: var(--red);
+    background: rgb(232 48 31 / 0.1);
+  }
+  .is-ig .dk-acct-ig .dk-box,
+  .is-yt .dk-acct-yt .dk-box {
+    background: var(--red);
+    border-color: var(--red);
+  }
+  .is-ig .dk-acct-ig .dk-box::after,
+  .is-yt .dk-acct-yt .dk-box::after {
+    content: "";
+    width: 7px;
+    height: 4px;
+    border: solid #fff;
+    border-width: 0 0 2px 2px;
+    transform: rotate(-45deg) translate(1px, -1px);
+  }
+  .dk-pf {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+  }
+  .dk-pf-black {
+    box-shadow: inset 0 0 0 1px #444;
+  }
+  .dk-post-form {
+    opacity: 0.35;
+    transition: opacity 0.3s;
+  }
+  .is-ig .dk-post-form {
+    opacity: 1;
+  }
+  .dk-input {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--deep);
+    font-size: 12px;
+  }
+  .dk-input em {
+    color: var(--dim);
+    font-size: 10px;
+  }
+  .dk-area {
+    display: block;
+    line-height: 1.6;
+    min-height: 62px;
+  }
+  .dk-dlg-foot {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 10px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+  }
+  .dk-radio {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dk-radio i {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid #666;
+  }
+  .dk-r-now i,
+  .is-at .dk-r-at i {
+    border: 4px solid var(--red);
+  }
+  .is-at .dk-r-now i {
+    border: 1.5px solid #666;
+  }
+  .dk-time {
+    color: var(--dim);
+  }
+  .is-at .dk-time {
+    color: var(--paper);
+    border-color: #555;
+  }
+  .dk-in .dk-approve {
+    margin-left: auto;
+    padding: 7px 14px;
+    opacity: 0.45;
+  }
+  .is-ig .dk-approve {
+    opacity: 1;
+  }
+  .dk-v-sch,
+  .dk-c-1,
+  .dk-c-2,
+  .is-at .dk-v-post,
+  .is-ig .dk-c-0,
+  .is-yt .dk-c-1 {
+    display: none;
+  }
+  .is-at .dk-v-sch,
+  .is-ig .dk-c-1,
+  .is-yt .dk-c-2 {
+    display: inline;
+  }
+  .is-ig.is-yt .dk-c-1 {
+    display: none;
+  }
+  .dk-confirm {
+    position: absolute;
+    right: 16px;
+    bottom: 58px;
+    width: 330px;
+    padding: 14px;
+    border: 1px solid #444;
+    border-radius: 10px;
+    background: #1e1e1e;
+    box-shadow: 0 20px 50px rgb(0 0 0 / 0.7);
+    font-size: 12.5px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .dk-confirm ul {
+    display: grid;
+    gap: 6px;
+    margin: 10px 0 !important;
+  }
+  .dk-confirm li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dk-confirm .dk-dim {
+    font-size: 11px;
+    line-height: 1.45;
+  }
+  .dk-confirm .dk-acts {
+    justify-content: flex-end;
+  }
+  .is-confirm .dk-confirm {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---------- narrower screens ---------- */
+  @media (max-width: 900px) {
+    .dk-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+    }
+    .dk-stage-col {
+      display: contents;
+    }
+    .dk-win {
+      order: 1;
+    }
+    .dk-steps-col {
+      order: 2;
+    }
+    .dk-ask {
+      order: 3;
+      margin-top: 0;
+    }
+    .dk-steps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .dk-steps li {
+      padding: 10px 12px;
+      gap: 10px;
+    }
+    .dk-step-t b {
+      font-size: 14px;
+    }
+    .dk-step-t span {
+      font-size: 12.5px;
+    }
+  }
+  @media (max-width: 560px) {
+    .dk-bar {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .dk-chs {
+      flex-basis: 100%;
+      gap: 6px;
+    }
+    .dk-ch-btn {
+      font-size: 12px;
+    }
+    .dk-ch-name em {
+      display: none;
+    }
+    .dk-pause {
+      order: -1;
+      margin-left: auto;
+    }
+    .dk-steps {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 4px;
+    }
+    .dk-steps li:not(.is-now) .dk-step-t span {
+      display: none;
+    }
+    .dk-ask {
+      padding: 10px 12px 12px;
+      font-size: 12.5px;
+    }
+    .dk-term {
+      min-height: calc(8 * 1.75em);
+    }
+    .dk-win {
+      border-radius: 8px;
+    }
+  }
+  /* zoomed in on a narrow screen (scripts/desk.ts): a squarer window */
+  .is-zoomed .dk-win {
+    aspect-ratio: 560 / 600;
+  }
+</style>

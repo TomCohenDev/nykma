@@ -1,0 +1,117 @@
+<!doctype html>
+<html data-theme="riso">
+<head>
+<meta charset="utf-8" />
+<title>nykma · script view</title>
+<link rel="stylesheet" href="base.css" />
+<style>
+  .app { display: grid; grid-template-columns: 1fr 420px; grid-template-rows: 48px 1fr; height: 900px; }
+  .top { grid-column: 1 / -1; }
+  .doc { overflow: hidden; padding: 26px 0 0; background: var(--bg-1); }
+  .page { width: 760px; margin: 0 auto; }
+  .side { border-left: 1.5px solid var(--text-1); background: var(--bg-0); display: flex; flex-direction: column; align-items: center; padding: 22px 20px; gap: 14px; }
+  .scn { display: grid; grid-template-columns: 92px 1fr; gap: 18px; padding: 16px 0; border-top: 1.5px solid var(--line-2); position: relative; }
+  .scn .th { width: 92px; height: 52px; border-radius: 3px; background-size: cover; background-position: center; box-shadow: 0 0 0 1.5px var(--text-1); }
+  .scn .tm { white-space: nowrap; font-family: var(--mono); font-size: 10.5px; color: var(--text-3); margin-top: 6px; }
+  .scn h3 { margin: 0 0 6px; font-size: 13px; font-weight: 700; letter-spacing: .01em; display: flex; align-items: center; gap: 8px; }
+  .scn h3 .drag { color: var(--text-4); margin-left: -2px; }
+  .line { display: flex; gap: 10px; font-size: 16px; line-height: 1.5; margin: 3px 0; }
+  .line .sp { width: 86px; flex: none; font-size: 12px; font-weight: 700; color: var(--text-3); padding-top: 3px; }
+  .line .w { flex: 1; }
+  .ost { display: inline-block; font-family: var(--mono); font-size: 13px; padding: 2px 8px; border-radius: 3px; background: color-mix(in srgb, var(--t-text) 14%, transparent); color: var(--text-1); box-shadow: inset 3px 0 0 var(--t-text); margin: 4px 0; }
+  .fx { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: color-mix(in srgb, var(--t-sfx) 18%, transparent); color: #9a4a00; vertical-align: 2px; }
+  .said { background: var(--t-note); box-shadow: 0 0 0 2px var(--t-note); border-radius: 2px; }
+  .now { position: absolute; left: -26px; top: 18px; width: 14px; height: 14px; background: var(--select); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+  .edit { background: var(--bg-2); box-shadow: 0 0 0 1.5px var(--text-1), 3px 3px 0 var(--text-1); border-radius: 3px; padding: 1px 4px; }
+  .legend { display: flex; gap: 14px; font-size: 11.5px; color: var(--text-2); align-items: center; }
+  .legend i { width: 10px; height: 10px; display: inline-block; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top" style="border-bottom:1.5px solid var(--text-1)">
+    <div class="logo" style="background:var(--text-1);color:var(--bg-2)">n</div>
+    <div class="crumbs"><span>gomlin</span><svg class="i s"><use href="#chevr"/></svg><b>etzba-achat</b></div>
+    <div class="spacer"></div>
+    <div class="seg" style="box-shadow:inset 0 0 0 1.5px var(--text-1)"><span><svg class="i s"><use href="#film"/></svg>Timeline</span><span class="on" style="background:var(--text-1);color:var(--bg-2)"><svg class="i s"><use href="#align"/></svg>Script</span><span><svg class="i s"><use href="#grid"/></svg>Storyboard</span></div>
+    <div class="spacer"></div>
+    <span class="chip" style="background:var(--t-note);color:#14161a"><svg class="i s"><use href="#mic"/></svg>Voice edits cost <span class="num">~120</span> credits</span>
+    <button class="btn primary">Re-voice 1 line</button>
+  </header>
+
+  <section class="doc">
+    <div class="page">
+      <div class="row" style="justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div class="t-display" style="font-weight:800;letter-spacing:-0.035em">One finger.</div>
+          <div style="color:var(--text-2);font-size:14px;margin-top:2px">The ad as a script. Edit words, drag a scene to reorder, click a word to jump there.</div>
+        </div>
+        <div class="legend"><span><i style="background:var(--t-voice)"></i>Voice</span><span><i style="background:var(--t-text)"></i>On screen</span><span><i style="background:var(--t-sfx)"></i>Sound</span></div>
+      </div>
+
+      <div class="scn">
+        <div><div class="th" style="background-image:url(img/ezs2.jpg)"></div><div class="tm">0:00 – 0:03.5</div></div>
+        <div>
+          <h3><svg class="i s drag"><use href="#drag"/></svg>1 · Lens</h3>
+          <div class="line"><span class="sp">NARRATOR</span><span class="w">Twelve arms. Zero sleep.</span></div>
+          <span class="ost">THE RIVAL · 12 ARMS · 40 SCREENS · 0 SLEEP</span>
+        </div>
+      </div>
+      <div class="scn">
+        <div><div class="th" style="background-image:url(img/ezs6.jpg)"></div><div class="tm">0:03.5 – 0:07.5</div></div>
+        <div>
+          <h3><svg class="i s drag"><use href="#drag"/></svg>2 · The farm</h3>
+          <div class="line"><span class="sp">RIVAL</span><span class="w"><span class="fx">カタカタ typing</span> Apply! Apply! APPLY!</span></div>
+        </div>
+      </div>
+      <div class="scn">
+        <div><div class="th" style="background-image:url(img/ezs10.jpg)"></div><div class="tm">0:07.5 – 0:10.5</div></div>
+        <div>
+          <span class="now"></span>
+          <h3><svg class="i s drag"><use href="#drag"/></svg>3 · Frenzy</h3>
+          <div class="line"><span class="sp">RIVAL</span><span class="w"><span class="said">Nobody out-applies</span> Twelve-Arms-sama!</span></div>
+        </div>
+      </div>
+      <div class="scn">
+        <div><div class="th" style="background-image:url(img/ezs14.jpg)"></div><div class="tm">0:10.5 – 0:13.5</div></div>
+        <div>
+          <h3><svg class="i s drag"><use href="#drag"/></svg>4 · He walks in</h3>
+          <div class="line"><span class="sp">NARRATOR</span><span class="w">Until... he walked in.</span></div>
+          <span class="ost">Until... he walked in.</span>
+        </div>
+      </div>
+      <div class="scn">
+        <div><div class="th" style="background-image:url(img/ezs18.jpg)"></div><div class="tm">0:13.5 – 0:22</div></div>
+        <div>
+          <h3><svg class="i s drag"><use href="#drag"/></svg>5 · The approach</h3>
+          <div class="line"><span class="sp">RIVAL</span><span class="w">Nani?! ONE hand?! In MY farm?!</span></div>
+          <div class="line"><span class="sp">HERO</span><span class="w">One hand is <span class="edit">more than</span> generous... Twelve-chan.</span></div>
+          <div class="row" style="gap:8px;margin:6px 0 0 96px"><span class="chip" style="background:var(--t-note);color:#14161a">Changed · the voice will be redone for this line</span><span class="t-micro">Undo</span></div>
+        </div>
+      </div>
+      <div class="scn" style="opacity:.5">
+        <div><div class="th" style="background-image:url(img/ezs22.jpg)"></div><div class="tm">0:22 – 0:25</div></div>
+        <div>
+          <h3><svg class="i s drag"><use href="#drag"/></svg>6 · Scanner</h3>
+          <div class="line"><span class="sp">RIVAL</span><span class="w">One finger?! Baka!</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="side">
+    <div class="adframe" style="width:300px;height:533px;background:url(img/ez-9x16.jpg) center/cover;position:relative">
+    </div>
+    <div style="width:300px;display:flex;align-items:center;gap:10px">
+      <button style="width:36px;height:36px;border-radius:50%;background:var(--text-1);color:var(--bg-2);display:grid;place-items:center"><svg class="i" style="stroke-width:2.6"><use href="#pause"/></svg></button>
+      <div style="flex:1;height:6px;border-radius:3px;background:var(--bg-4);position:relative;box-shadow:inset 0 0 0 1.5px var(--text-1)"><div style="position:absolute;left:0;top:0;bottom:0;width:20%;background:var(--accent);border-radius:3px"></div></div>
+      <span class="num t-micro" style="color:var(--text-1)">0:09</span>
+    </div>
+    <div style="width:300px;padding:12px;border-radius:var(--r-3);background:var(--bg-2);box-shadow:0 0 0 1.5px var(--text-1),4px 4px 0 var(--text-1);font-size:12.5px;line-height:1.5;color:var(--text-2)">
+      <b style="color:var(--text-1)">How edits land.</b> On-screen words change the code directly. A spoken line goes back to the voice: the desk shows the credit cost first, and only that line is redone.
+    </div>
+  </aside>
+</div>
+<script src="icons.js"></script>
+</body>
+</html>

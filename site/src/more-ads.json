@@ -1,0 +1,8 @@
+[
+  { "slug": "lo-maamin", "brand": "gomlin", "title": "lo maamin", "lang": "Hebrew", "ratio": "16x9", "seconds": 23 },
+  { "slug": "pag-tokef", "brand": "gomlin", "title": "pag tokef", "lang": "Hebrew", "ratio": "16x9", "seconds": 31 },
+  { "slug": "achuzim", "brand": "Tom Cohen", "icon": "/icons/tomcohen.svg", "title": "achuzim", "lang": "Hebrew", "ratio": "16x9", "seconds": 23 },
+  { "slug": "spring-moves", "brand": "mathbooklm", "title": "spring moves", "lang": "Hebrew", "ratio": "1x1", "seconds": 34 },
+  { "slug": "compile-tom", "brand": "Tom Cohen", "icon": "/icons/tomcohen.svg", "title": "compile tom", "lang": "Hebrew", "ratio": "1x1", "seconds": 23 },
+  { "slug": "think-up", "brand": "tick3d", "title": "think up", "lang": "English", "ratio": "1x1", "seconds": 52 }
+]

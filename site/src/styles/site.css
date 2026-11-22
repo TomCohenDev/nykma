@@ -24,7 +24,6 @@
   --rule: rgb(20 20 20 / 0.16);
   --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
   --display: "Archivo Black", "Arial Black", system-ui, sans-serif;
-  --gutter: clamp(16px, 4vw, 40px);
 }
 
 *,
@@ -41,7 +40,7 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font: 400 15px/1.6 var(--mono);
+  font: 400 17px/1.65 var(--mono);
   font-variant-ligatures: none;
 }
 
@@ -59,11 +58,28 @@ a:hover {
   outline-offset: 2px;
 }
 
+/* docker.com's side margins: 16 px on a phone, 32 from 768 px wide, 40 from 1024 and 48 from 1440, with the
+   content no wider than 1344 px. */
 .wrap {
   width: 100%;
-  max-width: 1080px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0 var(--gutter);
+  padding: 0 16px;
+}
+@media (min-width: 768px) {
+  .wrap {
+    padding: 0 32px;
+  }
+}
+@media (min-width: 1024px) {
+  .wrap {
+    padding: 0 40px;
+  }
+}
+@media (min-width: 1440px) {
+  .wrap {
+    padding: 0 48px;
+  }
 }
 
 /* Header and footer */
@@ -105,7 +121,7 @@ a:hover {
   padding-block: 28px 40px;
   border-top: 1px solid var(--rule);
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14.5px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -113,7 +129,8 @@ a:hover {
 }
 .bottom nav {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 8px 20px;
 }
 
 /* The big words, and the one red stroke under them */
@@ -166,7 +183,7 @@ a:hover {
 .lede {
   max-width: 58ch;
   margin: 36px 0 0;
-  font-size: 16px;
+  font-size: 19px;
 }
 
 /* Pricing: personal on the left, company and its form on the right */
@@ -220,7 +237,7 @@ pre.shell {
   color: var(--paper);
   border-radius: 8px;
   overflow-x: auto;
-  font: 400 13.5px/1.7 var(--mono);
+  font: 400 15px/1.7 var(--mono);
 }
 pre.shell .prompt {
   color: var(--marker);
@@ -255,7 +272,7 @@ pre.shell .prompt {
 .field legend {
   display: block;
   font-weight: 600;
-  font-size: 13.5px;
+  font-size: 15px;
   margin-bottom: 6px;
   padding: 0;
 }
@@ -341,7 +358,7 @@ fieldset.field {
   gap: 12px 20px;
 }
 button {
-  font: 700 15px/1 var(--mono);
+  font: 700 16px/1 var(--mono);
   color: var(--paper);
   background: var(--ink);
   border: 0;
@@ -358,12 +375,12 @@ button[disabled] {
 }
 .or {
   color: var(--muted);
-  font-size: 13.5px;
+  font-size: 15px;
 }
 
 .status {
   margin: 0;
-  font-size: 14px;
+  font-size: 15.5px;
 }
 .status:empty {
   display: none;
@@ -382,10 +399,105 @@ button[disabled] {
   margin-top: 56px;
   max-width: 72ch;
   color: var(--muted);
-  font-size: 13.5px;
+  font-size: 15px;
 }
 .fine h2 {
   color: var(--ink);
-  font-size: 15px;
+  font-size: 17px;
   margin: 0 0 6px;
+}
+
+/* Examples on the home page: real ads, square, three across on a wide screen */
+
+.examples {
+  margin-top: 104px;
+}
+.examples h2 {
+  font: 400 clamp(28px, 4.4vw, 44px) / 1.05 var(--display);
+  margin: 0;
+}
+.examples-lede {
+  max-width: 62ch;
+  font-size: 19px;
+  margin: 14px 0 0;
+}
+.grid {
+  list-style: none;
+  margin: 40px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 48px 28px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 620px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 980px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.ad {
+  min-width: 0;
+}
+.frame {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ink);
+}
+.frame video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* The title, with the sound button beside it rather than over the ad, which has its own text in every corner. */
+.ad-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+.ad h3 {
+  font: 400 22px/1.15 var(--display);
+  margin: 0;
+}
+.sound {
+  flex: none;
+  padding: 7px 12px;
+  font: 600 14px/1 var(--mono);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+}
+.sound:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+.sound[aria-pressed="true"] {
+  background: var(--marker);
+  border-color: var(--marker);
+  color: #fff;
+}
+.ad .for {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+.ad .line {
+  margin: 10px 0 0;
+  font-size: 16.5px;
+  line-height: 1.55;
+}
+.ad .code {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 15px;
 }

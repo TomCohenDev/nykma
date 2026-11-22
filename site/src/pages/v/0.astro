@@ -1,0 +1,123 @@
+---
+// The first home page (the cream look), kept for reference since /v/1 became the home page on 2026-11-21.
+import Base from "../../layouts/Base.astro";
+import examples from "../../examples.json";
+
+const repo = "https://github.com/TomCohenDev/nykma";
+---
+
+<Base
+  title="nykma: nobody knows my app"
+  description="An ad maker that runs in Claude Code. It has the idea, builds the ad in code and hands you MP4s with post copy, in English or Hebrew."
+  page="home"
+  preview
+>
+  <h1 class="headline">
+    <span class="line">nobody knows</span>
+    <span class="line"
+      ><span class="struck"
+        >my app.<svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"
+          ><path d="M1 6.5 C 18 3.2, 34 8.4, 52 5.6 S 84 3.4, 99 6"></path></svg
+        ></span
+      ></span
+    >
+  </h1>
+  <p class="lede">
+    nykma is an ad maker that runs in Claude Code, on your machine. Ask for an ad and it has the idea, builds it in
+    code and hands you MP4s with post copy, in English or Hebrew. It posts only what you approve, and spends nothing without
+    your go-ahead.
+  </p>
+  <p class="lede">
+    <a href={repo}>The code is on GitHub</a>, free for personal use. Companies <a href="/pricing">ask sales</a>.
+  </p>
+
+  <section class="examples" aria-labelledby="examples-title">
+    <h2 id="examples-title">made with nykma</h2>
+    <p class="examples-lede">
+      Three ads for real apps, each one an idea nykma pitched and then built in code. The code for every one is in the
+      repo.
+    </p>
+    <ul class="grid">
+      {
+        examples.map((ad) => (
+          <li class="ad">
+            <div class="frame">
+              <video
+                src={`/examples/${ad.slug}.mp4`}
+                poster={`/examples/${ad.slug}.jpg`}
+                width="720"
+                height="720"
+                muted
+                loop
+                playsinline
+                preload="none"
+                aria-label={`${ad.title}, an ad for ${ad.brand} in ${ad.lang}`}
+                data-ad
+              />
+            </div>
+            <div class="ad-head">
+              <h3>{ad.title}</h3>
+              <button type="button" class="sound" aria-pressed="false" data-sound>
+                sound on
+              </button>
+            </div>
+            <p class="for">
+              for {ad.brand}, in {ad.lang}
+            </p>
+            <p class="line">{ad.line}</p>
+            <a class="code" href={`${repo}/tree/main/src/ads/${ad.slug}`}>
+              see the code
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<script>
+  // Each example plays muted while it's on screen and pauses when it leaves. "sound on" plays it with sound and mutes
+  // the others. With reduced motion nothing plays by itself: the poster stays until someone presses play.
+  const videos = [...document.querySelectorAll<HTMLVideoElement>("video[data-ad]")];
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const setSound = (video: HTMLVideoElement, on: boolean) => {
+    video.muted = !on;
+    const button = video.closest(".ad")!.querySelector<HTMLButtonElement>("[data-sound]")!;
+    button.setAttribute("aria-pressed", String(on));
+    button.textContent = on ? "sound off" : "sound on";
+  };
+
+  for (const video of videos) {
+    const button = video.closest(".ad")!.querySelector<HTMLButtonElement>("[data-sound]")!;
+    button.addEventListener("click", () => {
+      const on = video.muted;
+      for (const other of videos) if (other !== video) setSound(other, false);
+      setSound(video, on);
+      if (on) {
+        video.controls = true;
+        video.play().catch(() => {});
+      }
+    });
+    if (still) {
+      video.controls = true;
+      video.preload = "metadata";
+    }
+  }
+
+  if (!still && "IntersectionObserver" in window) {
+    const seen = new IntersectionObserver(
+      (entries) => {
+        for (const { target, isIntersecting } of entries) {
+          const video = target as HTMLVideoElement;
+          if (isIntersecting) {
+            video.preload = "auto";
+            video.play().catch(() => {});
+          } else video.pause();
+        }
+      },
+      { threshold: 0.5 },
+    );
+    videos.forEach((video) => seen.observe(video));
+  }
+</script>

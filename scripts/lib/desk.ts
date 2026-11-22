@@ -6,7 +6,9 @@
  *   GET  /api/registry                      every ad's takes, ratios and scenes, plus its story.json from disk
  *   GET  /api/chat?folder= | brand= | slug= | run=   the conversation: past runs (.chat.json) and live ones
  *   POST /api/ask    { folder?, slug?, brand?, kit?, kind?, text, shown? }   starts or continues ad-agent
- *   POST /api/story  { slug, take?, story }  writes src/ads/<slug>/story[-<take>].json
+ *   POST /api/story  { slug, take?, story, label? }  writes src/ads/<slug>/story[-<take>].json
+ *   POST /api/tune   { slug, take?, ratio: "16x9"|"1x1"|"9x16"|"all", id, value, label? }   sets one knob in tune[-<take>].json;
+ *                                        null removes it
  *   POST /api/render { slug, folder? }      renders every ratio and take, then copies them to the queue folder. No agent
  *   POST /api/upload?to=folder:<f>|brand:<b>|board:<slug>|footage:<slug>&name=<file>   raw body, saved to queue/<f>/inbox/,
  *                                        brands/<b>/uploads/, public/ads/<slug>/board/ (an image for the board) or
@@ -40,9 +42,32 @@
  *                                        Pixabay (spec.md §6.8). Needs x-nykma-token: bun run stock sends it
  *   POST /api/stock/take { slug, id, type?, name?, ratios?, query?, restore? }   downloads one into public/ads/<slug>/stock/
  *                                        and records it in sources.json. Needs x-nykma-token
+ *   GET  /api/publish                       publishing (publish/index.ts, spec.md §10.12): providers with their setup
+ *                                        steps, the connected accounts and the posts. Never a token
+ *   GET  /api/publish/draft?folder=         what the publish dialog starts from: the MP4s, covers and post.md's copy
+ *   GET  /api/publish/options?account=      the per-post choices for an account (TikTok asks the platform)
+ *   GET  /api/publish/login?state=          whether a login that Connect opened has come back
+ *   POST /api/publish/provider { provider, values } | /api/publish/provider/remove { provider }   an app's credentials,
+ *                                        or a login made of fields (Bluesky, Telegram), which connects at once
+ *   POST /api/publish/connect { provider }  the login URL to open. It comes back to 127.0.0.1:8723, not to the page
+ *   POST /api/publish/account/remove { id }
+ *   POST /api/publish/approve { folder, posts }   approves posts: the only way one is made. The page, or
+ *                                        bun run publish with x-nykma-token
+ *   POST /api/publish/job { id, action: "cancel" | "now" | "remove" }   the page, or bun run publish with the token
+ *   POST /api/publish/reveal { folder, file }   shows the file in Explorer or Finder, for posting by hand
  *   GET  /media/<folder>/<file>             the queue folder's files
  *   GET  /brand-files/<brand>/<file>        a brand kit's files (logos, fonts)
  *   GET  /api/file?path=&folder=&brand=     an image a storyboard row points at
+ *   GET  /api/source/element?loc=<file>:<line>:<col>[&text=...][&slug=]   an element's text, style, props and data-*
+ *                                        attributes in an ad's code (source.ts). Each text (what the element shows, then
+ *                                        its parents') also finds the string literals in the ad's folder it comes from
+ *   POST /api/source/edit { loc, hash, edit, label? }   changes, adds or removes one literal in src/ads/ (409 with the
+ *                                        hash if the file changed)
+ *   POST /api/source/undo { slug? }         the same as /api/history/undo
+ *   GET  /api/history?slug=                 the ad's change history: the desk's writes to story, tune and code (history.ts)
+ *   POST /api/history/undo | /api/history/redo { slug } | /api/history/goto { slug, position }   moves through it,
+ *                                        never over a file changed since (409)
+ * Every write to an ad (story, tune, a source edit) is one entry in its history, labelled with `label` or a made-up one.
  *
  * Sessions live in queue/<folder>/.session or brands/<brand>/.session, and finished runs in .chat.json next to them
  * (all gitignored), so notes continue the same conversation and the chat survives a restart.
@@ -51,7 +76,7 @@
 import { execFile, spawn } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
 import { randomBytes, randomUUID } from "node:crypto";
-import { copyFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { copyFileSync, createWriteStream, existsSync, mkdirSync, readdirSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { basename, join, relative, resolve, sep } from "node:path";
 import sirv from "sirv";
@@ -68,7 +93,10 @@ import { codexAccount, findCodex } from "./codex.ts";
 import { localStatus, startComfy, stopComfy, type LocalStatus } from "./local.ts";
 import { NotConnected, search as searchStock, take as takeStock, testStockKey } from "./stock-run.ts";
 import { isRatio, isSource, type Kind } from "./stock.ts";
+import { editSource, elementAt, sourceFailure, undoSource } from "./source.ts";
+import { goto as historyGoto, historyOf, record, redo as historyRedo, undo as historyUndo, writeAtomic, type FileChange, type HistoryKind } from "./history.ts";
 import { home as keyHome, isService, keyHint, readKey, removeKey, saveKey, SECRET_ENV, SERVICES } from "./keys.ts";
+import { act as actOnPost, approve as approvePosts, connect as connectProvider, disconnect, draft as publishDraft, forgetProvider, loginOutcome, optionsFor, publishState, reveal, saveProvider, startPublishing } from "./publish/index.ts";
 
 const ROOT = resolve(import.meta.dirname, "../..");
 const QUEUE = join(ROOT, "queue");
@@ -152,7 +180,10 @@ export type BrandKit = {
   updated: number;
 };
 
-export type SceneInfo = { id: string; name: string; frames: number; from: number; onStory: boolean; image?: boolean };
+/** `frames` is how long it plays, `full` its length untrimmed, and `trimIn` the scene frame it starts on (story.json `trim`). */
+export type SceneInfo = { id: string; name: string; frames: number; from: number; onStory: boolean; image?: boolean; trimIn: number; full: number };
+/** A cue as the video plays it: `at` in frames from the start, `trim` frames into its file, `frames` long when that's known. */
+export type CueInfo = { src: string; at: number; trim?: number; volume?: number; frames?: number; scene?: string };
 export type TakeInfo = {
   take?: string;
   name: string; // slug or slug-take
@@ -168,6 +199,10 @@ export type TakeInfo = {
   story?: Story;
   /** Whether the ad lists `scenes` (so arrows mean something) or is one component. */
   hasScenes: boolean;
+  /** The take's sound, from its first ratio. */
+  cues: CueInfo[];
+  /** tune.json (or tune-<take>.json), read from disk like the story. */
+  tune?: object;
 };
 export type AdInfo = { slug: string; takes: TakeInfo[] };
 
@@ -278,7 +313,14 @@ function newest(dir: string): number {
   let latest = 0;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
-    latest = Math.max(latest, entry.isDirectory() ? newest(path) : statSync(path).mtimeMs);
+    // A temp file (a desk edit being saved) can vanish between the listing and the stat.
+    let mtime = 0;
+    try {
+      mtime = entry.isDirectory() ? newest(path) : statSync(path).mtimeMs;
+    } catch {
+      continue;
+    }
+    latest = Math.max(latest, mtime);
   }
   return latest;
 }
@@ -311,6 +353,25 @@ async function registry(server: ViteDevServer): Promise<{ ads: AdInfo[]; error?:
       } catch {
         story = undefined;
       }
+      const tuneFile = join(ADS, video.slug, `tune${video.take ? `-${video.take}` : ""}.json`);
+      const tuneText = readIf(existsSync(tuneFile) ? tuneFile : join(ADS, video.slug, "tune.json"));
+      let tune: object | undefined;
+      try {
+        tune = tuneText ? JSON.parse(tuneText) : undefined;
+      } catch {
+        tune = undefined;
+      }
+      const cues: CueInfo[] = video.cues.map((cue) => {
+        const [from, to] = typeof cue.trim === "number" ? [cue.trim, undefined] : (cue.trim ?? [0, undefined]);
+        return {
+          src: cue.src,
+          at: cue.at ?? 0,
+          ...(from ? { trim: from } : {}),
+          ...(cue.volume !== undefined ? { volume: cue.volume } : {}),
+          ...(to !== undefined ? { frames: to - from } : {}),
+          ...(cue.scene ? { scene: cue.scene } : {}),
+        };
+      });
       take = {
         take: video.take,
         name: video.take ? `${video.slug}-${video.take}` : video.slug,
@@ -321,9 +382,11 @@ async function registry(server: ViteDevServer): Promise<{ ads: AdInfo[]; error?:
         dir: video.dir,
         audioTimed: video.audioTimed,
         ratios: [],
-        scenes: video.scenes.map(({ id, name, frames, from, onStory, image }) => ({ id, name, frames, from, onStory, ...(image ? { image: true } : {}) })),
+        scenes: video.scenes.map(({ id, name, frames, from, onStory, image, trimIn, full }) => ({ id, name, frames, from, onStory, ...(image ? { image: true } : {}), trimIn, full })),
         story,
         hasScenes: !(video.scenes.length === 1 && video.scenes[0].id === video.slug && !video.story),
+        cues,
+        ...(tune ? { tune } : {}),
       };
       ad.takes.push(take);
     }
@@ -869,12 +932,59 @@ async function post(path: string, body: any, res: ServerResponse) {
     if (!NAME.test(slug) || !existsSync(join(ADS, slug)) || (take && !NAME.test(take))) return send(res, 404, { error: "No such ad." });
     const story = body.story as Story;
     const ids = (list: unknown) => Array.isArray(list) && list.every((item) => typeof item === "string");
-    if (!story || !ids(story.order) || !Array.isArray(story.arrows)) return send(res, 400, { error: "That isn't a story." });
+    // The timeline writes the order and trims; arrows were the old board's and are no longer needed.
+    if (!story || !ids(story.order) || (story.arrows !== undefined && !Array.isArray(story.arrows))) return send(res, 400, { error: "That isn't a story." });
+    const frame = (n: unknown) => n === undefined || (typeof n === "number" && Number.isFinite(n) && n >= 0);
+    const trims = Object.values((story as Story & { trim?: Record<string, { in?: unknown; out?: unknown }> }).trim ?? {});
+    if (!trims.every((trim) => trim && typeof trim === "object" && frame(trim.in) && frame(trim.out))) return send(res, 400, { error: "A trim is { in, out } in frames." });
     const images = Object.values(story.images ?? {});
     const inPublic = (src: unknown) => typeof src === "string" && src.startsWith(`ads/${slug}/`) && !src.includes("..");
     if (!images.every((image) => inPublic(image?.src))) return send(res, 400, { error: `Board images must be under public/ads/${slug}/.` });
-    writeFileSync(join(ADS, slug, `story${take ? `-${take}` : ""}.json`), `${JSON.stringify(story, null, 2)}\n`);
+    // Written whole, then renamed: a half-written story.json would break every board frame's import of the stories.
+    const storyFile = join(ADS, slug, `story${take ? `-${take}` : ""}.json`);
+    const before = readIf(storyFile) ?? null;
+    const after = `${JSON.stringify(story, null, 2)}\n`;
+    writeAtomic(storyFile, after);
+    const label = labelOf(body.label) ?? storyLabel(before, story);
+    toHistory(slug, "story", label, [{ path: repoPath(storyFile), before, after }], `story:${storyFile}:${label}`);
     return send(res, 200, {});
+  }
+  if (path === "/api/tune") {
+    const slug = String(body.slug ?? "");
+    const take = body.take ? String(body.take) : undefined;
+    if (!NAME.test(slug) || !existsSync(join(ADS, slug)) || (take && !NAME.test(take))) return send(res, 404, { error: "No such ad." });
+    const scope = String(body.ratio ?? "");
+    const id = String(body.id ?? "");
+    if (!["all", ...RATIOS].includes(scope)) return send(res, 400, { error: "ratio is 16x9, 1x1, 9x16 or all." });
+    if (!/^[\w.-]{1,64}$/.test(id)) return send(res, 400, { error: "That isn't a knob id." });
+    const value: unknown = body.value;
+    const nudge = (v: unknown) =>
+      typeof v === "object" && v !== null && !Array.isArray(v) && Object.entries(v).every(([key, n]) => ["dx", "dy", "scale", "rotate"].includes(key) && typeof n === "number" && Number.isFinite(n));
+    const plain = value === null || typeof value === "string" || typeof value === "boolean" || (typeof value === "number" && Number.isFinite(value));
+    if (!plain && !nudge(value)) return send(res, 400, { error: "A knob is a number, string, boolean, { dx, dy, scale, rotate } or null." });
+    // A take with no tune file of its own sets the ad's, as that's the one it reads.
+    const own = join(ADS, slug, `tune${take ? `-${take}` : ""}.json`);
+    const file = take && !existsSync(own) ? join(ADS, slug, "tune.json") : own;
+    let tune: Record<string, Record<string, unknown>>;
+    try {
+      const text = readIf(file);
+      tune = text ? JSON.parse(text) : {};
+    } catch {
+      return send(res, 409, { error: `${relative(ROOT, file)} isn't valid JSON, so it wasn't overwritten.` });
+    }
+    const before = readIf(file) ?? null;
+    const old = tune[scope]?.[id];
+    const values = { ...(tune[scope] ?? {}) };
+    if (value === null) delete values[id];
+    else values[id] = value;
+    if (Object.keys(values).length) tune[scope] = values;
+    else delete tune[scope];
+    const after = `${JSON.stringify(tune, null, 2)}\n`;
+    writeAtomic(file, after);
+    const where = scope === "all" ? "" : ` (${scope.replace("x", ":")})`;
+    const auto = value === null ? `Reset ${id}${where}` : `${id}${old === undefined ? "" : ` ${knobText(old)}`} → ${knobText(value)}${where}`;
+    toHistory(slug, "tune", labelOf(body.label) ?? auto, [{ path: repoPath(file), before, after }], `tune:${file}:${scope}:${id}`);
+    return send(res, 200, { tune });
   }
   if (path === "/api/settings") return send(res, 200, saveSettings(body.settings));
   if (path === "/api/keys") {
@@ -966,6 +1076,66 @@ async function post(path: string, body: any, res: ServerResponse) {
   return send(res, 404, { error: "No such action." });
 }
 
+const repoPath = (file: string) => relative(ROOT, file).split(sep).join("/");
+const labelOf = (label: unknown) => (typeof label === "string" && label.trim() ? label.trim().slice(0, 200) : undefined);
+const knobText = (value: unknown) =>
+  value && typeof value === "object"
+    ? Object.entries(value)
+        .map(([key, n]) => `${key} ${n}`)
+        .join(", ")
+    : typeof value === "string"
+      ? `"${value.length > 40 ? `${value.slice(0, 39)}…` : value}"`
+      : String(value);
+
+/** Adds a write to the ad's history (history.ts). The write is made either way: a history that fails only warns. */
+function toHistory(slug: string, kind: HistoryKind, label: string, files: FileChange[], key: string) {
+  try {
+    record(slug, kind, label, files, key);
+  } catch (error) {
+    console.warn(`[desk] ${files.map((file) => file.path).join(", ")} changed but isn't in the history: ${(error as Error).message}`);
+  }
+}
+
+/** A label for a story write, from what changed in it. */
+function storyLabel(before: string | null, story: Story): string {
+  let old: Record<string, any> = {};
+  try {
+    old = before ? JSON.parse(before) : {};
+  } catch {}
+  const now = story as Record<string, any>;
+  const same = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+  const list = (ids: string[]) => (ids.length > 2 ? `${ids.slice(0, 2).join(", ")} and ${ids.length - 2} more` : ids.join(", "));
+  if (!same(old.order, now.order)) {
+    const was: string[] = Array.isArray(old.order) ? old.order : [];
+    const is: string[] = Array.isArray(now.order) ? now.order : [];
+    const added = is.filter((id) => !was.includes(id));
+    const removed = was.filter((id) => !is.includes(id));
+    if (added.length && !removed.length) return `Add ${list(added)}`;
+    if (removed.length && !added.length) return `Remove ${list(removed)}`;
+    if (!added.length && !removed.length) return "Reorder scenes";
+  }
+  const changedKeys = (a: Record<string, unknown> = {}, b: Record<string, unknown> = {}) =>
+    [...new Set([...Object.keys(a), ...Object.keys(b)])].filter((key) => !same(a[key], b[key]));
+  const images = changedKeys(old.images, now.images);
+  if (images.length) return images.every((id) => !old.images?.[id]) ? "Add image" : images.every((id) => !now.images?.[id]) ? "Remove image" : `Change ${list(images)}`;
+  const trims = changedKeys(old.trim, now.trim);
+  if (trims.length) return `Trim ${list(trims)}`;
+  const transitions = changedKeys(old.transitions, now.transitions);
+  if (transitions.length) return `Transition into ${list(transitions)}`;
+  const keys = changedKeys(old, now);
+  return keys.length ? `Change ${list(keys)}` : "Change the story";
+}
+
+/** The ad's history: what the desk changed, and moving through it (history.ts). */
+function historyPost(path: string, body: any) {
+  const slug = String(body.slug ?? "");
+  if (!NAME.test(slug) || !existsSync(join(ADS, slug))) throw Object.assign(new Error("No such ad."), { status: 404 });
+  if (path === "/api/history/undo") return historyUndo(slug);
+  if (path === "/api/history/redo") return historyRedo(slug);
+  if (path === "/api/history/goto") return historyGoto(slug, Number(body.position));
+  throw Object.assign(new Error("No such action."), { status: 404 });
+}
+
 /** Free stock (stock-run.ts): a search, or taking one result into the ad. */
 function stock(path: string, body: any): Promise<unknown> {
   const slug = String(body.slug ?? "");
@@ -994,6 +1164,21 @@ function stock(path: string, body: any): Promise<unknown> {
   });
 }
 
+/**
+ * Publishing's actions, from the desk page (sameOrigin). Approving is the only way a post is made, and approve and job
+ * also take bun run publish's desk token, so an agent can post when asked.
+ */
+async function publishPost(path: string, body: any, byScript: boolean): Promise<unknown> {
+  if (path === "/api/publish/provider") return saveProvider(body.provider, body.values && typeof body.values === "object" ? body.values : {});
+  if (path === "/api/publish/provider/remove") return forgetProvider(body.provider), {};
+  if (path === "/api/publish/connect") return connectProvider(body.provider);
+  if (path === "/api/publish/account/remove") return disconnect(String(body.id ?? "")), {};
+  if (path === "/api/publish/approve") return { jobs: await approvePosts(String(body.folder ?? ""), Array.isArray(body.posts) ? body.posts : [], byScript ? "by bun run publish" : undefined) };
+  if (path === "/api/publish/job") return actOnPost(String(body.id ?? ""), String(body.action ?? "")), {};
+  if (path === "/api/publish/reveal") return reveal(String(body.folder ?? ""), String(body.file ?? ""));
+  throw new Error("No such action.");
+}
+
 /** An image a storyboard row points at: the queue folder, the repo, public/ or the brand. Only images, only in the repo. */
 function storyboardImage(res: ServerResponse, query: URLSearchParams) {
   const path = query.get("path") ?? "";
@@ -1008,6 +1193,9 @@ function storyboardImage(res: ServerResponse, query: URLSearchParams) {
 
 /** Connect middleware for the dev server. */
 export function deskApi(server: ViteDevServer) {
+  // Approved posts go out on time while the desk runs (publish/index.ts). A script's own Vite server (render, stills,
+  // validate: middleware mode, no HTTP server) loads this plugin too, and must not take the posting clock.
+  if (!server.config.server.middlewareMode) startPublishing();
   // bun run gen in a terminal finds the desk here. The token changes every start, so an old file is harmless.
   server.httpServer?.once("listening", () => {
     const address = server.httpServer!.address();
@@ -1034,7 +1222,11 @@ export function deskApi(server: ViteDevServer) {
     if (req.method === "GET") {
       if (path === "/api/state") return send(res, 200, state());
       if (path === "/api/chat") return send(res, 200, chat(url.searchParams));
-      if (path === "/api/registry") return void registry(server).then((reply) => send(res, 200, reply));
+      if (path === "/api/registry")
+        return void registry(server).then(
+          (reply) => send(res, 200, reply),
+          (error) => send(res, 200, { ads: [], error: String(error?.message ?? error) }),
+        );
       if (path === "/api/settings") return send(res, 200, readSettings());
       if (path === "/api/instructions") return send(res, 200, { files: instructions(url.searchParams.get("brand") ?? undefined) });
       if (path === "/api/instruction") {
@@ -1050,6 +1242,20 @@ export function deskApi(server: ViteDevServer) {
       if (path === "/api/keys") return send(res, 200, keysState());
       if (path === "/api/keys/test") return void testKey(url.searchParams.get("service")).then((reply) => send(res, 200, reply));
       if (path === "/api/gen") return void genState(url.searchParams.get("slug") ?? "").then((reply) => send(res, reply.error ? 400 : 200, reply));
+      if (path === "/api/publish") return send(res, 200, publishState());
+      if (path === "/api/publish/login") return send(res, 200, loginOutcome(url.searchParams.get("state") ?? ""));
+      if (path === "/api/publish/draft") {
+        try {
+          return send(res, 200, publishDraft(url.searchParams.get("folder") ?? ""));
+        } catch (error) {
+          return send(res, 404, { error: (error as Error).message });
+        }
+      }
+      if (path === "/api/publish/options")
+        return void optionsFor(url.searchParams.get("account") ?? "").then(
+          (options) => send(res, 200, { options }),
+          (error) => send(res, 400, { error: String(error?.message ?? error) }),
+        );
       if (path === "/api/gen/job") {
         const job = jobOf(url.searchParams.get("id") ?? "");
         return job ? send(res, 200, job) : send(res, 404, { error: "No such job. Did the desk restart?" });
@@ -1059,6 +1265,19 @@ export function deskApi(server: ViteDevServer) {
         if (!found) return;
         req.url = `/${relative(ROOT, found).split(sep).map(encodeURIComponent).join("/")}`;
         return files(req, res, () => send(res, 404, { error: "No such file." }));
+      }
+      if (path === "/api/source/element") {
+        try {
+          const texts = url.searchParams.getAll("text").slice(0, 6);
+          return send(res, 200, elementAt(url.searchParams.get("loc") ?? "", texts, url.searchParams.get("slug") ?? undefined));
+        } catch (error) {
+          return send(res, ...sourceFailure(error));
+        }
+      }
+      if (path === "/api/history") {
+        const slug = url.searchParams.get("slug") ?? "";
+        if (!NAME.test(slug) || !existsSync(join(ADS, slug))) return send(res, 404, { error: "No such ad." });
+        return send(res, 200, historyOf(slug));
       }
       return send(res, 404, { error: "No such thing." });
     }
@@ -1080,8 +1299,26 @@ export function deskApi(server: ViteDevServer) {
         .then((reply) => send(res, 200, reply))
         .catch((error) => send(res, error instanceof NotConnected ? 409 : 400, { error: String(error?.message ?? error) }));
     }
-    if (!sameOrigin(req)) return send(res, 403, { error: "Only the desk page can do this." });
+    // bun run publish posts through the desk too, so an agent the user asked can post: approving and acting on a post.
+    // Setting up a provider and connecting stay on the page, since a login is a browser window.
+    const byScript = (path === "/api/publish/approve" || path === "/api/publish/job") && req.headers["x-nykma-token"] === DESK_TOKEN;
+    if (!byScript && !sameOrigin(req)) return send(res, 403, { error: path.startsWith("/api/publish/") ? "Only the desk page or bun run publish can do this." : "Only the desk page can do this." });
     if (path === "/api/upload") return upload(req, res, url.searchParams);
+    if (path === "/api/source/edit" || path === "/api/source/undo")
+      return void readBody(req)
+        .then((body) =>
+          send(res, 200, path === "/api/source/undo" ? undoSource(body.slug ? String(body.slug) : undefined) : editSource(String(body.loc ?? ""), String(body.hash ?? ""), body.edit, body.label)),
+        )
+        .catch((error) => send(res, ...sourceFailure(error)));
+    if (path.startsWith("/api/history/"))
+      return void readBody(req)
+        .then((body) => send(res, 200, historyPost(path, body)))
+        .catch((error) => send(res, typeof error?.status === "number" ? error.status : 400, { error: String(error?.message ?? error) }));
+    if (path.startsWith("/api/publish/"))
+      return void readBody(req)
+        .then((body) => publishPost(path, body, byScript))
+        .then((reply) => send(res, 200, reply ?? {}))
+        .catch((error) => send(res, 400, { error: String(error?.message ?? error) }));
     readBody(req)
       .then((body) => post(path, body, res))
       .catch((error) => send(res, 400, { error: String(error?.message ?? error) }));

@@ -1,0 +1,71 @@
+---
+// The five landing page variations, side by side, to pick one. Not linked from the site, and not indexed.
+import Term from "../../layouts/Term.astro";
+
+const variations = [
+  ["0", "the first home page", "The cream look the site started with, before the variations."],
+  ["1", "the home page", "How nykma works as a video the scroll plays, every ad, how to start. Now at /."],
+  ["2", "two ways", "The headline beside a terminal over the desk app, then the six steps, numbered."],
+  ["3", "the manual", "The whole page as a Unix man page: synopsis, description, examples, workflow, files."],
+  ["4", "the work first", "The headline, then the three ads large with their spec sheets, then how one gets made."],
+  ["5", "the spec sheet", "The headline over a table of facts, then the examples and plain answers to common questions."],
+];
+---
+
+<Term title="nykma: landing page variations" description="The landing page variations for nykma." preview>
+  <div class="t-wrap">
+    <h1 class="t-h1 h">the landing pages<span class="cur"></span></h1>
+    <ol class="vs">
+      {
+        variations.map(([n, name, what]) => (
+          <li>
+            <a href={`/v/${n}/`}>
+              <span class="n">{n}</span>
+              <b>{name}</b>
+              <span class="w">{what}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</Term>
+
+<style>
+  .h {
+    font-size: clamp(34px, 6vw, 64px);
+    margin-top: 64px;
+  }
+  .vs {
+    list-style: none;
+    margin: 48px 0 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .vs a {
+    display: grid;
+    grid-template-columns: 40px 200px 1fr;
+    gap: 6px 20px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+  }
+  .vs a:hover b {
+    color: var(--red);
+  }
+  .n {
+    color: var(--red);
+    font-weight: 800;
+  }
+  .w {
+    color: var(--dim);
+  }
+  @media (max-width: 700px) {
+    .vs a {
+      grid-template-columns: 32px 1fr;
+    }
+    .w {
+      grid-column: 2;
+    }
+  }
+</style>

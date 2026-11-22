@@ -49,11 +49,13 @@ type Props<T> = {
   fov?: number;
   /** A CSS colour, or null for a transparent canvas over whatever is behind it. */
   background?: string | null;
+  /** Smooth edges (the default). `false` keeps hard pixels, for a small canvas scaled up with `imageRendering: "pixelated"`. */
+  antialias?: boolean;
   style?: CSSProperties;
   className?: string;
 };
 
-export function Three<T>({ setup, draw, width, height, fov = 35, background = null, style, className }: Props<T>) {
+export function Three<T>({ setup, draw, width, height, fov = 35, background = null, antialias = true, style, className }: Props<T>) {
   const frame = useFrame();
   const video = useVideo();
   const w = width ?? video.width;
@@ -65,7 +67,7 @@ export function Three<T>({ setup, draw, width, height, fov = 35, background = nu
   latest.current = { draw, frame };
 
   useLayoutEffect(() => {
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas.current!, antialias: true, alpha: background === null, preserveDrawingBuffer: true });
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas.current!, antialias, alpha: background === null, preserveDrawingBuffer: true });
     renderer.setPixelRatio(1);
     renderer.setSize(w, h, false);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -122,7 +124,7 @@ export function Three<T>({ setup, draw, width, height, fov = 35, background = nu
     };
     // `setup` runs once per size: a new function each render isn't a new scene.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [w, h, fov, background]);
+  }, [w, h, fov, background, antialias]);
 
   // Every frame, drawn as React commits it, so the seek's paint shows it.
   useLayoutEffect(() => live.current?.paint(), [frame]);

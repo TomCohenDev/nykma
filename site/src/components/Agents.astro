@@ -1,0 +1,338 @@
+---
+// How the agents work, as three items on the left that open one at a time, each with its own picture on the right.
+// While it's on screen the open item moves on by itself, with a line under it that fills as it goes; a click picks
+// one. With reduced motion nothing moves by itself.
+import Terminal from "./Terminal.astro";
+import { session } from "../nykma";
+
+const items = [
+  {
+    title: "Six ideas. One pitch.",
+    text: "The ad agent sends three explorers down three creative routes at once. They bring back six ideas, and it pitches you the strongest: two lines, a storyboard and a free animatic.",
+  },
+  {
+    title: "Move fast. Keep the last word.",
+    text: "The agents stop at the pitch and again at the first look. Say go, give notes or ask for another idea. Nothing is posted, and nothing is spent without your go-ahead.",
+  },
+  {
+    title: "Honest by default.",
+    text: "A claims checker reads every claim in the pitch against your brand kit before you see it. Ask, and a reviewer and free validators check the renders too.",
+  },
+];
+const routes = [
+  { name: "route 1", agents: ["explorer 1", "idea a", "idea b"] },
+  { name: "route 2", agents: ["explorer 2", "idea c", "idea d"] },
+  { name: "route 3", agents: ["explorer 3", "idea e", "idea f"] },
+];
+const claims = [
+  ["ok", "“free plan”", "brand.md: pricing"],
+  ["ok", "“works offline”", "brand.md: product facts"],
+  ["ok", "the app's screens", "brands/myapp/assets"],
+  ["no", "“loved by thousands”", "no source: cut from the pitch"],
+];
+---
+
+<div class="ag" data-agents>
+  <ol class="ag-list">
+    {
+      items.map((item, i) => (
+        <li class:list={["ag-item", { on: i === 0 }]}>
+          <button type="button" class="ag-title" aria-expanded={i === 0 ? "true" : "false"} data-i={i}>
+            {item.title}
+          </button>
+          <div class="ag-body">
+            <p>{item.text}</p>
+          </div>
+          <span class="ag-bar" aria-hidden="true">
+            <span></span>
+          </span>
+        </li>
+      ))
+    }
+  </ol>
+
+  <div class="ag-stage">
+    <div class="ag-panel on" data-panel="0">
+      <p class="ag-panel-h">Six ideas</p>
+      <div class="ag-stack">
+        {
+          routes.map((route, r) => (
+            <div class="ag-route" style={`--r:${r}`}>
+              <p>{route.name}</p>
+              <div class="ag-chips">
+                {route.agents.map((name, i) => (
+                  <span class:list={["ag-chip", { lead: i === 0, pick: r === 1 && i === 2 }]}>{name}</span>
+                ))}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+      <p class="ag-foot"><span class="red">ad-agent</span> pitches idea d</p>
+    </div>
+
+    <div class="ag-panel" data-panel="1">
+      <p class="ag-panel-h">Your call</p>
+      <Terminal lines={session.slice(0, 8)} title="claude" class="ag-term" />
+    </div>
+
+    <div class="ag-panel" data-panel="2">
+      <p class="ag-panel-h">Every claim checked</p>
+      <div class="ag-claims">
+        <p class="ag-file">queue/2026-11-19-free-plan/claims.md</p>
+        <ul>
+          {
+            claims.map(([state, claim, why]) => (
+              <li class={state}>
+                <b>{state === "ok" ? "+" : "-"}</b>
+                <span>{claim}</span>
+                <em>{why}</em>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .ag {
+    display: grid;
+    gap: 40px 56px;
+    text-align: left;
+  }
+  @media (min-width: 900px) {
+    .ag {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      align-items: start;
+    }
+  }
+  .ag-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .ag-item {
+    position: relative;
+    border-bottom: 1px solid var(--line);
+  }
+  .ag-title {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 22px 0;
+    font: 700 clamp(20px, 2.2vw, 24px) / 1.3 var(--mono);
+    letter-spacing: -0.01em;
+    color: var(--dim);
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .ag-title:hover,
+  .on .ag-title {
+    color: var(--paper);
+  }
+  .ag-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s ease;
+  }
+  .ag-body p {
+    overflow: hidden;
+    margin: 0;
+    color: var(--dim);
+    font-size: 17px;
+    max-width: 52ch;
+  }
+  .on .ag-body {
+    grid-template-rows: 1fr;
+  }
+  .on .ag-body p {
+    padding-bottom: 24px;
+  }
+  .ag-bar {
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 1px;
+  }
+  .ag-bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--red);
+  }
+
+  .ag-stage {
+    position: relative;
+    min-height: 540px;
+    background: var(--deep);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    overflow: hidden;
+    background-image: radial-gradient(var(--line) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+  .ag-panel {
+    position: absolute;
+    inset: 0;
+    padding: 32px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px);
+    transition:
+      opacity 0.45s ease,
+      transform 0.45s ease,
+      visibility 0.45s;
+  }
+  .ag-panel.on {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+  .ag-panel-h {
+    margin: 0 0 28px;
+    font-weight: 800;
+    font-size: clamp(24px, 3vw, 34px);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .ag-stack {
+    display: grid;
+    gap: 14px;
+  }
+  .ag-route {
+    background: var(--raise);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px 18px;
+    opacity: calc(1 - var(--r) * 0.22);
+    margin-left: calc(var(--r) * 22px);
+  }
+  .ag-route p {
+    margin: 0 0 12px;
+    font-weight: 700;
+  }
+  .ag-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .ag-chip {
+    font: 600 12px/1 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 7px 11px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--dim);
+  }
+  .ag-chip.lead {
+    color: var(--paper);
+  }
+  .ag-chip.pick {
+    color: #fff;
+    background: var(--red);
+    border-color: var(--red);
+  }
+  .ag-foot {
+    margin: 22px 0 0;
+    font-size: 16px;
+    color: var(--dim);
+  }
+  .ag-term {
+    font-size: 13px;
+  }
+  .ag-claims {
+    background: var(--raise);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .ag-file {
+    margin: 0 0 14px;
+    color: var(--dim);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+  .ag-claims ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .ag-claims li {
+    display: grid;
+    grid-template-columns: 1.4em 1fr;
+    gap: 0 6px;
+    font-size: 16px;
+  }
+  .ag-claims b {
+    grid-row: span 2;
+    font-weight: 800;
+  }
+  .ag-claims .no b {
+    color: var(--red);
+  }
+  .ag-claims .no span {
+    text-decoration: line-through;
+    text-decoration-color: var(--red);
+  }
+  .ag-claims em {
+    font-style: normal;
+    color: var(--dim);
+    font-size: 13px;
+  }
+  @media (max-width: 640px) {
+    .ag-stage {
+      min-height: 600px;
+    }
+    .ag-panel {
+      padding: 22px 16px;
+    }
+    .ag-route {
+      margin-left: calc(var(--r) * 10px);
+    }
+  }
+</style>
+
+<script>
+  const HOLD = 7000;
+  for (const box of document.querySelectorAll<HTMLElement>("[data-agents]")) {
+    const items = [...box.querySelectorAll<HTMLElement>(".ag-item")];
+    const panels = [...box.querySelectorAll<HTMLElement>(".ag-panel")];
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let index = 0;
+    let start = 0;
+    let seen = false;
+    const show = (next: number) => {
+      index = next;
+      start = performance.now();
+      items.forEach((item, i) => {
+        item.classList.toggle("on", i === next);
+        item.querySelector("button")!.setAttribute("aria-expanded", String(i === next));
+        item.querySelector<HTMLElement>(".ag-bar span")!.style.width = "0";
+      });
+      panels.forEach((panel, i) => panel.classList.toggle("on", i === next));
+    };
+    items.forEach((item, i) => item.querySelector("button")!.addEventListener("click", () => show(i)));
+    if (still) continue;
+    const tick = (now: number) => {
+      if (seen) {
+        const done = (now - start) / HOLD;
+        if (done >= 1) show((index + 1) % items.length);
+        else items[index].querySelector<HTMLElement>(".ag-bar span")!.style.width = `${done * 100}%`;
+      }
+      requestAnimationFrame(tick);
+    };
+    new IntersectionObserver(([entry]) => {
+      seen = entry.isIntersecting;
+      if (seen) start = performance.now();
+    }, { threshold: 0.4 }).observe(box);
+    requestAnimationFrame(tick);
+  }
+</script>

@@ -1,0 +1,187 @@
+---
+// The desk's editor, drawn for the demo on the home page (Desk.astro): the viewer with a made-up 9:16 ad for myapp,
+// the scenes, the timeline (scene clips with filmstrips, the transition diamonds, the sound) and the inspector. The
+// "edit" chapter starts on the first draft; "effects" starts where "edit" ends (the new headline, moved down) with the
+// Effects tab a click away. Every state change is a class the demo's timeline (scripts/desk.ts) puts on the chapter.
+interface Props {
+  mode: "edit" | "effects";
+}
+const { mode } = Astro.props;
+const edited = mode === "effects";
+
+// The filmstrips: one 52 × 40 frame per tile, repeated along each clip.
+const tile = (body: string) =>
+  `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='52' height='40'>${body}<rect x='51' width='1' height='40' fill='#0d0d0d'/></svg>`)}")`;
+const strips = [
+  tile(
+    `<rect width='51' height='40' fill='#fbf8f2'/><rect x='8' y='5' width='14' height='3' fill='#14141466'/><rect x='8' y='12' width='30' height='5' fill='#141414'/><rect x='8' y='24' width='34' height='3' rx='1' fill='#14141433'/><rect x='8' y='29' width='34' height='3' rx='1' fill='#14141433'/><circle cx='10' cy='35.5' r='1.6' fill='#e8301f'/>`,
+  ),
+  tile(
+    `<rect width='51' height='40' fill='#f4efe6'/><rect x='7' y='6' width='37' height='7' rx='2' fill='#fff' stroke='#14141422'/><rect x='7' y='16' width='37' height='7' rx='2' fill='#fff' stroke='#14141422'/><rect x='7' y='26' width='37' height='7' rx='2' fill='#fff' stroke='#14141422'/><circle cx='11' cy='9.5' r='1.8' fill='#e8301f'/><circle cx='11' cy='19.5' r='1.8' fill='#e8301f'/>`,
+  ),
+  tile(
+    `<rect width='51' height='40' fill='#141414'/><rect x='14' y='11' width='22' height='10' fill='#f4efe6'/><rect x='12' y='26' width='26' height='3' fill='#f4efe655'/><rect x='17' y='32' width='16' height='3' rx='1.5' fill='#e8301f'/>`,
+  ),
+];
+// The sound: a waveform with made-up but fixed heights.
+const bars = Array.from({ length: 240 }, (_, i) => {
+  const v = 0.35 + 0.3 * Math.abs(Math.sin(i * 0.37)) + 0.25 * Math.abs(Math.sin(i * 1.91 + 1)) * Math.abs(Math.cos(i * 0.11));
+  const h = Math.min(0.95, v) * 30;
+  return `M${i * 4 + 1.5} ${16 - h / 2}v${h}`;
+}).join("");
+const clips = [
+  { n: 1, name: "Hook", secs: "2.0s", w: 312, strip: strips[0] },
+  { n: 2, name: "The week", secs: "3.0s", w: 468, strip: strips[1] },
+  { n: 3, name: "End card", secs: "1.5s", w: 234, strip: strips[2] },
+];
+const entrances = ["Fade in", "Fade up", "Slide up", "Pop", "Blur in", "Wipe"];
+const loops = ["Float", "Pulse", "Wiggle"];
+const exits = ["Fade out", "Slide down", "Zoom out"];
+const transitions = ["Cut", "Crossfade", "Slide left", "Push left", "Whip left", "Iris"];
+// Each effect's little picture: where the square comes from.
+const glyph: Record<string, string> = {
+  "Fade in": "fade",
+  "Fade up": "up",
+  "Slide up": "up2",
+  Pop: "pop",
+  "Blur in": "blur",
+  Wipe: "wipe",
+  Float: "float",
+  Pulse: "pop",
+  Wiggle: "wig",
+  "Fade out": "fade",
+  "Slide down": "down",
+  "Zoom out": "pop",
+};
+---
+
+<div class:list={["dk-ed", `dk-ed-${mode}`]}>
+  <div class="dk-ed-top">
+    <p class="dk-crumbs"><span class="dk-dim">‹ Projects /</span> <span class="dk-dim">myapp /</span> <b>free-plan</b></p>
+    <p class="dk-stages">
+      <span>✓ Pitch</span><span>✓ Build</span><span>✓ First look</span><span class="dk-stage-now">● Edit</span>
+    </p>
+    <p class="dk-ed-acts"><span class="dk-btn">Render</span><span class="dk-btn dk-primary">Publish</span></p>
+  </div>
+
+  <div class="dk-ed-body">
+    <aside class="dk-scenes">
+      <p class="dk-tabs-sm"><b>Scenes</b><span>Media</span></p>
+      <ol>
+        {clips.map((clip) => <li class:list={{ "dk-on": clip.n === 1 }}><i>{clip.n}</i><span>{clip.name}</span><em>{clip.secs}</em></li>)}
+      </ol>
+      <p class="dk-add">+ Add a clip</p>
+    </aside>
+
+    <div class="dk-viewer">
+      <p class="dk-ratios"><span>16:9</span><span>1:1</span><b>9:16</b></p>
+      <div class="dk-ad" data-k="ad">
+        <div class="dk-sc dk-sc1">
+          <b class="dk-ad-logo">myapp</b>
+          <div class="dk-h1w" data-k="h1" style={edited ? "--dy:42" : undefined}>
+            <p class="dk-h1" data-k="h1text">{edited ? "Free. Forever." : "Free plan."}</p>
+            <div class="dk-selbox" aria-hidden="true"><i></i><i></i><i></i><i></i><em>h1</em></div>
+          </div>
+          <p class="dk-ad-sub">Plan a week. Pay nothing.</p>
+          <ul class="dk-ad-list">
+            <li class="dk-done"><i></i>Gym, 7:00</li>
+            <li class="dk-done"><i></i>Call mom</li>
+            <li><i></i>Ship v1.2</li>
+          </ul>
+          <p class="dk-ad-url">myapp.com</p>
+        </div>
+        <div class="dk-sc dk-sc2">
+          <p class="dk-ad-logo">myapp</p>
+          <ul class="dk-week">
+            {["Mon", "Tue", "Wed", "Thu", "Fri"].map((day, i) => <li class:list={{ "dk-done": i < 3 }}><i></i><b>{day}</b><span>{["Gym, 7:00", "Call mom", "Ship v1.2", "Dinner", "Plan"][i]}</span></li>)}
+          </ul>
+          <p class="dk-ad-sub">All five lists. Still free.</p>
+        </div>
+      </div>
+      <div class="dk-transport">
+        <span class="dk-mono">00:00:<b data-k="tc">{edited ? "00" : "12"}</b> / 00:06:15</span>
+        <span class="dk-tp"><i>⏮</i><i class="dk-play">▶</i><i>⏭</i></span>
+        <span class="dk-dim">30 fps</span>
+      </div>
+    </div>
+
+    <aside class="dk-insp">
+      <p class="dk-tabs-sm">
+        <span class="dk-tab-inspect" data-k="tabinspect">Inspect</span><span class="dk-tab-fx" data-k="tabfx">Effects</span><span>Agent</span>
+      </p>
+
+      <div class="dk-pane-inspect">
+        <p class="dk-hint">Click anything in the viewer to change it.</p>
+        <div class="dk-props">
+          <p class="dk-el"><code>h1</code> <b data-k="eltext">{edited ? "Free. Forever." : "Free plan."}</b></p>
+          <p class="dk-path">free-plan/Hook.tsx:24 · 9:16</p>
+          <p class="dk-label">Text</p>
+          <p class="dk-field" data-k="field"><span data-k="fieldtext">{edited ? "Free. Forever." : "Free plan."}</span><i class="dk-caret"></i></p>
+          <p class="dk-label">Look</p>
+          <dl class="dk-dl">
+            <dt>Font</dt><dd>JetBrains Mono · 800</dd>
+            <dt>Size</dt><dd>145 px</dd>
+            <dt>Colour</dt><dd><i class="dk-sw"></i>#141414</dd>
+            <dt>Top</dt><dd><span class="dk-top0">330 px</span><span class="dk-top1">586 px</span></dd>
+          </dl>
+          <div class="dk-hist">
+            <p class="dk-label">History</p>
+            <ol>
+              <li class="dk-h-1"><span>Text → “Free. Forever.”</span><em>now</em></li>
+              <li class="dk-h-2"><span>Moved h1 0, +256</span><em>now</em></li>
+            </ol>
+            <p class="dk-undo"><span class="dk-btn" data-k="undo">↶ Undo</span><span class="dk-dim">Ctrl+Z</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dk-pane-fx">
+        <p class="dk-el"><code>h1</code> <b>Free. Forever.</b></p>
+        <p class="dk-label">Entrances</p>
+        <ul class="dk-fx">{entrances.map((name) => <li data-k={name === "Fade up" ? "fadeup" : undefined}><i class={`dk-g dk-g-${glyph[name]}`}><b></b></i>{name}</li>)}</ul>
+        <p class="dk-label">Loops</p>
+        <ul class="dk-fx">{loops.map((name) => <li><i class={`dk-g dk-g-${glyph[name]}`}><b></b></i>{name}</li>)}</ul>
+        <p class="dk-label">Exits</p>
+        <ul class="dk-fx">{exits.map((name) => <li><i class={`dk-g dk-g-${glyph[name]}`}><b></b></i>{name}</li>)}</ul>
+        <p class="dk-fxline"><code>in</code> Fade up · frame 12 · 15 frames</p>
+      </div>
+    </aside>
+  </div>
+
+  <div class="dk-tl">
+    <p class="dk-tl-head"><span class="dk-dim">Drag a scene to move it · drag its edges to trim · click a diamond for a transition</span><span class="dk-mono">00:06:15</span></p>
+    <div class="dk-tl-grid" data-k="tl" style={edited ? undefined : "--ph:62"}>
+      <p class="dk-ruler">{[0, 1, 2, 3, 4, 5, 6].map((s) => <span style={`left:${s * 156}px`}>0:0{s}</span>)}</p>
+      <p class="dk-track-name dk-tn-v">Video</p>
+      <div class="dk-track dk-track-v">
+        {
+          clips.map((clip, i) => (
+            <Fragment>
+              <div class:list={["dk-clip", { "dk-clip-on": i === 0 }]} style={`width:${clip.w - 3}px`}>
+                <p>
+                  <b>{clip.n}</b> {clip.name}
+                  <em>{clip.secs}</em>
+                </p>
+                <span class="dk-strip" style={`background-image:${clip.strip}`} />
+              </div>
+              {i < clips.length - 1 && <span class:list={["dk-dia", { "dk-dia-1": i === 0 }]} data-k={i === 0 ? "dia" : undefined} style={`left:${clips.slice(0, i + 1).reduce((a, c) => a + c.w, 0) - 1.5}px`} />}
+            </Fragment>
+          ))
+        }
+        <span class="dk-dia-label">Push left · 15f</span>
+      </div>
+      <p class="dk-track-name dk-tn-s">Sound</p>
+      <div class="dk-track dk-track-s">
+        <div class="dk-wave">
+          <b>music.wav</b>
+          <svg viewBox="0 0 960 32" preserveAspectRatio="none" aria-hidden="true"><path d={bars} /></svg>
+        </div>
+      </div>
+      <span class="dk-ph" aria-hidden="true"></span>
+    </div>
+    <div class="dk-pop" aria-hidden="true">
+      <p>Transition</p>
+      <ul>{transitions.map((name) => <li data-k={name === "Push left" ? "push" : undefined} class:list={{ "dk-cur": name === "Cut" }}>{name}</li>)}</ul>
+    </div>
+  </div>
+</div>

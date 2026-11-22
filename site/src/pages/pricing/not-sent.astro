@@ -1,11 +1,31 @@
 ---
-import Base from "../../layouts/Base.astro";
+// Where the sales form lands without JavaScript, when a field was missing or it couldn't send (worker/index.ts).
+import Term from "../../layouts/Term.astro";
 ---
 
-<Base title="Not sent" description="The sales form didn't send." page="pricing">
-  <h1 class="headline"><span class="line">it didn't send.</span></h1>
-  <p class="lede">
-    A field was missing, or the form couldn't reach sales. <a href="/pricing#sales">Fill it in again</a>, or email
-    <a href="mailto:sales@nobodyknowsmyapp.com">sales@nobodyknowsmyapp.com</a> with your name, company and how many people will use nykma.
-  </p>
-</Base>
+<Term title="Not sent" description="The sales form didn't send.">
+  <section class="t-wrap note">
+    <h1 class="t-h1">It didn't send<span class="cur"></span></h1>
+    <p class="t-lede">
+      A field was missing, or the form couldn't reach sales. Fill it in again, or email
+      <a href="mailto:sales@nobodyknowsmyapp.com">sales@nobodyknowsmyapp.com</a> with your name, company and how many
+      people will use nykma.
+    </p>
+    <div class="t-btns"><a class="t-btn primary" href="/pricing#sales">fill it in again</a></div>
+  </section>
+</Term>
+
+<style>
+  .note {
+    padding-top: clamp(80px, 14vw, 180px);
+    text-align: center;
+  }
+  .note .t-lede {
+    margin-left: auto;
+    margin-right: auto;
+    color: var(--dim);
+  }
+  .note .t-btns {
+    justify-content: center;
+  }
+</style>

@@ -1,0 +1,204 @@
+---
+// The example ads from src/examples.json, on dark. Each plays muted while it's on screen; "sound on" plays one with
+// sound and mutes the rest; with reduced motion none plays by itself. `detail` adds a small spec sheet under each.
+import examples from "../examples.json";
+
+interface Props {
+  detail?: boolean;
+  columns?: 1 | 3;
+}
+const { detail = false, columns = 3 } = Astro.props;
+const repo = "https://github.com/TomCohenDev/nykma";
+---
+
+<ul class:list={["xv", columns === 1 && "xv-one"]}>
+  {
+    examples.map((ad) => (
+      <li class="xv-ad">
+        <div class="xv-frame">
+          <video
+            src={`/examples/${ad.slug}.mp4`}
+            poster={`/examples/${ad.slug}.jpg`}
+            width="720"
+            height="720"
+            muted
+            loop
+            playsinline
+            preload="none"
+            aria-label={`${ad.title}, an ad for ${ad.brand} in ${ad.lang}`}
+            data-ad
+          />
+        </div>
+        <div class="xv-head">
+          <h3>{ad.title}</h3>
+          <button type="button" class="xv-sound" aria-pressed="false" data-sound>
+            sound on
+          </button>
+        </div>
+        {detail ? (
+          <dl class="xv-spec">
+            <dt>brand</dt>
+            <dd>{ad.brand}</dd>
+            <dt>language</dt>
+            <dd>{ad.lang}</dd>
+            <dt>length</dt>
+            <dd>{ad.seconds} s</dd>
+            <dt>sizes</dt>
+            <dd>{ad.ratios.join(", ")}</dd>
+            <dt>idea</dt>
+            <dd>{ad.line}</dd>
+          </dl>
+        ) : (
+          <>
+            <p class="xv-for">
+              for {ad.brand}, in {ad.lang}
+            </p>
+            <p class="xv-line">{ad.line}</p>
+          </>
+        )}
+        <a class="xv-code" href={`${repo}/tree/main/src/ads/${ad.slug}`}>
+          see the code
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .xv {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 48px 28px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) {
+    .xv:not(.xv-one) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 980px) {
+    .xv:not(.xv-one) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .xv-ad {
+    min-width: 0;
+  }
+  .xv-frame {
+    aspect-ratio: 1;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--deep);
+  }
+  .xv-frame video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .xv-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .xv-head h3 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 800;
+  }
+  .xv-sound {
+    flex: none;
+    font: 600 13.5px/1 var(--mono);
+    color: var(--paper);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 12px;
+    cursor: pointer;
+  }
+  .xv-sound:hover {
+    border-color: var(--paper);
+  }
+  .xv-sound[aria-pressed="true"] {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+  .xv-for {
+    margin: 4px 0 0;
+    color: var(--dim);
+    font-size: 14.5px;
+  }
+  .xv-line {
+    margin: 10px 0 0;
+    font-size: 15.5px;
+    line-height: 1.6;
+  }
+  .xv-spec {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 16px;
+    margin: 12px 0 0;
+    font-size: 14.5px;
+    line-height: 1.55;
+  }
+  .xv-spec dt {
+    color: var(--dim);
+  }
+  .xv-spec dd {
+    margin: 0;
+  }
+  .xv-code {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 14.5px;
+    color: var(--dim);
+  }
+</style>
+
+<script>
+  const videos = [...document.querySelectorAll<HTMLVideoElement>("video[data-ad]")];
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const buttonOf = (video: HTMLVideoElement) => video.closest(".xv-ad")!.querySelector<HTMLButtonElement>("[data-sound]")!;
+  const setSound = (video: HTMLVideoElement, on: boolean) => {
+    video.muted = !on;
+    const button = buttonOf(video);
+    button.setAttribute("aria-pressed", String(on));
+    button.textContent = on ? "sound off" : "sound on";
+  };
+  for (const video of videos) {
+    buttonOf(video).addEventListener("click", () => {
+      const on = video.muted;
+      for (const other of videos) if (other !== video) setSound(other, false);
+      setSound(video, on);
+      if (on) {
+        video.controls = true;
+        video.play().catch(() => {});
+      }
+    });
+    if (still) {
+      video.controls = true;
+      video.preload = "metadata";
+    }
+  }
+  if (!still && "IntersectionObserver" in window) {
+    const seen = new IntersectionObserver(
+      (entries) => {
+        for (const { target, isIntersecting } of entries) {
+          const video = target as HTMLVideoElement;
+          if (isIntersecting) {
+            video.preload = "auto";
+            video.play().catch(() => {});
+          } else video.pause();
+        }
+      },
+      { threshold: 0.5 },
+    );
+    videos.forEach((video) => seen.observe(video));
+  }
+</script>

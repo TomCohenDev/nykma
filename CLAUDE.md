@@ -9,7 +9,7 @@ A bare-bones local ad maker. One agent (`.claude/agents/ad-agent.md`) has an ide
 ## Commands
 
 ```bash
-bun run dev                                    # the desk: dashboard, board and chat (the scrubbing preview is at /)
+bun run dev                                    # the desk: dashboard, viewer, timeline, inspector and chat (the scrubbing preview is at /)
 bun run history <brand>                        # the ideas a brand's ads have used, and the user's notes for it (free)
 bun run animatic <slug>                        # pitch slideshow from pitch.md (free)
 bun run claims <slug>                          # the pitch's claims against brand.md -> queue/<date>-<slug>/claims.md (a few cents)
@@ -30,6 +30,7 @@ bun run screen <slug> <clip> [--corners "x,y x,y x,y x,y"]   # finds a (green) s
 bun run stock <slug> "query" [--video|--photo] [--ratio 9x16] [--min-seconds 4]   # free stock (Pexels, Pixabay) through the desk: a numbered sheet
 bun run stock <slug> --take pexels:12345 [--name <clip>]   # downloads one to public/ads/<slug>/stock/; a clip is unpacked like footage
 bun run stock <slug>                           # downloads the stock in sources.json again after a clone
+bun run publish [<slug> --to <account>,... [--at <time>] [--dry-run]]   # posts through the desk; alone, lists accounts and posts
 bun run local:setup                            # video on this PC: ComfyUI + LTX-2.5 (ltx-2.5-q4) in ~/nykma-local (Windows, NVIDIA)
 bun run eval <version> [--briefs <a,b>] [--build]   # runs of a prompt version on evals/briefs/, pitch or to the MP4 (spends tokens; evals/README.md)
 bun run eval compare <a> <b>                   # how two versions worked: tools, cost, traces, MP4s (free)
@@ -51,11 +52,11 @@ These hold for anyone touching `src/`, agent or not, because breaking them break
 
 - **Every value is a function of the frame.** No CSS animation, timers, `Math.random()` or `Date.now()`: renders must come out the same twice. Use `random(seed)`.
 - **`gen/` is gitignored.** An ad timed by audio leaves out `frames` and reads its timeline through `useTimeline()`. Never `import` from `gen/`, because a missing import breaks every ad.
-- **The board writes `story.json`.** An ad lists `scenes` in the registry, and `src/ads/<slug>/story.json` holds their order. The desk rewrites it when the user draws arrows or adds images, so read it before rendering and keep what you don't change.
+- **The desk writes `story.json`, `tune.json` and literals.** An ad lists `scenes` in the registry; `src/ads/<slug>/story.json` holds their order, trims and transitions, and `tune.json` the knobs (`useTune()`). The desk rewrites them when the user moves, trims or adds a scene, sets a transition or turns a knob, and it can change a literal (text, a number or string in a style or attribute) in an ad's code, add or remove a style property (`translate`, `scale`, a colour) and set an element's `data-fx` effects. So read them, and the file you're about to edit, before changing or rendering, and keep what you don't change.
 
 ## Limits for every session
 
-- Don't post or publish anything, and don't open `.env` or `.env.local`.
+- Post or schedule only when the user asks, and only with `bun run publish` (spec.md §10.12), which posts through the desk on the accounts connected on its Publishing page. Don't open `.env` or `.env.local`, and never read `~/.config/nykma/`.
 - Don't spend ElevenLabs credits or generated-media budget beyond what the user approved.
 
 ## Changing nykma

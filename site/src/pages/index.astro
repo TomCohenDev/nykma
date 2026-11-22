@@ -1,26 +1,172 @@
 ---
-import Base from "../layouts/Base.astro";
+// The home page (variation 1 until 2026-11-21; /v/1 redirects here), laid out like docker.com in our own look: the hero and how nykma works as a video the scroll plays
+// (components/Story.astro), every ad, the desk (Desk.astro) and the code behind a frame (Frames.astro), how to start, and the price. The words follow Docker's
+// way of saying things (short lines, a turn in the headline, parallel names), and every claim is one nykma keeps.
+import Term from "../layouts/Term.astro";
+import AllAds from "../components/AllAds.astro";
+import Desk from "../components/Desk.astro";
+import Frames from "../components/Frames.astro";
+import Install from "../components/Install.astro";
+import Story from "../components/Story.astro";
+import { lede, repo } from "../nykma";
 ---
 
-<Base
-  title="nykma: nobody knows my app"
-  description="An ad maker that runs in Claude Code. It has the idea, builds the ad in code and hands you MP4s with post copy."
-  page="home"
->
-  <h1 class="headline">
-    <span class="line">nobody knows</span>
-    <span class="line"
-      ><span class="struck"
-        >my app.<svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"
-          ><path d="M1 6.5 C 18 3.2, 34 8.4, 52 5.6 S 84 3.4, 99 6"></path></svg
-        ></span
-      ></span
-    >
-  </h1>
-  <p class="lede">
-    nykma is an ad maker that runs in Claude Code, on your machine. Ask for an ad and it has the idea, builds it in
-    code and hands you MP4s with post copy, in English or Hebrew. It never posts anything, and spends nothing without
-    your go-ahead.
-  </p>
-  <p class="lede">Tutorials are coming. For now: <a href="https://github.com/TomCohenDev/nykma">the code on GitHub</a>, free for personal use, and <a href="/pricing">pricing</a> for companies.</p>
-</Base>
+<Term title="nykma: nobody knows my app" description={lede}>
+  <Story lede={lede} />
+
+  <section class="t-wrap block" id="examples">
+    <p class="tag">made with nykma</p>
+    <h2 class="h2">See what it makes</h2>
+    <div class="gap"><AllAds /></div>
+  </section>
+
+  <Desk />
+
+  <Frames />
+
+  <section class="start" id="start">
+    <div class="t-wrap start-grid">
+      <div class="start-in">
+        <p class="tag">get started</p>
+        <h2 class="h2">The shortest way from an app to its ad.</h2>
+        <p class="start-p">
+          Brand kit, pitch, build and hand-off in one place. Go from a repo, a URL or a few screenshots to MP4s and post
+          copy, on your own machine, in code you can read.
+        </p>
+        <div class="gap"><Install /></div>
+        <p class="links">
+          <a class="more" href={repo}>view on github <span>→</span></a>
+          <a class="more" href="/pricing">pricing <span>→</span></a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="t-wrap cta">
+    <h2 class="h2 big">Get your app known<b>_</b></h2>
+    <p>Free for personal use. Companies need a commercial licence.</p>
+    <div class="hero-btns center">
+      <a class="t-btn primary" href="#start">get started</a>
+      <a class="t-btn" href="/pricing">pricing</a>
+    </div>
+  </section>
+
+  <div class="mark" aria-hidden="true">nykma</div>
+</Term>
+
+<style>
+  /* ---------- shared ---------- */
+  .tag {
+    display: inline-block;
+    margin: 0;
+    padding: 3px 8px;
+    font: 700 12px/1.4 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid currentColor;
+    border-radius: 5px;
+  }
+  .h2 {
+    margin: 22px 0 0;
+    font-weight: 800;
+    font-size: clamp(28px, 3.8vw, 44px);
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+  }
+  .more {
+    display: inline-flex;
+    gap: 8px;
+    font: 700 13px/1 var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .more span {
+    color: var(--red);
+    transition: transform 0.2s;
+  }
+  .more:hover span {
+    transform: translateX(4px);
+  }
+  .gap {
+    margin-top: 40px;
+  }
+  .block {
+    padding-top: clamp(90px, 12vw, 150px);
+  }
+
+  .hero-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 36px;
+  }
+  .hero-btns.center {
+    justify-content: center;
+  }
+
+  /* ---------- start ---------- */
+  .start {
+    margin-top: clamp(90px, 12vw, 150px);
+    background: var(--deep);
+    padding: clamp(80px, 11vw, 130px) 0;
+  }
+  /* Centred, one under the other; the commands stay left-aligned in their box. */
+  .start-in {
+    max-width: 860px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .start-p {
+    margin: 22px auto 0;
+    color: var(--dim);
+    max-width: 58ch;
+  }
+  .start-in :global(.in-box) {
+    text-align: left;
+  }
+  .start-in :global(.in-then),
+  .start-in :global(.in-needs) {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px 28px;
+    margin: 28px 0 0;
+  }
+
+  /* ---------- end ---------- */
+  .cta {
+    text-align: center;
+    padding-top: clamp(100px, 13vw, 170px);
+  }
+  .cta .big {
+    font-size: clamp(36px, 6.4vw, 80px);
+  }
+  .cta .big b {
+    color: var(--red);
+  }
+  .cta p {
+    margin: 20px auto 0;
+    color: var(--dim);
+    font-size: clamp(18px, 1.7vw, 21px);
+  }
+  .mark {
+    margin-top: clamp(80px, 10vw, 130px);
+    font-weight: 800;
+    font-size: clamp(110px, 27vw, 380px);
+    line-height: 0.72;
+    letter-spacing: -0.07em;
+    text-align: center;
+    height: 0.62em;
+    overflow: hidden;
+    color: var(--paper);
+    user-select: none;
+  }
+  :global(.t-bottom) {
+    margin-top: 0 !important;
+  }
+</style>

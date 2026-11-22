@@ -22,6 +22,10 @@ export async function listVideos(): Promise<Video[]> {
     logLevel: "warn",
     server: { middlewareMode: true, hmr: false, ws: false, watch: null }, // One read, so nothing needs to watch public/ or out/.
     optimizeDeps: { noDiscovery: true },
+    // Its own dependency cache. Its optimizer settings differ from the dev server's, so sharing node_modules/.vite made
+    // every render, still or validate rebuild that cache with only React in it, and the open desk went blank with
+    // "Outdated Optimize Dep".
+    cacheDir: join(ROOT, "node_modules/.vite-scripts"),
   });
   try {
     return (await server.ssrLoadModule("/src/registry.ts")).videos;

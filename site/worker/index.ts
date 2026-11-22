@@ -25,7 +25,7 @@ const EMAIL = /^[^\s@<>()",;:]+@[^\s@<>()",;:]+\.[^\s@<>()",;:]{2,}$/;
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.hostname === "www.nobodyknowsmyapp.com") return Response.redirect(`https://nobodyknowsmyapp.com${url.pathname}${url.search}`, 301);
+    if (url.hostname.startsWith("www.")) return Response.redirect(`https://${url.hostname.slice(4)}${url.pathname}${url.search}`, 301);
     if (url.pathname === "/api/contact") {
       if (request.method !== "POST") return new Response("Use POST.", { status: 405, headers: { allow: "POST" } });
       return contact(request, env);

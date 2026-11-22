@@ -1,0 +1,162 @@
+<!doctype html>
+<html data-theme="graphite">
+<head>
+<meta charset="utf-8" />
+<title>nykma · home</title>
+<link rel="stylesheet" href="base.css" />
+<style>
+  .app { display: grid; grid-template-columns: 56px 1fr; height: 900px; }
+  main { overflow: hidden; padding: 0 32px; }
+  .head { height: 64px; display: flex; align-items: center; gap: 12px; }
+  .search { width: 340px; height: 32px; border-radius: var(--r-2); background: var(--bg-1); box-shadow: inset 0 0 0 1px var(--line-1); display: flex; align-items: center; gap: 8px; padding: 0 10px; color: var(--text-3); font-size: 13px; }
+  .composer { margin-top: 4px; border-radius: var(--r-4); background: var(--bg-1); box-shadow: inset 0 0 0 1px var(--line-2); padding: 18px 18px 12px; }
+  .composer .ph { font-family: var(--font-display); font-size: 20px; color: var(--text-3); letter-spacing: -0.01em; }
+  .composer .ph b { color: var(--text-1); font-weight: 500; }
+  .composer .caret { display: inline-block; width: 2px; height: 22px; background: var(--accent); vertical-align: -4px; margin-left: 1px; }
+  .opt { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: var(--bg-2); box-shadow: inset 0 0 0 1px var(--line-1); font-size: 12.5px; color: var(--text-2); }
+  .opt b { color: var(--text-1); font-weight: 500; }
+  .moves { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 22px; }
+  .move { border-radius: var(--r-3); background: var(--bg-1); box-shadow: inset 0 0 0 1px var(--line-1); padding: 12px; display: flex; gap: 12px; }
+  .move .th { width: 54px; height: 96px; border-radius: 6px; background-size: cover; background-position: center; flex: none; box-shadow: 0 0 0 1px var(--line-2); }
+  .move .th.w { width: 128px; height: 72px; }
+  .move .k { font-size: 11.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .move .n { font-size: 14px; font-weight: 600; margin-top: 3px; }
+  .move .d { font-size: 12px; color: var(--text-3); margin-top: 2px; line-height: 1.4; }
+  .move .acts { display: flex; gap: 6px; margin-top: 10px; }
+  .bar { height: 3px; border-radius: 2px; background: var(--bg-3); margin-top: 10px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .libh { display: flex; align-items: center; gap: 10px; margin: 28px 0 14px; }
+  .cards { display: flex; flex-wrap: wrap; gap: 20px 16px; align-items: flex-start; }
+  .card .im { height: 210px; border-radius: var(--r-2); background-size: cover; background-position: center; position: relative; box-shadow: 0 0 0 1px var(--line-1); }
+  .card .im .st { position: absolute; left: 8px; top: 8px; }
+  .card .im .len { position: absolute; right: 8px; bottom: 8px; font-family: var(--mono); font-size: 10.5px; padding: 2px 5px; border-radius: 4px; background: rgba(0,0,0,.6); color: #fff; }
+  .card .im .rs { position: absolute; left: 8px; bottom: 8px; display: flex; gap: 3px; }
+  .card .im .rs span { font-family: var(--mono); font-size: 9.5px; padding: 1px 4px; border-radius: 3px; background: rgba(0,0,0,.6); color: #fff; }
+  .card .nm { font-size: 13px; font-weight: 600; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+  .card .mt { font-size: 12px; color: var(--text-3); }
+  .stc { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 7px; border-radius: 999px; font-size: 11px; font-weight: 600; background: rgba(10,10,12,.72); color: #fff; backdrop-filter: blur(6px); }
+  .bdot { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  .tabs { display: flex; gap: 2px; }
+  .tab { height: 28px; padding: 0 10px; display: inline-flex; align-items: center; gap: 6px; border-radius: var(--r-2); font-size: 13px; color: var(--text-3); font-weight: 500; }
+  .tab.on { background: var(--bg-3); color: var(--text-1); }
+  .tab .c { font-family: var(--mono); font-size: 11px; color: var(--text-4); }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="rail">
+    <div class="logo" style="margin-bottom:12px">n</div>
+    <div class="r on" title="Projects"><svg class="i l"><use href="#grid"/></svg></div>
+    <div class="r" title="Brand kits"><svg class="i l"><use href="#palette"/></svg></div>
+    <div class="r" title="Publishing"><svg class="i l"><use href="#cal"/></svg></div>
+    <div style="flex:1"></div>
+    <div class="r" title="Settings"><svg class="i l"><use href="#gear"/></svg></div>
+    <div class="avatar" style="background:var(--bg-4);color:var(--text-2);margin-top:6px">T</div>
+  </nav>
+  <main>
+    <div class="head">
+      <span class="t-page">Projects</span>
+      <div class="spacer"></div>
+      <div class="search"><svg class="i s"><use href="#search"/></svg>Search ads, brands, scenes<span class="kbd" style="margin-left:auto">Ctrl K</span></div>
+    </div>
+
+    <div class="composer">
+      <div class="ph"><b>A 15-second ad for mathbooklm: the free plan, shown by solving one real homework problem</b><span class="caret"></span></div>
+      <div class="row" style="margin-top:16px;gap:8px">
+        <span class="opt"><span class="bdot" style="background:#6a69d6"></span><b>mathbooklm</b><svg class="i s"><use href="#chev"/></svg></span>
+        <span class="opt"><svg class="i s"><use href="#film"/></svg><b>Video</b></span>
+        <span class="opt"><svg class="i s"><use href="#ratio"/></svg><b>9:16</b> + 1:1</span>
+        <span class="opt"><svg class="i s"><use href="#check"/></svg>Pitch first</span>
+        <span class="opt"><svg class="i s"><use href="#mic"/></svg>Voice: automatic</span>
+        <span class="opt"><svg class="i s"><use href="#upload"/></svg>Add files</span>
+        <div class="spacer"></div>
+        <span class="t-micro">The pitch costs a few cents. Nothing renders until you say go.</span>
+        <button class="btn primary">Pitch it<svg class="i s"><use href="#send"/></svg></button>
+      </div>
+    </div>
+
+    <div class="moves">
+      <div class="move">
+        <div class="th" style="background-image:url(img/kav1.jpg)"></div>
+        <div style="min-width:0">
+          <div class="k" style="color:var(--accent)"><span class="dot"></span>Pitch waiting for you</div>
+          <div class="n">shorashim</div>
+          <div class="d">Roots drawn in one ink line grow into the word tree. 12 s, 4 shots.</div>
+          <div class="acts"><button class="btn primary sm">Go</button><button class="btn sm">Another idea</button></div>
+        </div>
+      </div>
+      <div class="move">
+        <div class="th" style="background-image:url(img/cap2.jpg)"></div>
+        <div style="min-width:0">
+          <div class="k" style="color:var(--info)"><span class="dot"></span>First look ready</div>
+          <div class="n">capcut-cut</div>
+          <div class="d">24.5 s · 9:16. Rendered 18 min ago, not watched yet.</div>
+          <div class="acts"><button class="btn sm"><svg class="i s"><use href="#play"/></svg>Watch</button></div>
+        </div>
+      </div>
+      <div class="move">
+        <div class="th w" style="background-image:url(img/d-etzba-achat.jpg)"></div>
+        <div style="min-width:0">
+          <div class="k" style="color:var(--ok)"><span class="dot"></span>3 ready to post</div>
+          <div class="n">etzba-achat +2</div>
+          <div class="d">Captions written for TikTok, Reels, YouTube.</div>
+          <div class="acts"><button class="btn sm"><svg class="i s"><use href="#cal"/></svg>Schedule</button></div>
+        </div>
+      </div>
+      <div class="move">
+        <div class="th" style="background-image:url(img/sela2.jpg)"></div>
+        <div style="min-width:0;flex:1">
+          <div class="k" style="color:var(--text-2)"><span class="spark" style="display:inline-flex"><svg class="i s"><use href="#spark"/></svg></span>Agent working</div>
+          <div class="n">ha-sela</div>
+          <div class="d">Building scene 3 of 5: the vase turns.</div>
+          <div class="bar"><i style="width:62%"></i></div>
+          <div class="t-micro num" style="margin-top:6px">62% · about 4 min</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="libh">
+      <div class="tabs">
+        <span class="tab on">All <span class="c">44</span></span>
+        <span class="tab">Pitch <span class="c">10</span></span>
+        <span class="tab">In progress <span class="c">3</span></span>
+        <span class="tab">First look <span class="c">11</span></span>
+        <span class="tab">Ready <span class="c">23</span></span>
+        <span class="tab">Posted <span class="c">7</span></span>
+      </div>
+      <div class="spacer"></div>
+      <span class="opt"><span class="bdot" style="background:var(--text-3)"></span>Every brand<svg class="i s"><use href="#chev"/></svg></span>
+      <div class="seg"><span class="on"><svg class="i s"><use href="#grid"/></svg>Grid</span><span><svg class="i s"><use href="#layers"/></svg>Pipeline</span></div>
+    </div>
+
+    <div class="cards" id="cards"></div>
+  </main>
+</div>
+<script src="icons.js"></script>
+<script>
+  const H = 210;
+  const items = [
+    ["cap1", 9/16, "capcut-cut", "capcut", "#25d0e6", "First look", "var(--info)", "24.5s", ["9:16"]],
+    ["d-whos-sarah", 16/9, "whos-sarah", "nykma", "#d8d8d8", "Ready", "var(--ok)", "18.0s", ["16:9","1:1","9:16"]],
+    ["kav4", 9/16, "kav-echad", "mathbooklm", "#6a69d6", "Ready", "var(--ok)", "14.5s", ["9:16"]],
+    ["d-etzba-achat", 16/9, "etzba-achat", "gomlin", "#655ee4", "Posted", "var(--text-2)", "21.0s", ["16:9","1:1","9:16"]],
+    ["sela1", 9/16, "ha-sela", "gomlin", "#655ee4", "Building", "var(--accent)", "—", ["9:16"]],
+    ["d-lightroom-grade", 9/16, "lightroom-grade", "lightroom", "#31a8ff", "Ready", "var(--ok)", "16.0s", ["9:16"]],
+    ["d-achuzim", 16/9, "achuzim", "gomlin", "#655ee4", "Ready", "var(--ok)", "12.0s", ["16:9","1:1","9:16"]],
+    ["d-notion-views", 1, "notion-views", "notion", "#e8e8e8", "Ready", "var(--ok)", "15.0s", ["1:1"]],
+    ["d-one-tile", 16/9, "one-tile", "stardew-valley", "#f5d36b", "Ready", "var(--ok)", "20.0s", ["16:9"]],
+    ["d-tiktok-feed", 9/16, "tiktok-feed", "tiktok", "#fe2c55", "First look", "var(--info)", "13.0s", ["9:16"]],
+  ];
+  document.getElementById("cards").innerHTML = items.map(([img, ar, name, brand, bc, st, sc, len, rs]) => `
+    <div class="card" style="width:${Math.round(H*ar)}px">
+      <div class="im" style="background-image:url(img/${img}.jpg)">
+        <span class="st stc"><span class="dot" style="color:${sc}"></span>${st}</span>
+        <span class="rs">${rs.map(r=>`<span>${r}</span>`).join("")}</span>
+        <span class="len">${len}</span>
+      </div>
+      <div class="nm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${name}</div>
+      <div class="mt" style="display:flex;align-items:center;gap:6px;white-space:nowrap"><span class="bdot" style="background:${bc}"></span>${brand}</div>
+    </div>`).join("");
+</script>
+</body>
+</html>

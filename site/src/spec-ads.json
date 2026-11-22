@@ -1,0 +1,124 @@
+[
+  {
+    "slug": "linear-backlog",
+    "brand": "Linear",
+    "title": "the backlog empties itself",
+    "line": "24 new issues triaged and planned into a cycle without leaving the keyboard.",
+    "lang": "English",
+    "ratio": "16x9",
+    "seconds": 29,
+    "group": "apps"
+  },
+  {
+    "slug": "duolingo-streak",
+    "brand": "Duolingo",
+    "title": "one small lesson a day",
+    "line": "A streak climbs to 365 while the lessons flip by, with the ad's words in Hebrew.",
+    "lang": "Hebrew",
+    "ratio": "9x16",
+    "seconds": 22,
+    "group": "apps"
+  },
+  {
+    "slug": "stripe-checkout",
+    "brand": "Stripe",
+    "title": "the code is the checkout",
+    "line": "The real 18-line Checkout Session call builds the hosted page as it types.",
+    "lang": "English",
+    "ratio": "1x1",
+    "seconds": 28,
+    "group": "apps"
+  },
+  {
+    "slug": "waze-reroute",
+    "brand": "Waze",
+    "title": "on time after all",
+    "line": "The road turns red, drivers report the jam, and Waze takes you around it.",
+    "lang": "Hebrew",
+    "ratio": "9x16",
+    "seconds": 22,
+    "group": "apps"
+  },
+  {
+    "slug": "notion-views",
+    "brand": "Notion",
+    "title": "one page, every shape",
+    "line": "The same six tasks become a list, a board, a calendar, a table and a wiki.",
+    "lang": "English",
+    "ratio": "1x1",
+    "seconds": 25,
+    "group": "apps"
+  },
+  {
+    "slug": "tiktok-feed",
+    "brand": "TikTok",
+    "title": "there's always another one",
+    "line": "Real clips stack into a 3D tower, the feed dives through it, then snaps back to one video.",
+    "lang": "English",
+    "ratio": "9x16",
+    "seconds": 24,
+    "group": "social"
+  },
+  {
+    "slug": "capcut-cut",
+    "brand": "CapCut",
+    "title": "the ad edits itself",
+    "line": "Splits, a speed change and captions land on the timeline just ahead of the playhead, on real footage.",
+    "lang": "English",
+    "ratio": "9x16",
+    "seconds": 25,
+    "group": "social"
+  },
+  {
+    "slug": "instagram-one-photo",
+    "brand": "Instagram",
+    "title": "one photo, every format",
+    "line": "One photo morphs from post to Story to Reel to a profile grid, in Hebrew, in one take.",
+    "lang": "Hebrew",
+    "ratio": "9x16",
+    "seconds": 27,
+    "group": "social"
+  },
+  {
+    "slug": "canva-resize",
+    "brand": "Canva",
+    "title": "design once, every shape",
+    "line": "A flyer designs itself, then resizes into a post, banner, slides, poster and card.",
+    "lang": "English",
+    "ratio": "9x16",
+    "seconds": 28,
+    "group": "social"
+  },
+  {
+    "slug": "lightroom-grade",
+    "brand": "Lightroom",
+    "title": "what was already there",
+    "line": "Every slider regrades a real photo pixel by pixel as it moves, with the ad's words in Hebrew.",
+    "lang": "Hebrew",
+    "ratio": "9x16",
+    "seconds": 28,
+    "group": "social"
+  },
+  {
+    "slug": "one-tile",
+    "brand": "Stardew Valley",
+    "title": "one tile",
+    "line": "One overgrown tile is cleared, planted and farmed through a year, then the whole farm rises around it, in voxels drawn in code.",
+    "lang": "English",
+    "ratio": "16x9",
+    "seconds": 28,
+    "group": "games",
+    "icon": ""
+  },
+  {
+    "slug": "altos-suns",
+    "brand": "Alto's Odyssey",
+    "title": "follow the sun",
+    "line": "One unbroken push through each scene's sun into the next hour of the desert, with the game's own press-kit art.",
+    "lang": "English",
+    "ratio": "9x16",
+    "seconds": 24,
+    "group": "games",
+    "icon": "/icons/altos.png"
+  }
+]
