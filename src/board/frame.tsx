@@ -465,11 +465,14 @@ function Strip({ video, frames, count, height }: { video: Video; frames: number;
   const shown = mode === "all" ? count : 1;
   const at = (i: number) => Math.min(frames - 1, Math.floor(((i + 0.5) / shown) * frames));
   useEffect(() => tell({ type: "ready", frames, fps: video.fps }), [frames, video.fps]);
+  // Shrunk with `zoom`, not `transform: scale()`, so the scene is laid out at the strip's size. Under a scale transform
+  // Chrome rasterizes a 3D-tilted plane near its full size: one strip of nykma-launch's wall of clips held 400 MB of GPU
+  // memory, and a timeline of them ran the desk out of it and painted its page in black blocks. Zoomed, under 100 MB.
   return (
     <div style={{ display: "flex", height, overflow: "hidden" }}>
       {Array.from({ length: shown }, (_, i) => (
         <div key={i} style={{ width: video.width * scale, height, flex: "none", overflow: "hidden" }}>
-          <div style={{ transform: `scale(${scale})`, transformOrigin: "0 0" }}>
+          <div style={{ zoom: scale }}>
             <Guard>
               <Stage video={video} frame={at(i)} />
             </Guard>

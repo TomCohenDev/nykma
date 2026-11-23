@@ -328,6 +328,34 @@ function newest(dir: string): number {
   return latest;
 }
 
+const LOAD_TIMEOUT = 45_000;
+let loading: Promise<Video[]> | undefined;
+
+/**
+ * The registry through Vite's SSR loader, one load at a time however often the desk polls. A load that never settles
+ * (seen 2026-11-22, the desk polling while an agent wrote a new ad) stays pending in Vite's module runner, and every
+ * later load waits on it, so the desk showed no scenes and no error until it was restarted. After LOAD_TIMEOUT the
+ * load fails with an error the desk shows, and the next poll starts on a fresh runner.
+ */
+function loadVideos(server: ViteDevServer): Promise<Video[]> {
+  if (loading) return loading;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timedOut = new Promise<never>((_, fail) => {
+    timer = setTimeout(() => {
+      // Vite keeps the runner on a private field and makes a new one when it's gone (ssrLoadModule in vite's node.js).
+      (server as { _ssrCompatModuleRunner?: unknown })._ssrCompatModuleRunner = undefined;
+      server.moduleGraph.invalidateAll();
+      fail(new Error(`Loading src/registry.ts took over ${LOAD_TIMEOUT / 1000}s, so the desk is trying again. If this keeps happening, restart the desk (bun run dev).`));
+    }, LOAD_TIMEOUT);
+  });
+  const load = Promise.race([server.ssrLoadModule("/src/registry.ts").then((module) => module.videos as Video[]), timedOut]).finally(() => {
+    clearTimeout(timer);
+    if (loading === load) loading = undefined;
+  });
+  loading = load;
+  return load;
+}
+
 async function registry(server: ViteDevServer): Promise<{ ads: AdInfo[]; error?: string }> {
   const changed = newest(join(ROOT, "src"));
   if (changed > loadedAt) {
@@ -336,7 +364,7 @@ async function registry(server: ViteDevServer): Promise<{ ads: AdInfo[]; error?:
   }
   let videos: Video[];
   try {
-    videos = (await server.ssrLoadModule("/src/registry.ts")).videos;
+    videos = await loadVideos(server);
   } catch (error) {
     loadedAt = 0; // Try again next time: the agent may be halfway through an edit.
     return { ads: [], error: String((error as Error)?.message ?? error) };

@@ -4,6 +4,26 @@ Newest first. `spec.md` says how nykma works now. This file says what changed an
 
 ## 2026-11-22
 
+### Fixed: the desk turning black on nykma-launch
+- **Why.** The desk crashed again on nykma-launch: black blocks across the viewer, the panels and the timeline. That's Chrome running out of GPU memory. The project page alone held about 1.3 GB, against 280 MB for lidim. Almost all of it was the timeline's filmstrips. Each strip mounts the scene at full size and shrank it with `transform: scale()`, and Chrome rasterizes a 3D-tilted plane (the ad's wall of clips) near its full layout size whatever the scale: one strip of the end card held about 430 MB for a picture 60 px tall. The images, the blur and the box shadows weren't the cost; hiding them changed little.
+- **What** (`src/board/frame.tsx`, spec.md §10.4). A strip shrinks each frame with CSS `zoom`, so the scene is laid out at the strip's size and rasterized at it. Three frames of the end card went from about 1 GB to under 100 MB, and the whole page loaded at about 270 MB. The strips look the same, give or take a pixel.
+- **Still heavy.** Playing nykma-launch in the viewer still peaks around 1 GB while the wall scenes play, since the viewer draws them at full size.
+- **Tested.** Typecheck, and GPU memory measured in headed Chromium from Windows' GPU counters: each wall scene's strip with `transform` and with `zoom`, compared side by side, and the whole desk page loaded and playing.
+
+### Fixed: the chat's message box
+- **Why.** The user said the agent's message box looked and acted weird: one line tall with scroll arrows, a red border, a light-blue chip on a red tint and a faded red send button. The box measured its height while the Agent tab was hidden, read 0, and kept it until you typed.
+- **What** (`src/desk/Chat.tsx`, `desk.css`). The box measures again whenever its width changes (a hidden tab has none) and skips a measure taken while hidden. It has whole-pixel lines and no scrollbar until its text passes 220px. It's a quiet card that lifts to a neutral border when you type, not the accent red. Chips are neutral. The send button is grey until there's something to send. The hint says Shift+Enter makes a new line, and a green dot pulses while the agent works.
+- **Tested** in Playwright on lidim: hidden then shown, one line, several lines, past the maximum, cleared, typed and switched tabs, the chat panel at 280, 700 and 340px, and both themes. Typecheck.
+
+### Fixed: the desk showing no scenes
+- **Why.** After an agent built lidim, the desk showed no scenes for any ad. Its `/api/registry` request never answered: a load of `src/registry.ts` through Vite's SSR loader had stuck, and every later poll waited on it, with no error. The ad's code was fine (a fresh Vite server loaded all 92 videos), and the desk recovered as soon as it restarted.
+- **What** (`scripts/lib/desk.ts`). The desk runs one registry load at a time however often it polls. A load that takes over 45 seconds fails with an error that says to restart the desk if it keeps happening, and the next poll starts on a fresh module runner with the module graph invalidated. Typecheck; the registry loads in about a second after the restart.
+
+### Fixed: the pitch's animatic
+- **Why.** The user said the pitch looked bad and its animatic didn't work any more. skitsa's (a 1:1 post, one row) was a 16:9 frame where the on-screen text grew into a box covering most of it, pushed the description off the top, and scrambled the punctuation of Hebrew quoted inside English labels. Nothing about the animatic had changed: this pitch's on-screen text was far longer than earlier ones', and the layout had no limit.
+- **What** (`scripts/animatic.ts`, spec.md §7.1). The caption block takes at most 38% of the frame, its text shrinking to fit; a row without an image sets its description in the space above the caption, shrunk to fit; a long cell is split at its sentences, one per line; each line, and each quoted piece in it, keeps its own direction (`dir="auto"`, `unicode-bidi: plaintext`, `<bdi>`). `ad-agent.md` now runs the animatic in the brief's first layout, so a square post gets a square animatic.
+- **Remade.** skitsa's animatic at 1:1 and receipts' at 16:9 (the old ones are kept outside the repo). Typecheck.
+
 ### Changed: a README that shows what nykma does
 - **Why.** The user wanted a much more impressive README on GitHub, with a video of everything nykma can do, in the spirit of ComfyUI's.
 - **What.** A centred header with badges and a looping 20-second GIF that links to a 70-second MP4 tour (`docs/media/`), a gallery of six public ads, a features section (the agent, ads in code, the desk), desk shortcuts, and the setup, flow, commands and layout as before. The tour: real ads from public brands (whos-sarah, etzba-achat, mashal, lo-maamin, under-pressure, pag-tokef, spring-moves, madrich, lc-lesson, newton-lesson), then the desk on under-pressure: the brief, every ratio, Layers, Add, dragging with snapping, effects, the timeline and the agent, with captions in nykma's own fonts and colours. The desk was recorded from the public export (no private brands or projects) with Playwright and cut with ffmpeg; it's silent.

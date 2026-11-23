@@ -1,5 +1,5 @@
 /** The chat panel: the conversation with ad-agent for a project or a brand kit (spec.md §10.6). */
-import { useEffect, useLayoutEffect, useRef, useState, type DragEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type DragEvent, type ReactNode } from "react";
 import { post, upload, usePoll, type Run } from "./api";
 import { ClipIcon, CloseIcon, SendIcon, SparkIcon, StopIcon } from "./icons";
 import { Markdown } from "./md";
@@ -30,6 +30,7 @@ type Props = {
 const WIDTH_KEY = "nykma.chatWidth";
 const DEFAULT_WIDTH = 340;
 const MIN_WIDTH = 280;
+const MAX_INPUT = 220; // the message box's tallest, in px, before it scrolls
 const maxWidth = () => Math.max(MIN_WIDTH, Math.min(900, innerWidth - 560)); // leave room for the board and the left panel
 
 function applyWidth(width: number) {
@@ -184,12 +185,29 @@ export function Chat({ query, title, subtitle, quick = [], chips = [], onRemoveC
     if (box && pinned.current && !selecting.current && !holdsSelection) box.scrollTop = box.scrollHeight;
   }, [size]);
 
-  useLayoutEffect(() => {
+  // The box grows with its text up to MAX_INPUT, then scrolls. It's measured again whenever its width changes, because
+  // a measure taken while the agent tab is hidden reads 0 and left a one-line box with scroll arrows.
+  const fit = useCallback(() => {
+    const box = input.current;
+    if (!box || !box.clientWidth) return;
+    box.style.height = "auto";
+    const height = Math.min(box.scrollHeight, MAX_INPUT);
+    box.style.height = `${height}px`;
+    box.style.overflowY = box.scrollHeight > MAX_INPUT ? "auto" : "hidden";
+  }, []);
+  useLayoutEffect(fit, [text, fit]);
+  useEffect(() => {
     const box = input.current;
     if (!box) return;
-    box.style.height = "auto";
-    box.style.height = `${Math.min(box.scrollHeight, 220)}px`;
-  }, [text]);
+    let width = box.clientWidth;
+    const watch = new ResizeObserver(() => {
+      if (box.clientWidth === width) return;
+      width = box.clientWidth;
+      fit();
+    });
+    watch.observe(box);
+    return () => watch.disconnect();
+  }, [fit]);
 
   const send = async (body: string) => {
     const said = body.trim();
@@ -348,7 +366,7 @@ export function Chat({ query, title, subtitle, quick = [], chips = [], onRemoveC
               <ClipIcon />
             </button>
             <input ref={picker} type="file" multiple hidden onChange={(event) => event.target.files && void takeFiles(event.target.files)} />
-            <span className="compose-hint">{live ? "The agent is working" : "Enter to send"}</span>
+            <span className={`compose-hint${live ? " live" : ""}`}>{live ? "The agent is working" : "Enter to send · Shift+Enter for a new line"}</span>
             <button className="send" disabled={busy || !text.trim()} onClick={() => void send(text)} title="Send">
               <SendIcon />
             </button>

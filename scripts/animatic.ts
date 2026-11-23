@@ -37,6 +37,23 @@ function fontCss(brand?: Brand) {
 
 const fontFor = (text: string, fonts: ReturnType<typeof fontCss>) => (HEBREW.test(text) ? fonts.hebrew : fonts.latin);
 
+/**
+ * Text as lines, each its own paragraph with its own direction, so a Hebrew quote inside an English label (or the
+ * other way round) keeps its punctuation where it belongs. A long cell is split at its sentences, one per line.
+ */
+function paragraphs(text: string, long = 70) {
+  const lines = text.split(/\n+/).flatMap((line) => (line.length > long ? line.split(/(?<=[.!?…]["”'״׳)\]]?)\s+(?=\S)/) : [line]));
+  return lines
+    .map((line) => line.trim())
+    .filter(Boolean)
+    // Each quoted piece is isolated, so "פרסומת" inside an English label (or "Google Play" inside Hebrew) reads whole.
+    .map((line) => `<div dir="auto">${escape(line).replace(/(["“”״])([^"“”״]+)(["“”״])/g, "$1<bdi>$2</bdi>$3")}</div>`)
+    .join("");
+}
+
+/** The most of the frame's height the caption block may take, so the picture or the description still shows. */
+const CAPTION_SHARE = 0.38;
+
 type Layers = { picture: string; caption: string };
 
 /** One row as two PNGs: the picture, drawn large so the push-in stays sharp, and the caption, which holds still. */
@@ -50,10 +67,11 @@ async function drawRow(browser: Browser, row: Row, size: { width: number; height
     .card { position: absolute; inset: 0; background: #16181d; display: flex; align-items: center; justify-content: center; padding: ${60 * unit}px; box-sizing: border-box; }
     .card img { max-width: 100%; max-height: 100%; }
     .picture { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #16181d; }
-    .happens { color: #8b93a3; font-size: ${30 * unit}px; line-height: 1.4; text-align: center; max-width: 85%; white-space: pre-line; }
+    .happens { color: #8b93a3; font-size: ${30 * unit}px; line-height: 1.4; text-align: center; max-width: 85%; max-height: 100%; overflow: hidden; }
     .under { position: absolute; left: 6%; right: 6%; bottom: 6%; display: flex; flex-direction: column; align-items: center; gap: ${10 * unit}px; }
-    .caption { color: #fff; background: rgba(0, 0, 0, 0.72); font-size: ${46 * unit}px; font-weight: 700; line-height: 1.25; padding: ${10 * unit}px ${24 * unit}px; border-radius: ${8 * unit}px; text-align: center; }
-    .spoken { color: #ffe08a; background: rgba(0, 0, 0, 0.72); font-size: ${24 * unit}px; line-height: 1.35; padding: ${6 * unit}px ${16 * unit}px; border-radius: ${6 * unit}px; text-align: center; }
+    .caption { color: #fff; background: rgba(0, 0, 0, 0.72); font-size: ${46 * unit}px; font-weight: 700; line-height: 1.25; padding: ${10 * unit}px ${24 * unit}px; border-radius: ${8 * unit}px; text-align: center; max-width: 100%; box-sizing: border-box; }
+    .spoken { color: #ffe08a; background: rgba(0, 0, 0, 0.72); font-size: ${24 * unit}px; line-height: 1.35; padding: ${6 * unit}px ${16 * unit}px; border-radius: ${6 * unit}px; text-align: center; max-width: 100%; box-sizing: border-box; }
+    .happens > div, .caption > div, .spoken > div { unicode-bidi: plaintext; }
     .note { color: #8b93a3; font: ${15 * unit}px system-ui, sans-serif; background: rgba(0, 0, 0, 0.6); padding: ${2 * unit}px ${8 * unit}px; border-radius: ${4 * unit}px; }
   </style>`;
 
@@ -68,19 +86,47 @@ async function drawRow(browser: Browser, row: Row, size: { width: number; height
     return path;
   };
 
+  /** Shrinks the text in `selector` (a step at a time, not below `min` px) until `fits()` holds in the page. */
+  const fit = (selector: string, min: number, fits: string) =>
+    page.evaluate(
+      ([selector, min, fits]) => {
+        const els = [...document.querySelectorAll<HTMLElement>(selector as string)];
+        const ok = new Function(`return (${fits})`) as () => boolean;
+        for (let guard = 0; guard < 80 && !ok(); guard++) {
+          const sizes = els.map((el) => parseFloat(getComputedStyle(el).fontSize));
+          if (sizes.every((size) => size <= (min as number))) break;
+          els.forEach((el, i) => (el.style.fontSize = `${Math.max(min as number, sizes[i] * 0.94)}px`));
+        }
+      },
+      [selector, min, fits] as const,
+    );
+
+  // The caption first: it takes at most CAPTION_SHARE of the height, its text shrinking to fit.
+  const blocks = [
+    row.text && `<div class="caption" style='font-family: ${fontFor(row.text, fonts)}'>${paragraphs(row.text)}</div>`,
+    spoken && `<div class="spoken" style='font-family: ${fontFor(spoken, fonts)}'>${paragraphs(spoken)}</div>`,
+    spoken && `<div class="note">voice, timed from word count: no Hebrew voice installed</div>`,
+  ].filter(Boolean);
+  await page.setContent(`${base}<div class="under">${blocks.join("")}</div>`);
+  await page.evaluate(() => document.fonts.ready);
+  await fit(".caption, .spoken", 16 * unit, `document.querySelector(".under").offsetHeight <= ${Math.round(height * CAPTION_SHARE)}`);
+  const captionHeight = await page.evaluate(() => document.querySelector<HTMLElement>(".under")?.offsetHeight ?? 0);
+  const caption = join(dir, `row${row.number}-caption.png`);
+  await page.screenshot({ path: caption, omitBackground: true });
+
+  // The picture: an image as it is, or the description, set in the space above the caption and shrunk to fit it.
+  const room = captionHeight ? captionHeight + height * 0.06 + 16 * unit : 0;
   const picture = await shoot(
     image
       ? `<img class="picture" src="${dataUrl(image)}">`
-      : `<div class="card"><div class="happens" dir="auto" style='font-family: ${fontFor(row.happens, fonts)}'>${escape(row.happens)}</div></div>`,
+      : `<div class="card" style="padding-bottom: ${Math.round(room + 60 * unit)}px"><div class="happens" style='font-family: ${fontFor(row.happens, fonts)}'>${paragraphs(row.happens, 1e9)}</div></div>`,
     `row${row.number}-picture.png`,
     false,
   );
-  const blocks = [
-    row.text && `<div class="caption" dir="auto" style='font-family: ${fontFor(row.text, fonts)}'>${escape(row.text)}</div>`,
-    spoken && `<div class="spoken" dir="auto" style='font-family: ${fontFor(spoken, fonts)}'>${escape(spoken)}</div>`,
-    spoken && `<div class="note">voice, timed from word count: no Hebrew voice installed</div>`,
-  ].filter(Boolean);
-  const caption = await shoot(`<div class="under">${blocks.join("")}</div>`, `row${row.number}-caption.png`, true);
+  if (!image) {
+    await fit(".happens", 14 * unit, `(() => { const el = document.querySelector(".happens"); return el.scrollHeight <= el.clientHeight + 1; })()`);
+    await page.screenshot({ path: picture });
+  }
   await page.close();
   return { picture, caption };
 }

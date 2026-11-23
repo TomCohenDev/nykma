@@ -406,10 +406,10 @@ The agent writes:
 - **Other routes**: the explorers' other ideas, one line each.
 - **What the build will take**: the shots that need Blender, ElevenLabs credits (from `mv.py build --estimate`), and anything you need to provide.
 
-Then `bun run animatic <slug>` turns the table into a slideshow MP4 for free (no tokens, a few seconds):
+Then `bun run animatic <slug> --ratio <the brief's first layout>` turns the table into a slideshow MP4 for free (no tokens, a few seconds), in that shape (16:9 when none is given):
 
-- each row's image is shown for its time, with a slow push-in
-- the on-screen text is set as captions, in the brand font
+- each row's image is shown for its time, with a slow push-in; a row without one shows what happens, as text, in the space above its caption
+- the on-screen text is set as captions, in the brand font. The captions take at most 38% of the frame, their text shrinking to fit, and the description shrinks to fit the space left, so neither covers the other. A long cell is split at its sentences, one per line, and each line and each quoted piece keeps its own direction, so Hebrew quoted in an English label (or the other way round) reads whole
 - the voice lines are read by the OS speech synthesizer (Windows `System.Speech`, macOS `say`), so the lengths are real. If no Hebrew voice is installed, Hebrew lines are timed from their word count and the animatic says so
 - there's a click on every beat when a BPM is given
 
@@ -665,7 +665,7 @@ The story is the timeline: one track of scenes with no gaps, as in Final Cut's s
 - **Trimming a scene:** drag its start or end. A scene's code still runs from its own frame 0, so trimming only chooses which of its frames play (`trim` below). Dragging an end back out shows the frames again, up to the scene's full length. An image's end sets how long it shows.
 - **Taking one out:** **Take it out of the video** in the inspector. It waits under **Not in the video** in the left panel, which is where an alternative opening or a cut scene lives. It comes back at the end with the plus, or with **Put it in the video**.
 - **Your own images and clips:** drop them on the timeline where you want them, or **Add an image or a clip** (to the list, not the video). Images go to `public/ads/<slug>/board/`, because the video reads only `public/`. Clips (MOV, MP4, M4V, WebM, MKV or AVI, up to 4 GB) go to `public/ads/<slug>/footage/` and are unpacked to frames (§6.5) while the viewer says so, which takes a while for a long or 4K clip. In the inspector: **Shown for**, **Picture** (Fill crops to the frame, Fit shows all of it on black) and, for a clip, **Sound** on or off. **Remove from the project** takes one away; the file stays in `public/`. Trims inside a clip, slow motion and framing per shape are for the agent, through `<Footage>`.
-- **Filmstrips:** each scene shows a few of its own frames, drawn by the engine (`board.html?…&scene=…&strip=n&h=px`, one iframe per scene).
+- **Filmstrips:** each scene shows a few of its own frames, drawn by the engine (`board.html?…&scene=…&strip=n&h=px`, one iframe per scene). Each frame is shrunk with CSS `zoom`, not a scale transform, so it's laid out and rasterized at the strip's size: under a transform, Chrome rasterizes a 3D-tilted plane near its full size, and a timeline of them ran the desk out of GPU memory.
 - **Sound:** a second track shows the ad's cues where they start, from the registry.
 - **The playhead:** press anywhere on the ruler, on the playhead's handle or on an empty part of a track and drag to scrub; a double-click on a scene jumps to its start. Zoom with the slider; **Fit** goes back. Drag the timeline's top edge to make it taller (the filmstrips grow with it); the desk keeps the height.
 - **Transitions:** a diamond on a cut marks a transition into the scene after it, with a band over the frames it covers. Clicking it opens the scene's transition in the Effects tab (§10.13).

@@ -1768,59 +1768,80 @@ body.resizing .board {
 }
 
 .chip-button.danger {
-  color: #ff9c86;
+  color: var(--red);
 }
 
+/* The message box: a quiet card that lifts a little when you type in it, never the red of an error. */
 .compose-box {
-  background: var(--canvas);
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.compose-box:hover {
+  border-color: var(--bg-4);
 }
 
 .compose-box:focus-within {
-  border-color: var(--blue);
+  border-color: var(--text-4);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
 }
 
+/* Whole-pixel lines, so the height the box measures always holds its text and no scroll arrows appear. */
 .compose-box textarea,
 .compose-box textarea:focus {
   display: block;
-  padding: 9px 11px 4px;
+  min-height: 40px;
+  padding: 10px 12px 6px;
   background: none;
   border: 0;
+  border-radius: 0;
   resize: none;
+  overflow-y: hidden;
   font-size: 13.5px;
-  line-height: 1.5;
+  line-height: 21px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-4) transparent;
+}
+
+.compose-box textarea::placeholder {
+  color: var(--text-4);
 }
 
 .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  padding: 8px 8px 0;
+  gap: 5px;
+  padding: 9px 10px 0;
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   height: 22px;
-  padding: 0 4px 0 8px;
-  color: #9fd3ff;
-  background: var(--blue-soft);
-  border-radius: 5px;
+  padding: 0 3px 0 8px;
+  color: var(--text-1);
+  background: var(--bg-3);
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .chip.note {
   padding-inline-end: 8px;
   color: #ffd99a;
   background: rgba(255, 166, 41, 0.14);
+  border-color: rgba(255, 166, 41, 0.24);
 }
 
 .chip.file {
   color: var(--text-2);
-  background: var(--panel-2);
 }
 
 .chip button {
@@ -1829,39 +1850,95 @@ body.resizing .board {
   width: 16px;
   height: 16px;
   padding: 0;
-  color: inherit;
+  color: var(--text-3);
   background: none;
   border: 0;
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
 .chip button:hover {
+  color: var(--text-1);
   background: rgba(255, 255, 255, 0.1);
 }
 
 .compose-tools {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 6px 6px;
+  gap: 6px;
+  padding: 0 8px 8px 6px;
+}
+
+.compose-tools .icon-button {
+  width: 26px;
+  height: 26px;
+  color: var(--text-3);
+  border-radius: 7px;
+}
+
+.compose-tools .icon-button:hover {
+  color: var(--text-1);
+  background: var(--bg-3);
 }
 
 .compose-hint {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   flex: 1;
-  color: var(--text-3);
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-4);
   font-size: 11px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.compose-hint.live {
+  color: var(--text-2);
+}
+
+/* A slow pulse while the agent works. The desk's own UI may animate; only ads must be frame-pure. */
+.compose-hint.live::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: compose-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes compose-pulse {
+  50% {
+    opacity: 0.3;
+  }
 }
 
 .send {
   display: grid;
+  flex: none;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   color: var(--accent-ink);
   background: var(--blue);
   border: 0;
   border-radius: 50%;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.send:not(:disabled):hover {
+  background: var(--blue-2);
+}
+
+/* Nothing to send: a quiet grey button, not a faded red one. */
+.send:disabled {
+  color: var(--text-4);
+  background: var(--bg-3);
+  opacity: 1;
 }
 
 .chat-error {
