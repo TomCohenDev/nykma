@@ -1,6 +1,6 @@
 /**
  * The desk's change history, one per ad (spec.md §10.13). Every file the desk writes in src/ads/<slug>/ (a literal in
- * the code, tune.json, story.json) is one entry, so the desk can undo, redo or go back to any point.
+ * the code, tune.json, story.json, a talking head's cut.json and take.json) is one entry, so the desk can undo, redo or go back to any point.
  *
  *   record(slug, kind, label, files, key?)   after a write: what each file was and is now
  *   historyOf(slug)                          the entries, oldest first, and how many are applied
@@ -23,7 +23,7 @@ const CAP = 200;
 /** Two writes with the same key this close together are one entry: a slider dragged, a value nudged with the arrows. */
 const MERGE_MS = 2000;
 
-export type HistoryKind = "source" | "tune" | "story";
+export type HistoryKind = "source" | "tune" | "story" | "cut";
 /** One file's change. null is a file that isn't there. */
 export type FileChange = { path: string; before: string | null; after: string | null };
 export type HistoryItem = { id: string; at: number; kind: HistoryKind; label: string; files: string[] };

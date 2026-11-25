@@ -14,6 +14,9 @@
  *                                        brands/<b>/uploads/, public/ads/<slug>/board/ (an image for the board) or
  *                                        public/ads/<slug>/footage/ (a video clip, up to 4 GB)
  *   POST /api/footage { slug, file }     unpacks a clip in footage/ to frames, and answers with its meta (spec.md §6.5)
+ *   GET  /api/take?slug=                   a talking head's cut: take.json, cut.json's lines and cut.md (spec.md §6.11)
+ *   POST /api/take { slug, line?, pick?, verify? }   another try for a line (pick, or null for the cutter's choice), then
+ *                                         bun run take <slug> [--verify]. In the history, so Undo puts the cut back
  *   POST /api/brand-md    { brand, text }   saves brand.md as you edited it
  *   POST /api/brand-check { brand }         runs bun run brand-check
  *   GET  /api/instructions?brand=           the agent's instruction files, and which the brand edited (agents.ts)
@@ -232,6 +235,8 @@ function readAd(folder: string): Ad {
 
   const docs = [
     ["Pitch", "pitch.md"],
+    ["Script", "script.md"],
+    ["The cut", "cut.md"],
     ["Post copy", "post.md"],
     ["Notes", "README.md"],
     ["Reviewer", "review.md"],
@@ -629,9 +634,24 @@ function describe(name: string, input: Record<string, unknown>) {
 type Ask = {
   folder?: string; slug?: string; brand?: string; kit?: string; kind?: string; text: string; shown?: string; session?: string; thread?: string;
   ratios?: Ratio[]; pitch?: boolean; thumbnail?: boolean;
+  /** Files the brief came with (a talking head's take), from the repo root. */
+  files?: string[];
 };
 
-function promptFor({ folder, slug, brand, kit, kind, text, ratios, pitch, thumbnail }: Ask, session?: string) {
+/** What a talking-head brief adds: the guide to follow, and the take if there is one. */
+function talkingHead(files: string[] = []) {
+  const take = files.filter((file) => VIDEO.test(file));
+  const other = files.filter((file) => !VIDEO.test(file));
+  return [
+    "\nKind: a talking-head video, someone talking to camera. Follow .claude/guides/talking-head.md from the start: it says what the pitch is for a take, and how to cut it with bun run take.",
+    take.length
+      ? `The take (move it into your queue folder's inbox/ once you've made the folder): ${take.join(", ")}`
+      : "No take yet: write the script and the recording sheet as the guide says, and stop for the recording.",
+    other.length ? `Also given: ${other.join(", ")}` : "",
+  ].filter(Boolean).join("\n");
+}
+
+function promptFor({ folder, slug, brand, kit, kind, text, ratios, pitch, thumbnail, files }: Ask, session?: string) {
   if (session) return text;
   if (kit) return `Work on the brand kit in brands/${kit}/ (spec.md §9), from the desk. The user says:\n\n${text}`;
   if (folder) return `Continue the ad in queue/${folder}/, following the flow in your prompt. The user says:\n\n${text}`;
@@ -639,7 +659,8 @@ function promptFor({ folder, slug, brand, kit, kind, text, ratios, pitch, thumbn
   const settings = readSettings();
   const asset = kind === "asset" ? `\nKind: an asset, not a video: stills, \`kind: "asset"\` in the registry, one image per scene (spec.md §10.5).` : "";
   const brief = briefFor(settings, { ratios: ratios?.length ? ratios : settings.ratios, pitch, thumbnail, asset: kind === "asset" });
-  return `${text}${brand ? `\n\nBrand: ${brand}` : "\n"}${asset}\n${brief}`;
+  const talking = kind === "talking-head" ? talkingHead(files) : "";
+  return `${text}${brand ? `\n\nBrand: ${brand}` : "\n"}${asset}${talking}\n${brief}`;
 }
 
 function start(ask: Ask) {
@@ -882,6 +903,10 @@ function upload(req: IncomingMessage, res: ServerResponse, query: URLSearchParam
     name = name.replace(/ +/g, "-");
     const [stem, ext] = [name.slice(0, name.lastIndexOf(".")), name.slice(name.lastIndexOf("."))];
     for (let n = 2; existsSync(join(dir, name)); n++) name = `${stem}-${n}${ext}`;
+  } else if (kind === "incoming" && /^[a-z0-9]{6,32}$/.test(target)) {
+    // A talking head's take sent with a new brief, before the agent has made the project's folder: it moves it there.
+    if (!VIDEO.test(name) && !/\.(wav|mp3|m4a|aac|flac|md|txt)$/i.test(name)) return send(res, 400, { error: "A take is a video (or a mic recording, or a script)." });
+    dir = join(QUEUE, "_incoming", target);
   } else if (kind === "footage" && NAME.test(target) && existsSync(join(ADS, target))) {
     if (!VIDEO.test(name)) return send(res, 400, { error: "A clip is a video: MOV, MP4, M4V, WebM, MKV or AVI." });
     dir = join(PUBLIC_ADS, target, "footage");
@@ -889,7 +914,7 @@ function upload(req: IncomingMessage, res: ServerResponse, query: URLSearchParam
     const [stem, ext] = [name.slice(0, name.lastIndexOf(".")), name.slice(name.lastIndexOf("."))];
     for (let n = 2; existsSync(join(dir, name)); n++) name = `${stem}-${n}${ext}`;
   } else return send(res, 400, { error: "Upload to a project, a brand kit or an ad's board." });
-  const limit = kind === "footage" ? 4_000_000_000 : 500_000_000;
+  const limit = kind === "footage" || kind === "incoming" ? 4_000_000_000 : 500_000_000;
   mkdirSync(dir, { recursive: true });
   const path = join(dir, name);
   const out = createWriteStream(path);
@@ -923,6 +948,18 @@ async function post(path: string, body: any, res: ServerResponse) {
     );
   }
 
+  if (path === "/api/take") {
+    const slug = String(body.slug ?? "");
+    if (!NAME.test(slug) || !existsSync(join(ADS, slug, "cut.json"))) return send(res, 404, { error: "That ad has no cut: run bun run take first." });
+    const folderOf = queueOf(slug);
+    if (busy((run) => run.kind === "agent" && (run.slug === slug || (!!folderOf && run.folder === folderOf)))) return send(res, 409, { error: "The agent is working on this ad. Let it finish first." });
+    if (cutting.has(slug)) return send(res, 409, { error: "It's already cutting." });
+    return void recut(slug, body).then(
+      (reply) => send(res, 200, reply),
+      (error) => send(res, error.status ?? 500, { error: String(error?.message ?? error) }),
+    );
+  }
+
   if (path === "/api/ask") {
     const text = String(body.text ?? "").trim();
     if (!text) return send(res, 400, { error: "Write what you want first." });
@@ -943,6 +980,7 @@ async function post(path: string, body: any, res: ServerResponse) {
         kit: kit ?? before?.brand,
         brand: body.brand || before?.uses || undefined,
         kind: body.kind,
+        files: Array.isArray(body.files) ? body.files.map(String).filter((file: string) => /^queue\/_incoming\/[a-z0-9]+\/[^\\/]+$/.test(file) && existsSync(join(ROOT, file))) : undefined,
         text,
         shown: body.shown,
         session: before?.session,
@@ -1157,6 +1195,64 @@ function storyLabel(before: string | null, story: Story): string {
   return keys.length ? `Change ${list(keys)}` : "Change the story";
 }
 
+// ---- A talking head's cut (spec.md §6.11) ----
+
+const cutting = new Set<string>();
+const queueOf = (slug: string) => queueFolders().filter((name) => folderSlug(name) === slug).sort().at(-1);
+
+/** take.json, cut.json's lines and cut.md, for the desk's Cut tab. */
+function cutState(slug: string) {
+  const dir = join(ADS, slug);
+  const parse = (file: string) => {
+    try {
+      return JSON.parse(readIf(join(dir, file)) ?? "null");
+    } catch {
+      return null;
+    }
+  };
+  const take = parse("take.json");
+  const cut = parse("cut.json");
+  if (!take || !cut) return undefined;
+  const folder = queueOf(slug);
+  const report = readIf(folder ? join(QUEUE, folder, "cut.md") : join(ROOT, "out", slug, "cut.md"));
+  return { take, lines: cut.lines ?? [], clip: cut.clip, report, cutting: cutting.has(slug) };
+}
+
+/** Sets a line's try in cut.json (or clears it), then cuts again. Both files go in the history as one change. */
+async function recut(slug: string, body: any) {
+  const dir = join(ADS, slug);
+  const paths = [join(dir, "cut.json"), join(dir, "take.json")];
+  const before = paths.map((path) => readIf(path) ?? null);
+  const line = body.line === undefined ? undefined : String(body.line);
+  let label = body.verify ? "Hear the cut again" : "Cut again";
+  if (line !== undefined) {
+    const cut = JSON.parse(before[0]!);
+    const found = (cut.lines ?? []).find((item: any) => item.id === line);
+    if (!found) throw Object.assign(new Error(`cut.json has no line "${line}".`), { status: 404 });
+    const pick = body.pick === null ? undefined : Number(body.pick);
+    if (pick !== undefined && !(Number.isInteger(pick) && pick >= 1)) throw Object.assign(new Error("A try is a number from 1."), { status: 400 });
+    if (pick === undefined) delete found.pick;
+    else found.pick = pick;
+    writeAtomic(paths[0], JSON.stringify(cut, null, 1) + "\n");
+    label = pick === undefined ? `${line}: the cutter's try` : `${line}: try ${pick}`;
+  }
+  cutting.add(slug);
+  try {
+    const log = await new Promise<string>((done, fail) => {
+      const args = [...NODE_SCRIPT, "scripts/take.ts", slug, ...(body.verify ? ["--verify"] : [])];
+      execFile(process.platform === "win32" ? "node.exe" : "node", args, { cwd: ROOT, maxBuffer: 8e6, env: { ...process.env, PYTHONIOENCODING: "utf-8" } }, (error, stdout, stderr) =>
+        error ? fail(new Error((stderr || stdout || error.message).trim().split("\n").slice(-4).join("\n"))) : done(stdout),
+      );
+    });
+    const after = paths.map((path) => readIf(path) ?? null);
+    const files = paths.map((path, i) => ({ path, before: before[i], after: after[i] })).filter((file) => file.before !== file.after);
+    if (files.length) toHistory(slug, "cut", label, files, `cut:${slug}:${Date.now()}`);
+    return { ...cutState(slug), log: log.replace(/\r/g, "").split("\n").filter((row) => row && !/heard \d+\/\d+/.test(row)).slice(-30).join("\n") };
+  } finally {
+    cutting.delete(slug);
+  }
+}
+
 /** The ad's history: what the desk changed, and moving through it (history.ts). */
 function historyPost(path: string, body: any) {
   const slug = String(body.slug ?? "");
@@ -1311,6 +1407,11 @@ export function deskApi(server: ViteDevServer) {
         } catch (error) {
           return send(res, ...sourceFailure(error));
         }
+      }
+      if (path === "/api/take") {
+        const slug = url.searchParams.get("slug") ?? "";
+        const found = NAME.test(slug) ? cutState(slug) : undefined;
+        return send(res, found ? 200 : 404, found ?? { error: "No cut for that ad." });
       }
       if (path === "/api/history") {
         const slug = url.searchParams.get("slug") ?? "";

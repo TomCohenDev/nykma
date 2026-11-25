@@ -188,7 +188,72 @@ async function checkSound(video: Video, file: string, sound?: Stream) {
 
 type Line = { x: number; y: number; width: number; height: number };
 type Item = TextItem & { lines: Line[]; block: number; contrast?: number };
-type Sample = { frame: number; items: Item[]; colours: string[]; written: string[] };
+type Sample = { frame: number; items: Item[]; colours: string[]; written: string[]; cams: Cam[] };
+/** A talking head's camera (<TakeCam>, src/parts/take.tsx): its box, whether it's a circle, and the face's box in it. */
+type Cam = { id: string; box: Line; round: boolean; face: Line; guessed: boolean; forced: boolean; opacity: number };
+
+/** Where every <TakeCam> on the frame shows the face. */
+async function cameras(page: Page): Promise<Cam[]> {
+  return page.evaluate(() => {
+    const stage = document.querySelector("[data-nykma-stage]")!;
+    const origin = stage.getBoundingClientRect();
+    const rect = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left - origin.left, y: r.top - origin.top, width: r.width, height: r.height };
+    };
+    return [...stage.querySelectorAll("[data-take-cam]")].flatMap((el) => {
+      const face = el.querySelector("[data-face]");
+      // The camera shows what its nearest clipping box shows: often a circle or a frame around it.
+      let clip: Element = el;
+      for (let up = el.parentElement; up && up !== stage; up = up.parentElement) {
+        const style = getComputedStyle(up);
+        if (style.overflow !== "visible") {
+          clip = up;
+          break;
+        }
+      }
+      const box = rect(clip);
+      let opacity = 1;
+      for (let up: Element | null = el; up && up !== stage; up = up.parentElement) opacity *= Number(getComputedStyle(up).opacity);
+      const radius = parseFloat(getComputedStyle(clip).borderTopLeftRadius) || 0;
+      if (!face || box.width < 8 || box.height < 8) return [];
+      return [{ id: el.getAttribute("data-take-cam") ?? "", box, round: radius >= Math.min(box.width, box.height) * 0.4, face: rect(face), guessed: face.getAttribute("data-face") === "guessed", forced: face.hasAttribute("data-face-forced"), opacity }];
+    });
+  });
+}
+
+/**
+ * A talking head's face, from what the user kept saying about it: the whole head in the box (not cut at the top), its
+ * centre near the box's, not so close it fills it, and no caption across it.
+ */
+function faceProblems(cams: Cam[], items: Item[]): Problem[] {
+  const problems: Problem[] = [];
+  for (const cam of cams.filter((c) => c.opacity >= 0.5)) {
+    const { box, face } = cam;
+    const cx = face.x + face.width / 2;
+    const cy = face.y + face.height / 2;
+    const bx = box.x + box.width / 2;
+    const by = box.y + box.height / 2;
+    const name = `the face in ${cam.id}'s camera${cam.guessed ? " (no face found in the take, so guessed)" : ""}`;
+    // The face's box runs from the forehead to the chin (YuNet's). Hair past the edge is framing; a forehead or chin is a cut.
+    const inside = (x: number, y: number) =>
+      cam.round ? Math.hypot(x - bx, y - by) <= Math.min(box.width, box.height) / 2 + 2 : x >= box.x - 2 && x <= box.x + box.width + 2 && y >= box.y - 2 && y <= box.y + box.height + 2;
+    if (!inside(cx, face.y) || !inside(cx, face.y + face.height)) problems.push({ kind: "face-cut", text: cam.id, detail: `${name} is cut off: the ${!inside(cx, face.y) ? "forehead" : "chin"} is outside it` });
+    const off = (cx - bx) / box.width;
+    if (Math.abs(off) > 0.12) problems.push({ kind: "face-side", text: cam.id, detail: `${name} sits ${off > 0 ? "right" : "left"} of centre by ${Math.round(Math.abs(off) * 100)}% of the camera's width` });
+    const low = (cy - by) / box.height;
+    if (low > 0.1) problems.push({ kind: "face-low", text: cam.id, detail: `${name} sits low, ${Math.round(low * 100)}% of the camera's height below centre: move it up (TakeCam place)` });
+    const size = face.height / box.height;
+    const small = box.width < 700;
+    if (size > (small ? 0.66 : 0.42))
+      problems.push({ kind: "face-big", text: cam.id, detail: `${name} is too close, ${Math.round(size * 100)}% of the camera's height: ${cam.forced ? "the take is framed too close to show it smaller in this shape; a taller box, or record further from the phone" : "show more head and shoulders (TakeCam face)"}` });
+    if (size < (small ? 0.3 : 0.12)) problems.push({ kind: "face-small", text: cam.id, detail: `${name} is small, ${Math.round(size * 100)}% of the camera's height: closer (TakeCam face)` });
+    // Captions come a word at a time, so the words over the face make one finding.
+    const over = items.filter((i) => i.opacity >= 0.5 && i.lines.some((l) => overlap(l, face) > 0.15)).map((i) => i.text);
+    if (over.length) problems.push({ kind: "face-covered", text: cam.id, detail: `text covers ${name} ("${short(over.join(" "), 30)}"): move it below the chin` });
+  }
+  return problems;
+}
 
 async function lineBoxes(page: Page, items: TextItem[]): Promise<Item[]> {
   const extra = await page.evaluate(() => {
@@ -344,6 +409,7 @@ async function samplePage(session: Session, tool: Page, video: Video) {
     // Handwriting in `ink` mode is strokes with no text in it, and only its label says what it reads. Truth has to see that too,
     // from the frame the pen starts: an unwritten HandText is mounted, labelled and empty.
     const written = await page.evaluate(() => [...document.querySelectorAll("[data-nykma-stage] svg[role=img][aria-label]:has(path, text)")].map((svg) => svg.getAttribute("aria-label")!));
+    const cams = await cameras(page);
     const wantColours = i % 4 === 0;
     const measured = items.flatMap((item) => {
       const colour = parseColour(item.color);
@@ -353,8 +419,8 @@ async function samplePage(session: Session, tool: Page, video: Video) {
       const shot = await backdrop(page, frame);
       const { contrasts, colours } = await measure(tool, shot, measured.map(({ box }) => box), wantColours);
       measured.forEach(({ item }, at) => (item.contrast = contrasts[at]));
-      samples.push({ frame, items, colours, written });
-    } else samples.push({ frame, items, colours: [], written });
+      samples.push({ frame, items, colours, written, cams });
+    } else samples.push({ frame, items, colours: [], written, cams });
   }
 
   await rerenders(session, tool, video);
@@ -431,9 +497,9 @@ function checkLayout({ video, samples }: Pass) {
   type Open = Problem & { first: number; last: number; at: number };
   const done: Open[] = [];
   let open: Open[] = [];
-  samples.forEach(({ frame, items }, at) => {
+  samples.forEach(({ frame, items, cams }, at) => {
     const still: Open[] = [];
-    for (const problem of layoutProblems(video, items)) {
+    for (const problem of [...layoutProblems(video, items), ...faceProblems(cams, items)]) {
       const known = still.find((run) => run.kind === problem.kind && sameText(run.text, problem.text));
       if (known) continue;
       const run = open.find((candidate) => candidate.kind === problem.kind && sameText(candidate.text, problem.text));
@@ -447,7 +513,8 @@ function checkLayout({ video, samples }: Pass) {
 
   for (const run of done.sort((a, b) => a.first - b.first)) {
     const held = (run.last - run.first) / video.fps >= LIMITS.sustained;
-    const mild = run.kind === "small" || run.kind === "contrast-small";
+    // A face a little off is a note; a head cut off at the top fails like text out of the frame.
+    const mild = run.kind === "small" || run.kind === "contrast-small" || (run.kind.startsWith("face-") && run.kind !== "face-cut");
     add("Layout", held && !mild ? "fail" : "warn", run.detail, label(video), run.first, run.last);
   }
 }
@@ -693,6 +760,21 @@ function checkTransitions(videos: Video[]) {
 }
 
 /** Every literal `data-fx` in the ad's code that won't parse: those steps do nothing. */
+/** A talking head cut by bun run take: the cut is current, and it was heard again (`--verify`) before the user hears it. */
+function checkTake(slug: string, folder?: string) {
+  const dir = join(ROOT, "src", "ads", slug);
+  const cut = join(dir, "cut.json");
+  const take = join(dir, "take.json");
+  if (!existsSync(take)) return;
+  if (existsSync(cut) && statSync(cut).mtimeMs > statSync(take).mtimeMs + 1000)
+    add("Sound", "fail", `cut.json changed after the cut was made, so the ad plays the old one. Run: bun run take ${slug}`);
+  const md = folder ? readIf(join(folder, "cut.md")) : readIf(join(outDir(slug), "cut.md"));
+  if (!md) return add("Sound", "warn", `no cut.md for the take. Run: bun run take ${slug}`);
+  const verify = md.split(/^## Verify\s*$/m)[1]?.split(/^## /m)[0];
+  if (verify === undefined) add("Sound", "warn", `the cut wasn't heard again for clipped or doubled words. Run: bun run take ${slug} --verify`);
+  else if (/^\| (?!Scene|---)/m.test(verify)) add("Sound", "warn", `heard again, the cut differs from its words in places (cut.md, Verify): listen to them`);
+}
+
 function checkEffects(slug: string) {
   const dir = join(ROOT, "src", "ads", slug);
   if (!existsSync(dir)) return;
@@ -821,6 +903,7 @@ if (folder) {
 }
 checkHand(slug);
 checkTune(slug);
+checkTake(slug, folder);
 checkTransitions(videos);
 checkEffects(slug);
 if (readme) deliberate(readme);

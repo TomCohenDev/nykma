@@ -14,7 +14,8 @@ import { Scrubber, Timeline, timecode, type Clip } from "./Timeline";
 import { Viewer, type Layer, type Picked, type Sample, type Snap, type Transform, type ViewerApi } from "./Viewer";
 import { AddPanel, type AddItem } from "./AddPanel";
 import { LayersPanel } from "./LayersPanel";
-import { BackIcon, CloseIcon, FileIcon, FilmIcon, FrameIcon, ImageIcon, LayersIcon, PlayIcon, PauseIcon, PlusIcon, RenderIcon, SendIcon, SparkIcon } from "./icons";
+import { CutPanel } from "./CutPanel";
+import { BackIcon, CloseIcon, CutIcon, FileIcon, FilmIcon, FrameIcon, ImageIcon, LayersIcon, PlayIcon, PauseIcon, PlusIcon, RenderIcon, SendIcon, SparkIcon } from "./icons";
 import { Markdown } from "./md";
 import { imageSeconds, type Story, type StoryImage } from "../engine/ad";
 import type { StoryTransition } from "../engine/transitions";
@@ -258,7 +259,15 @@ export function ProjectView({ project, run, go, refresh, registryError }: Props)
   }, [snap]);
   const [selection, setSelection] = useState<Selection>(null);
   const [rightTab, setRightTab] = useState<"inspect" | "effects" | "history" | "agent">(() => (project?.running || run || !project || project.state === "pitch" ? "agent" : "inspect"));
-  const [leftTab, setLeftTab] = useState<"scenes" | "layers" | "add" | "media" | "files">("scenes");
+  const [leftTab, setLeftTab] = useState<"scenes" | "cut" | "layers" | "add" | "media" | "files">("scenes");
+  // A talking head cut by bun run take has a Cut tab: its lines, their tries, what was left out.
+  const [hasCut, setHasCut] = useState(false);
+  useEffect(() => {
+    if (!project?.slug) return setHasCut(false);
+    fetch(`/api/take?slug=${encodeURIComponent(project.slug)}`)
+      .then((res) => setHasCut(res.ok))
+      .catch(() => setHasCut(false));
+  }, [project?.slug, project?.running]);
   // The Layers tab: the selectable elements on the frame under the playhead, read from the viewer.
   const [layers, setLayers] = useState<Layer[] | null>(null);
   // The Add tab: a tile being dragged, the ad's look under the playhead, and a new element waiting to be seen once.
@@ -777,11 +786,11 @@ export function ProjectView({ project, run, go, refresh, registryError }: Props)
 
       <aside className="studio-left">
         <div className="ptabs">
-          {(["scenes", "layers", "add", "media", "files"] as const).map((tab) => {
-            const label = tab === "scenes" ? (take?.kind === "asset" ? "Images" : "Scenes") : tab === "layers" ? "Layers" : tab === "add" ? "Add" : tab === "media" ? "Media" : "Files";
+          {(["scenes", ...(hasCut ? (["cut"] as const) : []), "layers", "add", "media", "files"] as const).map((tab) => {
+            const label = tab === "scenes" ? (take?.kind === "asset" ? "Images" : "Scenes") : tab === "cut" ? "Cut" : tab === "layers" ? "Layers" : tab === "add" ? "Add" : tab === "media" ? "Media" : "Files";
             return (
               <button key={tab} className={`ptab${leftTab === tab ? " on" : ""}`} onClick={() => setLeftTab(tab)} title={label} aria-label={label}>
-                {tab === "scenes" ? <FilmIcon size={14} /> : tab === "layers" ? <LayersIcon size={14} /> : tab === "add" ? <PlusIcon size={14} /> : tab === "media" ? <ImageIcon size={14} /> : <FileIcon size={14} />}
+                {tab === "scenes" ? <FilmIcon size={14} /> : tab === "cut" ? <CutIcon size={14} /> : tab === "layers" ? <LayersIcon size={14} /> : tab === "add" ? <PlusIcon size={14} /> : tab === "media" ? <ImageIcon size={14} /> : <FileIcon size={14} />}
                 <span className="ptab-label">{label}</span>
               </button>
             );
@@ -861,6 +870,19 @@ export function ProjectView({ project, run, go, refresh, registryError }: Props)
               {!info && project && <p className="panel-empty">The ad isn't in the registry yet, so the timeline shows the pitch's storyboard.</p>}
               {registryError && <p className="panel-error">The registry didn't load: {registryError}</p>}
             </>
+          )}
+          {leftTab === "cut" && project && (
+            <CutPanel
+              slug={project.slug}
+              version={historyKey}
+              onSeek={(id) => {
+                const i = clips.findIndex((clip) => clip.id === id);
+                if (i < 0) return;
+                setPlaying(false);
+                setFrame(starts[i]);
+              }}
+              onChanged={() => (refresh(), setHistoryKey((key) => key + 1))}
+            />
           )}
           {leftTab === "layers" && (
             <LayersPanel

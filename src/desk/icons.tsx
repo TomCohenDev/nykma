@@ -98,6 +98,14 @@ export const FileIcon = (p: P) => (
     <path d="M9 1.5v3h3M6 8h4M6 10.5h4" />
   </Icon>
 );
+export const CutIcon = (p: P) => (
+  <Icon {...p}>
+    <circle cx="6" cy="6" r="2.5" />
+    <circle cx="6" cy="18" r="2.5" />
+    <path d="M8 7.5 20 17M8 16.5 20 7" />
+  </Icon>
+);
+
 export const FilmIcon = (p: P) => (
   <Icon {...p}>
     <rect x="2" y="3" width="12" height="10" rx="1.5" />

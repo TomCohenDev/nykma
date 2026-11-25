@@ -24,6 +24,8 @@ bun run stamp [<brand>] / bun run stamp --report   # which instructions make an 
 bun run hand <slug> [--force] / bun run hand:check <slug>
 bun run footage <slug> [<clip> ...]            # real footage -> frames, sound and sheet.jpg in gen/footage/
 bun run footage <slug> <url> --own             # the brand's own video, through yt-dlp
+bun run take <slug> <take> [--mic <file>]      # a talking-head take, cut: last good try of each line, pauses, voice, face -> cut.md (free, local)
+bun run take <slug> [--verify]                 # cut again from src/ads/<slug>/cut.json; --verify hears the cut again for clipped words
 bun run gen <slug> --estimate                  # generated stills and clips in gen.json, priced (free)
 bun run gen <slug>                             # makes the stills through the desk, within the budget approved there (videos: the desk)
 bun run screen <slug> <clip> [--corners "x,y x,y x,y x,y"]   # finds a (green) screen in a clip, for <ScreenInsert>

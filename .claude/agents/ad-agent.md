@@ -88,6 +88,7 @@ Read a guide when its moment comes, not before: everything in them is about buil
 | The idea needs depth: a device turning in space, 3D type or objects, a camera through a space | `.claude/guides/3d.md` |
 | The brief asks for a thumbnail (its "Thumbnail:" line) | `.claude/guides/thumbnail.md`, at the pitch, for the cover's words |
 | The user gives you video, or a clip on the timeline | `.claude/guides/footage.md` |
+| Someone talks to camera: a take to cut, a script to record, a person over screens, a tutorial | `.claude/guides/talking-head.md`, from the brief on: it routes to the script, cut and look guides |
 | A shot code can't make: a person, a place, a thing in the world | `.claude/guides/stock.md`, then `.claude/guides/generated.md` if stock has nothing |
 | The ad is in Hebrew (from the first idea) | `.claude/guides/hebrew.md` |
 | "Check it" | `.claude/guides/checks.md` |

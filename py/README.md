@@ -29,6 +29,8 @@ $py py/mv.py gen <slug> --force music      # re-roll one thing: music, stems, or
 $py py/mv.py blender <slug> --scene src/ads/<slug>/scene.py --preview --frames 1,300   # quick stills, out/<slug>/blender/
 $py py/mv.py blender <slug> --scene <file> --layer    # PNG plates, gen/blender/<scene>/, prints the <Plate> line
 $py py/mv.py blender <slug> --scene <file> --video    # standalone mp4 with mix.wav, out/<slug>/blender/<scene>.mp4
+$py py/take.py <clip dir> --cut … --take … --report …   # the talking-head cutter; bun run take runs it (spec.md §6.11)
+$py -m unittest py/test_take.py           # its choices, on made-up transcripts
 $py py/test_mv.py                          # tests; the real SDK against a fake server, no credits
 ```
 

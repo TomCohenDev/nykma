@@ -17,6 +17,7 @@
     "hand:check": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/hand-check.ts",
     "footage": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/footage.ts",
     "screen": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/screen.ts",
+    "take": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/take.ts",
     "gen": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/gen.ts",
     "stock": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/stock.ts",
     "publish": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/publish.ts",

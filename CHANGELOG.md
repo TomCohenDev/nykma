@@ -2,6 +2,22 @@
 
 Newest first. `spec.md` says how nykma works now. This file says what changed and why.
 
+## 2026-11-25
+
+### Added: talking heads, cut by nykma (`bun run take`, the Cut tab, the talking-head guides)
+- **Why.** The user has made several talking-head videos in nykma and each took two or more rounds of notes: the retakes cut by hand from Whisper's transcript, a `take.mjs` written per video, the face too low, too big or cut off in the circle, captions, too little moving. The user asked for talking-head skills better than what's out there. Research (other Claude skills and agent editors such as video-use, talking-head-editor, cut-video and HyperFrames, and the commercial tools: Descript, Captions, Submagic, Opus Clip, CapCut, Premiere) found the same core everywhere: keep the last complete take, shorten pauses to about a quarter second, pad the cut points asymmetrically, -14 LUFS, word-by-word captions. It found nothing for Hebrew or for where the face sits in the frame, and only one tool (talking-head-editor) hears its cut again to check it.
+- **What.**
+  - `bun run take` (`scripts/take.ts`, `py/take.py`, spec.md §6.11) cuts a take from its script or without one: it hears it a pause at a time, picks each line's last complete try, takes out restarts, stutters, fillers and long pauses, lines up a separate mic, cleans the voice, and finds the face and how far it jumps at each cut. It writes `cut.json` (the decisions), `take.json` (the cut the ad imports) and `cut.md` (the table). `--verify` hears the cut again and lists clipped or extra words.
+  - `src/parts/take.tsx`: `TakeCam` (the face framed from data), `SpokenCaptions`, `voiceCues`, `cutZoom`, `punch` and `saidAt`, from the two tutorials' own kits, made general.
+  - `validate` checks every talking-head camera's face (cut off, off centre, low, too close or small, text across it), and a stale or unverified cut.
+  - The desk: **Talking head** in the brief, with the take uploaded alongside it, and a **Cut** tab that lists each line's tries, so the user can swap one and undo it, then cut again or verify.
+  - Guides: `talking-head.md` is now the route, and `talking-head-script.md`, `talking-head-cut.md` and `talking-head-look.md` hold the craft, with numbers from the research. `queue/_template/script.md` is the script and the recording sheet. A brand's `spelling.json` holds how Whisper hears its product names.
+- **Tested.**
+  - The cutter against the user's approved cuts. One tutorial, with its script, got the same tries and cut points within about 0.1 s. Another had no script (the user improvised) and gave the same 20 stretches. Verify found 98% of the first one's words.
+  - A test ad of the parts, rendered at -14.3 LUFS, which `validate --layout` passed. It caught a chin pushed out of the circle and a caption over the face. The test ad is removed.
+  - Typecheck. The desk's new tab and composer typecheck, but weren't clicked through in a browser.
+- **Not changed.** `ad-agent.md` gets one row's wording, so no prompt version was saved for `bun run eval`; the guides it routes to are new.
+
 ## 2026-11-22
 
 ### Fixed: the desk turning black on nykma-launch

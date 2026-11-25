@@ -76,7 +76,11 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
 function Composer({ brands, go, focusKey }: { brands: BrandKit[]; go: Go; focusKey: number }) {
   const [text, setText] = useState("");
   const [brand, setBrand] = useState(brands[0]?.name ?? "");
-  const [kind, setKind] = useState<"video" | "asset">("video");
+  const [kind, setKind] = useState<"video" | "asset" | "talking-head">("video");
+  // A talking head's take (and a mic recording or a script), sent with the brief.
+  const [takeFiles, setTakeFiles] = useState<File[]>([]);
+  const [sent, setSent] = useState("");
+  const takeInput = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
   // This ad's layouts start from the saved settings, and change only for this ad.
@@ -103,10 +107,22 @@ function Composer({ brands, go, focusKey }: { brands: BrandKit[]; go: Go; focusK
     if (!text.trim() || sending) return;
     setSending(true);
     setError("");
-    post("/api/ask", { text, brand: brand || undefined, kind, ratios, pitch, thumbnail: kind === "asset" ? undefined : thumbnail })
+    const files = kind === "talking-head" ? takeFiles : [];
+    (async () => {
+      // The take goes up first, to queue/_incoming/<batch>/, and the agent moves it into the project's folder.
+      const batch = Math.random().toString(36).slice(2, 12).padEnd(8, "0");
+      const paths: string[] = [];
+      for (const [i, file] of files.entries()) {
+        setSent(`Uploading ${file.name} (${i + 1} of ${files.length})…`);
+        paths.push(await upload(file, `incoming:${batch}`));
+      }
+      setSent("");
+      return post("/api/ask", { text, brand: brand || undefined, kind, ratios, pitch, thumbnail: kind === "asset" ? undefined : thumbnail, files: paths });
+    })()
       .then((reply) => go(`#/run/${reply.id}`))
       .catch((failure) => {
         setError(failure.message);
+        setSent("");
         setSending(false);
       });
   };
@@ -122,7 +138,11 @@ function Composer({ brands, go, focusKey }: { brands: BrandKit[]; go: Go; focusK
         onKeyDown={(event) => {
           if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) submit();
         }}
-        placeholder="What should the next ad be about? A 15-second ad that shows the free plan solving one real homework problem…"
+        placeholder={
+          kind === "talking-head"
+            ? "What's the video about? A one-minute tutorial: build a lead machine with Claude and Google Sheets. Add your take, or leave it out for a script first…"
+            : "What should the next ad be about? A 15-second ad that shows the free plan solving one real homework problem…"
+        }
       />
       <div className="brief-opts">
         <label className="opt">
@@ -140,6 +160,9 @@ function Composer({ brands, go, focusKey }: { brands: BrandKit[]; go: Go; focusK
           </button>
           <button type="button" aria-pressed={kind === "asset"} onClick={() => setKind("asset")}>
             Asset
+          </button>
+          <button type="button" aria-pressed={kind === "talking-head"} onClick={() => setKind("talking-head")} title="Someone talking to camera: a take nykma cuts for you, or a script for you to record">
+            Talking head
           </button>
         </div>
         <div className="seg" role="group" aria-label="Layouts">
@@ -159,7 +182,32 @@ function Composer({ brands, go, focusKey }: { brands: BrandKit[]; go: Go; focusK
             Cover image
           </label>
         )}
-        <span className="brief-hint">{pitch ? "" : "No pitch: the agent builds straight away and stops at the first look."}</span>
+        {kind === "talking-head" && (
+          <>
+            <button type="button" className="ghost" onClick={() => takeInput.current?.click()} title="Your take of the whole script, retakes and all. A separate mic recording or the script can go with it.">
+              {takeFiles.length ? `${takeFiles.length} file${takeFiles.length > 1 ? "s" : ""}: ${takeFiles.map((file) => file.name).join(", ")}` : "Add the take"}
+            </button>
+            <input
+              ref={takeInput}
+              type="file"
+              accept="video/*,audio/*,.md,.txt"
+              multiple
+              hidden
+              onChange={(event) => {
+                setTakeFiles([...(event.target.files ?? [])]);
+                event.target.value = "";
+              }}
+            />
+          </>
+        )}
+        <span className="brief-hint">
+          {sent ||
+            (kind === "talking-head" && !takeFiles.length
+              ? "No take yet: the agent writes the script and a sheet to record from, then stops for your take."
+              : pitch
+                ? ""
+                : "No pitch: the agent builds straight away and stops at the first look.")}
+        </span>
         <button className="primary" disabled={!text.trim() || sending}>
           {sending ? "Starting…" : pitch ? "Pitch it" : "Build it"} <kbd>Ctrl ↵</kbd>
         </button>

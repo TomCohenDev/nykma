@@ -11,3 +11,4 @@ export * from "./Caption";
 export * from "./EndCard";
 export * from "./timeline";
 export * from "./hand";
+export * from "./take";
