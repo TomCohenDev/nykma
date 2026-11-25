@@ -19,10 +19,13 @@ const s = take.scene("hook");
 <SpokenCaptions words={s.words} style={{ left: 60, top: 1270, width: 960, height: 220 }} accent="#BF95F9" font={HE} />
 ```
 
-- `voiceCues` plays each part of the scene from the cleaned voice, trimmed in frames, with 10 ms fades. Picture and sound read the same parts, so lips stay in sync through every cut.
+- `voiceCues` plays each part of the scene from the cleaned voice, trimmed in frames, with a 2-frame fade at each edge. Picture and sound read the same parts, so lips stay in sync through every cut.
+- `<TakeScreen take scene />` plays the screen recording made during the take (`bun run take --screen`), at what was on screen as each word was said, through every cut. Put it where the screen goes; `fit`, `focus` and `zoom` as on `<Footage>`.
 - `TakeCam` frames the face from the cutter's face data: `place` is where the face's centre lands in the box, `face` its height (forehead to chin) as a share of the box. It never shows past the clip's edge, so a close take in a square stays bigger than asked (validate says so). Put it inside the shape that clips it: a circle, a rounded frame.
 - `cutZoom` hides the jump cuts inside a line: it alternates the framing between 1 and 1.1 at each cut where the head moved, which reads as a second camera, and leaves it alone where the head held still. `punch` is a short push-in that settles, for a word that lands.
 - `SpokenCaptions` sets the person's own words a page at a time, word by word as said, from the cut. `saidAt(scene, "word")` is the frame a word is said, to time anything else to it.
+- `<TakeFrame take scene box>` is the person in a moving box: `boxAt(f, keys)` springs it from one box to the next (full frame, a circle, a ring around a screen), and the framing follows the box's size, so the face stays right on the way.
+- `cropAt(f, keys)` and `<CropView crop source w h>` are a camera on a screen, recorded or redrawn: it moves from one rectangle of the screen to the next, eased, and never shows past the screen's edge. `cropPoint` says where a point of the screen lands, for a tap or a highlight.
 - A bespoke look (the brand's frame, its own caption style) can copy any of these into the ad's kit and change it.
 
 ## Framing
@@ -49,9 +52,18 @@ const s = take.scene("hook");
 - **An embed** (one huge word on the screen, behind or beside the person) is rare and earned: at most one a scene, never two on screen at once.
 - **Hebrew** reads right to left with English kept left to right inside it (`SpokenCaptions` does it). A highlight marks a whole word: a Hebrew prefix (ה־, ב־, ו־) is part of the word it's on.
 
+## Moving the person and the screens
+
+How the take and the screens move together, from the tutorials the user approved:
+
+- **Two places for the person, and moves between them.** Filling the frame for the hook, a punchline and the last line; a circle over the screen everywhere else. The move happens at a line's start, carried over the cut (`boxAt(f, [[0, FULL], [0, CIRCLE]])`: two keys at frame 0 spring from the last scene's place into this one's), or on the word that sends the viewer to the screen. A spring of about half a second (stiffness 170, damping 19) reads as a move, not a cut.
+- **Zooms on the person:** `cutZoom` at the jump cuts where the head moved, and `punch` (0.06 to 0.08, gone in about a quarter second) on a word that lands: a name, "wow", the number. Not on every line, and never more than about 1.2 in total.
+- **The camera on a screen** goes to what the line is about: the whole screen first, then the part being talked about as it's said (start the move 4 to 14 frames before the word, 12 to 24 frames long), and back out when the line moves on. A screen enters at its cut and keeps drifting slowly (about 2% over the scene), so it's never a still.
+- **The screen and the person never fight:** while the person fills the frame, no screen; while a screen is up, the person is the circle at a bottom corner, over it.
+
 ## Motion: something changes every 2 to 4 seconds
 
-A still screen with a caption under it reads as "not clear enough", and a person talking with nothing moving reads as long. The change can be a cut, a scale (a jump cut zoom, a punch on a beat), a screen springing in, a sticker on a key word, a number counting up, the camera moving across a screen to what the line is about. Time each to the word it belongs to (`saidAt`), entering at most half a second before it. Keep the first half-second of a line clear of new graphics, so the viewer hears it begin. One motion language for the whole video (ad-agent, Craft).
+A still screen with a caption under it reads as "not clear enough", and a person talking with nothing moving reads as long. The change can be a cut, a move of the person (full frame to circle), a scale (a jump cut zoom, a punch on a beat), a screen coming in, the camera moving across a screen to what the line is about, or the brand's own graphics (its stickers, counters, labels: `notes.md` says what they look like). Time each to the word it belongs to (`saidAt`), entering at most half a second before it. Words on screen (a sticker, a label) say only what the person says aloud: a product, a site or a feature they didn't name doesn't go on screen. A number on screen (a counter, a stat, a terminal's "100%") needs its source like any claim, or it goes. Icons (✓ ▶ ↗) are drawn as SVG: brand fonts rarely have them, and validate fails a system-font fallback. Keep the first half-second of a line clear of new graphics, so the viewer hears it begin. One motion language for the whole video (ad-agent, Craft).
 
 ## Screens of real products
 

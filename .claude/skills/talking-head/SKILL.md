@@ -11,7 +11,7 @@ nykma's talking-head method lives in its guides, which the desk's agent runs rea
 2. Read the brand's `brands/<brand>/notes.md` (`bun run history <brand>`): its layout and look win over the guides' defaults.
 3. Where you are decides the step:
    - **No take yet:** write `script.md` from `queue/_template/script.md` and stop for the recording.
-   - **A take:** `bun run take <slug> <take> [--mic <file>]`, read `cut.md`, fix spellings and highlights in `src/ads/<slug>/cut.json`, then `bun run take <slug> --verify`.
+   - **A take:** `bun run take <slug> <take> [--mic <file>] [--screen <file>]`, read `cut.md`, fix spellings and highlights in `src/ads/<slug>/cut.json`, then `bun run take <slug> --verify`.
    - **A note about the cut** ("use the other take of the hook", "you cut my last word"): change `cut.json` (`pick`, `trim`, the line's words) and run `bun run take <slug>` again. The user can also pick tries on the desk's Cut tab.
    - **A note about the picture:** `.claude/guides/talking-head-look.md`, then `bun run validate <slug> --layout` and a stills sheet before you show it.
 4. A note that should hold for the brand's next videos goes in `brands/<brand>/notes.md`, not in memory: agent runs don't read memory.

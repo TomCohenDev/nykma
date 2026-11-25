@@ -645,7 +645,7 @@ function talkingHead(files: string[] = []) {
   return [
     "\nKind: a talking-head video, someone talking to camera. Follow .claude/guides/talking-head.md from the start: it says what the pitch is for a take, and how to cut it with bun run take.",
     take.length
-      ? `The take (move it into your queue folder's inbox/ once you've made the folder): ${take.join(", ")}`
+      ? `The recordings (move them into your queue folder's inbox/ once you've made the folder): ${take.join(", ")}.${take.length > 1 ? " One is the take; the others may be a separate mic (--mic) and a screen recording made during the take (--screen): tell them apart by probing each (length, picture, sound), and ask if it isn't clear." : ""}`
       : "No take yet: write the script and the recording sheet as the guide says, and stop for the recording.",
     other.length ? `Also given: ${other.join(", ")}` : "",
   ].filter(Boolean).join("\n");

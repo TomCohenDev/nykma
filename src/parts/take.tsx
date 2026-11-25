@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Footage, useFrame, type Cue } from "../engine";
 import { against, runs, type Dir } from "./bidi";
-import { clamp, spring } from "./time";
+import { clamp, easings, lerp, prog, spring } from "./time";
 
 /**
  * A talking-head take, cut by `bun run take` (spec.md §6.11): the person's own words and picture, one scene per line.
@@ -29,6 +29,11 @@ export type TakeFile = {
   face: Face | null;
   frames: number;
   scenes: TakeScene[];
+  /**
+   * A screen recording made during the take (`bun run take --screen`): `at` is the take's second it starts at, lined up
+   * by its sound, or set by hand in cut.json when it had none. Null until it's lined up.
+   */
+  screen?: { name: string; src: string; fps: number; frames: number; width: number; height: number; at: number | null; by: string } | null;
 };
 export type Take = TakeFile & {
   /** The scene with this id; throws if the cut has none, so a renamed line fails loudly. */
@@ -68,10 +73,11 @@ export function takeTime(take: TakeFile, scene: TakeScene, f: number) {
 }
 
 /**
- * The scene's voice: one cue per part, trimmed from the cleaned voice, with a 10 ms fade at each edge (a longer fade
- * blurs speech; the cut points already sit in the quiet before and after the words).
+ * The scene's voice: one cue per part, trimmed from the cleaned voice, with a 2-frame fade at each edge (`fade`, in
+ * frames). The cut points sit in the quiet before and after the words, so the fade runs over room tone, not speech; 2 to
+ * 3 frames is what the user's approved tutorials used.
  */
-export function voiceCues(take: TakeFile, scene: TakeScene, { volume = 1, fade = 0.3, src = take.voice }: { volume?: number; fade?: number; src?: string } = {}): Cue[] {
+export function voiceCues(take: TakeFile, scene: TakeScene, { volume = 1, fade = 2, src = take.voice }: { volume?: number; fade?: number; src?: string } = {}): Cue[] {
   return scene.parts.map((p) => ({
     src,
     at: p.at,
@@ -107,6 +113,28 @@ export function cutZoom(scene: TakeScene, f: number, { amount = 0.1, visible = 0
 export const punch = (f: number, beats: readonly number[], amount = 0.06) =>
   1 + beats.reduce((m, at) => Math.max(m, f >= at ? amount * Math.exp(-(f - at) / 7) * Math.min(1, (f - at + 1) / 2) : 0), 0);
 
+/**
+ * Seconds into the screen recording at the scene's frame f: what was on screen as this word was said, through every cut.
+ * Throws when the recording isn't lined up yet (cut.md says how).
+ */
+export function screenTime(take: TakeFile, scene: TakeScene, f: number) {
+  const at = take.screen?.at;
+  if (at == null) throw new Error("The screen recording isn't lined up with the take: set screen.at in cut.json (cut.md says how) and run bun run take again.");
+  return takeTime(take, scene, f) - at;
+}
+
+/**
+ * The screen recording, playing in step with the person: the frame of it that was on screen as each word was said. It
+ * fills its parent (`fit`, `focus` and `zoom` as on `<Footage>`); before the recording starts it holds its first frame.
+ */
+export function TakeScreen({ take, scene, f: given, fit = "cover", focus, zoom, style }: { take: TakeFile; scene: TakeScene; f?: number; fit?: "cover" | "contain"; focus?: [number, number]; zoom?: number; style?: CSSProperties }) {
+  const local = useFrame();
+  const f = given ?? local;
+  const screen = take.screen;
+  if (!screen) throw new Error("This take has no screen recording: bun run take <slug> --screen <file>.");
+  return <Footage src={screen.src} fps={screen.fps} frames={screen.frames} at={() => Math.max(0, screenTime(take, scene, f))} fit={fit} focus={focus} zoom={zoom} style={style} />;
+}
+
 type CamProps = {
   take: TakeFile;
   scene: TakeScene;
@@ -139,9 +167,11 @@ export function TakeCam({ take, scene, w, h, place = [0.5, 0.44], face: faceSize
   const f = given ?? local;
   const { clip } = take;
   const [cx, cy, , fh] = scene.face ?? take.face ?? [0.5, 0.4, 0.3, 0.3];
-  // Big enough that the face is `faceSize` of the box, and that the clip covers the box.
+  // Big enough that the face is `faceSize` of the box, and that the clip covers the box; `zoom` on top, always, so a
+  // cut zoom or a punch shows even where covering decides the size.
   const cover = Math.max(w / clip.width, h / clip.height);
-  const s = Math.max(cover, ((faceSize * h) / (fh * clip.height)) * zoom);
+  const wanted = (faceSize * h) / (fh * clip.height);
+  const s = Math.max(cover, wanted) * zoom;
   const iw = clip.width * s;
   const ih = clip.height * s;
   const left = clamp(place[0] * w - cx * iw, w - iw, 0);
@@ -159,10 +189,93 @@ export function TakeCam({ take, scene, w, h, place = [0.5, 0.44], face: faceSize
         style={{ inset: "auto", left, top, width: iw, height: ih, objectFit: "fill" }}
       />
       {/* The face's box, for validate: the face is about as wide as 0.78 of its height. */}
-      <div data-face={scene.face ? "seen" : "guessed"} data-face-forced={s > ((faceSize * h) / (fh * clip.height)) * zoom * 1.02 ? "" : undefined} style={{ position: "absolute", left: fx - fhPx * 0.39, top: fy - fhPx / 2, width: fhPx * 0.78, height: fhPx, pointerEvents: "none" }} />
+      <div data-face={scene.face ? "seen" : "guessed"} data-face-forced={cover > wanted * 1.02 ? "" : undefined} style={{ position: "absolute", left: fx - fhPx * 0.39, top: fy - fhPx / 2, width: fhPx * 0.78, height: fhPx, pointerEvents: "none" }} />
       {children}
     </div>
   );
+}
+
+// ── moving the person and the screens ───────────────────────────────────────
+
+/** A box on the frame, in px: x, y, width, height, corner radius (a circle is a square with radius w / 2). */
+export type Box = readonly [x: number, y: number, w: number, h: number, r: number];
+export const lerpBox = (a: Box, b: Box, k: number): Box => [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k), lerp(a[3], b[3], k), lerp(a[4], b[4], k)];
+
+/**
+ * A box that springs from one place to the next at each key (scene frame, box): the person going from filling the frame
+ * to a circle over the screen and back, a screen growing to full. Two keys at frame 0 spring from the first into the
+ * second as the scene starts, which carries the move over the cut: `[[0, FULL], [0, CIRCLE]]`.
+ */
+export function boxAt(f: number, keys: readonly (readonly [at: number, box: Box])[], { stiffness = 170, damping = 19 } = {}): Box {
+  let b = keys[0][1];
+  for (let i = 1; i < keys.length; i++) {
+    const [at, next] = keys[i];
+    if (f >= at) b = lerpBox(b, next, spring(f - at, { stiffness, damping }));
+  }
+  return b;
+}
+
+/**
+ * The person in a moving box (`boxAt`): clipped to it, framed on the face. The framing follows the box's size unless
+ * `place` and `face` are given: about the eyes on the upper third and the face a fifth of the height when it fills the
+ * frame, the whole head centred and the face over two fifths of it in a small circle, and in between as it moves.
+ */
+export function TakeFrame({ take, scene, box, place, face, zoom = 1, f, style, children }: { take: TakeFile; scene: TakeScene; box: Box; place?: [number, number]; face?: number; zoom?: number; f?: number; style?: CSSProperties; children?: ReactNode }) {
+  const [x, y, w, h, r] = box;
+  const small = clamp((700 - Math.min(w, h)) / 400);
+  return (
+    <div style={{ position: "absolute", left: x, top: y, width: w, height: h, borderRadius: r, overflow: "hidden", ...style }}>
+      <TakeCam take={take} scene={scene} w={w} h={h} place={place ?? [0.5, lerp(0.36, 0.44, small)]} face={face ?? lerp(0.2, 0.42, small)} zoom={zoom} f={f}>
+        {children}
+      </TakeCam>
+    </div>
+  );
+}
+
+/** A rectangle of a source (a screen recording, a redrawn page), in the source's own px: x, y, width, height. */
+export type Crop = readonly [x: number, y: number, w: number, h: number];
+export const lerpCrop = (a: Crop, b: Crop, k: number): Crop => [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k), lerp(a[3], b[3], k)];
+
+/**
+ * A camera moving across a screen: crop keys (scene frame, crop, frames the move takes, 24 by default), each eased into
+ * the next. Start a move a few frames before the word it's about, so it lands as the word does.
+ */
+export function cropAt(f: number, keys: readonly (readonly [at: number, crop: Crop, dur?: number])[]): Crop {
+  let c = keys[0][1];
+  for (let i = 1; i < keys.length; i++) {
+    const [at, next, dur = 24] = keys[i];
+    c = lerpCrop(c, next, prog(f, [at, at + dur], easings.inOutCubic));
+  }
+  return c;
+}
+
+/** How a crop of a sw x sh source fills a w x h box: the scale and the source's top-left, never showing past its edge. */
+function cropFit(crop: Crop, [sw, sh]: readonly [number, number], w: number, h: number) {
+  const [cx, cy, cw, ch] = crop;
+  const s = Math.max(w / cw, h / ch, w / sw, h / sh);
+  const left = clamp(-cx * s + (w - cw * s) / 2, w - sw * s, 0);
+  const top = clamp(-cy * s + (h - ch * s) / 2, h - sh * s, 0);
+  return { s, left, top };
+}
+
+/**
+ * A crop of a source filling a w x h box: the camera on a screen (`cropAt` moves it). The children are the source at
+ * its own size, `source` px: a `<TakeScreen>`, a `<Footage>`, a redrawn page. It covers the box and never shows past the
+ * source's edge, so a crop near an edge gives way instead of showing blank.
+ */
+export function CropView({ crop, source, w, h, style, children }: { crop: Crop; source: readonly [w: number, h: number]; w: number; h: number; style?: CSSProperties; children: ReactNode }) {
+  const { s, left, top } = cropFit(crop, source, w, h);
+  return (
+    <div style={{ position: "absolute", inset: 0, overflow: "hidden", ...style }}>
+      <div style={{ position: "absolute", left, top, width: source[0], height: source[1], transform: `scale(${s})`, transformOrigin: "0 0" }}>{children}</div>
+    </div>
+  );
+}
+
+/** Where a point of the source (its px) lands in a CropView's box: for a tap, a highlight or an arrow on the screen. */
+export function cropPoint(crop: Crop, source: readonly [number, number], w: number, h: number, px: number, py: number) {
+  const { s, left, top } = cropFit(crop, source, w, h);
+  return { x: left + px * s, y: top + py * s, s };
 }
 
 // ── captions of what's said ──────────────────────────────────────────────────

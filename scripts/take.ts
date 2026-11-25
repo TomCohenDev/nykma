@@ -7,6 +7,8 @@
 // scenes), or one line per scene; with none given it's the queue folder's script.md, then the pitch's voice lines, and
 // with none at all the take's own sentences. More flags, kept in cut.json for the next run:
 //   --mic <file>          a separate mic recording of the same take, lined up with the camera's sound and used as the voice
+//   --screen <file>       a screen recording made during the take, unpacked and lined up by its sound (or by hand, cut.md
+//                         says how, when it has none), for <TakeScreen>
 //   --clean auto|on|off   the voice chain (auto: denoise only a noisy room)
 //   --pause 0.5           a pause longer than this inside a line becomes a jump cut
 //   --fresh               hear the take again instead of using what Whisper heard last time
@@ -27,6 +29,7 @@ const { positionals, values } = parseArgs({
   options: {
     script: { type: "string" },
     mic: { type: "string" },
+    screen: { type: "string" },
     lang: { type: "string" },
     clean: { type: "string" },
     pause: { type: "string" },
@@ -38,12 +41,12 @@ const { positionals, values } = parseArgs({
 });
 const [slug, given] = positionals;
 if (!slug || !/^[a-z0-9][a-z0-9_-]*$/i.test(slug)) {
-  console.error("Usage: bun run take <slug> [<take file or clip>] [--script <file>] [--mic <file>] [--lang he] [--verify]");
+  console.error("Usage: bun run take <slug> [<take file or clip>] [--script <file>] [--mic <file>] [--screen <file>] [--lang he] [--verify]");
   process.exit(1);
 }
 
 type Line = { id: string; line: string; pick?: number; hl?: string[]; fix?: Record<string, string>; trim?: [number, number]; pause?: number };
-type Cut = { clip?: string; lang?: string; mic?: string; clean?: string; pause?: number; script?: string; lines?: Line[]; fix?: Record<string, string> };
+type Cut = { clip?: string; lang?: string; mic?: string; screen?: { clip: string; at?: number | null; by?: string }; clean?: string; pause?: number; script?: string; lines?: Line[]; fix?: Record<string, string> };
 
 const adDir = join(ROOT, "src", "ads", slug);
 mkdirSync(adDir, { recursive: true });
@@ -152,6 +155,19 @@ if (!existsSync(join(clipDir, "meta.json"))) {
     process.exit(1);
   }
   await unpack(slug, file);
+}
+if (values.screen) {
+  const file = resolve(values.screen);
+  if (!existsSync(file) || !VIDEO.test(file)) {
+    console.error(`No screen recording at ${values.screen}`);
+    process.exit(1);
+  }
+  const name = clipName(file);
+  if (!clipsOf(slug).find((item) => item.meta?.name === name)?.meta || values.fresh) {
+    const meta = await unpack(slug, file);
+    console.log(`${meta.name}: ${meta.seconds} s at ${meta.fps} fps, ${meta.width}x${meta.height}${meta.sound ? ", with sound" : ", NO SOUND: it'll be lined up by hand"}`);
+  }
+  cut.screen = cut.screen?.clip === name ? cut.screen : { clip: name };
 }
 writeFileSync(cutPath, JSON.stringify(cut, null, 1) + "\n");
 

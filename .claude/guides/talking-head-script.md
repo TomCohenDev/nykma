@@ -26,6 +26,7 @@ What the person needs to record a take that cuts well. Put it under the script, 
 - **The phone at eye level, on something steady,** the lens at the eyes, a window or soft light in front, not behind or above. Look at the lens, not the screen.
 - **Framing:** vertical, from the chest up, with room above the head. For a video where they'll be a circle over screens, step back a little (face about a quarter of the frame's height): a take framed close can't be shown smaller in a square without cutting the head.
 - **1080p or 4K at a constant frame rate,** so a punch-in stays sharp. Phones: turn off "auto frame rate" or "cinematic" modes.
-- **Sound:** a clip-on or USB mic close to the mouth beats the phone's own. A mic recorded separately is fine: hand over both files, and `bun run take --mic` lines them up.
+- **Sound:** a clip-on or USB mic close to the mouth beats the phone's own. A mic recorded separately is fine: hand over both files, and `bun run take --mic` lines them up. Start the mic before the phone, and keep the mic, the phone and any screen recording running for the whole take, so one offset lines up everything.
+- **Between lines,** leave a second or two of silence. Clean gaps make clean cuts.
 - **Hold still for half a second** before the first line and after the last.
-- **Screens they'll show:** record them at the video's ratio (9:16 on a phone, or a window sized for it), with the real account, after the take, following the same steps.
+- **Screens they'll show:** record them during the take, as they talk, so the screen shows what each line is about, at the video's ratio or a window sized for it, with the real account. Record the screen's sound too (the mic, or the computer's sound): `bun run take --screen` lines it up by that. With no sound, say each slide's or page's name as you flip to it, so it can be lined up by hand. A screen recorded after the take, following the same steps, works too, cut to each line by hand.

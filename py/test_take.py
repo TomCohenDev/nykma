@@ -93,6 +93,23 @@ class Free(unittest.TestCase):
         self.assertIn("earlier try", left[3])
 
 
+class Screen(unittest.TestCase):
+    def test_lined_up_by_its_sound_or_not_at_all(self):
+        import json, tempfile, wave
+        rng = np.random.default_rng(3)
+        # Two minutes of "speech": bursts of noise with pauses between them.
+        cam = np.concatenate([rng.normal(0, 0.3 if k % 3 else 0.002, int(take.SR * rng.uniform(0.2, 0.9))) for k in range(240)]).astype(np.float32)
+        start = 37.5
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            (d / "meta.json").write_text(json.dumps({"name": "screen", "sound": "x"}))
+            self.assertIsNone(take.sync_screen(cam, d)["at"])  # no audio.wav: no sound
+            pcm = (cam[int(start * take.SR): int((start + 40) * take.SR)] * 20000).astype(np.int16)
+            with wave.open(str(d / "audio.wav"), "wb") as w:
+                w.setnchannels(1), w.setsampwidth(2), w.setframerate(take.SR), w.writeframes(pcm.tobytes())
+            self.assertAlmostEqual(take.sync_screen(cam, d)["at"], start, delta=0.02)
+
+
 class Spelling(unittest.TestCase):
     def test_lexicon_and_prefix(self):
         words = [{"text": "ב", "start": 0, "end": 0.1}, {"text": "-css,", "start": 0.1, "end": 0.4}, {"text": "קלוד,", "start": 0.5, "end": 0.8}]

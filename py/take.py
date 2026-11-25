@@ -168,6 +168,24 @@ def sync_mic(cam_wav: Path, mic: Path, out: Path, seconds: float) -> dict:
     return {"offset": round(offset, 4), "sure": round(sure, 3), "drift_ms": drift}
 
 
+def sync_screen(cam: np.ndarray, screen_dir: Path) -> dict:
+    """A screen recording made during the take, lined up by its sound: `at` is the take's second it starts at."""
+    meta = read_json(screen_dir / "meta.json") or {}
+    wav = screen_dir / "audio.wav"
+    if not meta.get("sound") or not wav.exists():
+        return {"at": None, "sound": False}
+    scr = load(wav)
+    es = energy(scr)
+    if len(es) < 300 or float(np.percentile(es, 90)) < -60:
+        return {"at": None, "sound": False}
+    a, b = envelope(cam), envelope(scr)
+    n = max(len(a), len(b))
+    a, b = np.pad(a, (0, n - len(a))), np.pad(b, (0, n - len(b)))
+    lag, sure = lag_of(a, b, n - 1)
+    # b[t + lag] matches a[t]: the screen's second 0 is the take's second -lag.
+    return {"at": round(-lag * HOP / SR, 3), "sound": True, "sure": round(sure, 3)}
+
+
 def clean_voice(src: Path, out: Path, floor: float, speech: float, mode: str) -> list[str]:
     """The voice chain. Returns what it did, in words."""
     steps, did = ["highpass=f=80"], ["high-pass at 80 Hz"]
@@ -676,6 +694,25 @@ def main() -> None:
     audio = load(src)
     e = energy(audio)
 
+    # A screen recording made during the take: lined up by its sound, or by hand (screen.at, "by": "hand") when it had none.
+    screen = cut.get("screen")
+    screen_meta = None
+    if screen and screen.get("clip"):
+        sdir = clip.parent / screen["clip"]
+        screen_meta = read_json(sdir / "meta.json")
+        if not screen_meta:
+            raise SystemExit(f"No unpacked screen recording {screen['clip']}: bun run take <slug> --screen <file>.")
+        if screen.get("by") != "hand":
+            found = sync_screen(load(cam), sdir)
+            if found["at"] is not None:
+                screen.update(at=found["at"], by="sound", sure=found["sure"])
+                if found["sure"] < 0.3:
+                    notes.append(f"The screen recording lined up with the take only loosely (correlation {found['sure']}): check a slide change against the word said with it.")
+            else:
+                screen.update(at=None, by="none")
+                notes.append(f"The screen recording ({screen['clip']}) has no sound, so it isn't lined up. Find a slide you flip to and the word you say as you do: "
+                             "set `screen.at` in cut.json to the take's second of that word minus the recording's second of that slide, with `\"by\": \"hand\"`, and run bun run take again.")
+
     # 2. What was said, from the cache when the recording and settings haven't changed.
     prompt = ", ".join(v for v in dict.fromkeys(fixes.values()) if not HEB.search(v))[:400]
     key = hashlib.sha256(json.dumps([TRANSCRIPT, src.stat().st_size, round(src.stat().st_mtime), lang, whisper.model_for(lang), prompt]).encode()).hexdigest()[:16]
@@ -854,6 +891,8 @@ def main() -> None:
         "scenes": [s for s in scenes if not s.get("missing")],
         "missing": missing,
         "left": [{"from": round(l["from"], 2), "to": round(l["to"], 2), "text": l["text"], "why": l["why"]} for l in left],
+        "screen": {"name": screen_meta["name"], "src": screen_meta["src"], "fps": screen_meta["fps"], "frames": screen_meta["frames"],
+                   "width": screen_meta["width"], "height": screen_meta["height"], "at": screen.get("at"), "by": screen.get("by")} if screen_meta else None,
     }
     write_json(take_path, take)
 
@@ -878,6 +917,8 @@ def main() -> None:
     if mic_info:
         md.append(f"- The mic ({rel(Path(cut['mic']) if not Path(cut['mic']).is_absolute() else Path(cut['mic']))}) is the voice, lined up at mic = camera + {mic_info['offset']} s"
                   + (f", drift {mic_info['drift_ms']} ms over the take" if mic_info.get("drift_ms") is not None else "") + ".")
+    if screen_meta:
+        md.append(f"- The screen recording ({screen_meta['name']}) " + (f"starts {screen['at']} s into the take, lined up by {screen['by']}." if screen.get("at") is not None else "isn't lined up: see Check."))
     md.append(f"- Room tone {floor:.0f} dBFS, speech peaks around {level:.0f} dBFS.")
     md.append(f"- Voice: {', '.join(chain) if chain else 'as recorded'} -> `{public(voice_src)}`.")
     if face_all:
